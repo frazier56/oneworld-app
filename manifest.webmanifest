@@ -1,0 +1,24 @@
+{
+  "id": "/",
+  "name": "One World",
+  "short_name": "One World",
+  "description": "AI-based solutions for small businesses and freelancers. One sign-in for OneJob, OneScore, OneEvent, OneSocial, OneAgent, OneVoice, OnePage and OneApp.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAFAF8",
+  "theme_color": "#FAFAF8",
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "/mark-oneworld.png",
+      "sizes": "432x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
