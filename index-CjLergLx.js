@@ -114,8 +114,9 @@ ${m}`}class oe extends Error{constructor({message:t,code:n,cause:r,name:s}){var 
 >\r
 > **v5:** VP architecture ruling (\`MAX-20260805-1545\`) — **both cancellation journeys ship at\r
 > launch** as distinct user contracts; A3a records that as the intended architecture and corrects\r
-> the actor (the HOST selects the booking policy; the CLIENT agrees to it). The P0 fee conflict\r
-> (8.99% wired vs 5.99% intended) stays a red gate. Both remain gated, not published.\r
+> the actor (the HOST selects the booking policy; the CLIENT agrees to it). The platform-fee
+> launch ruling is 5.99%; remaining payment work is verification and cleanup, not a fee decision.
+> Both remain gated, not published.
 \r
 **Effective date:** \`[[LAUNCH PROOF: date of publication]]\`\r
 **Version:** 2026-08-05.3\r
@@ -237,15 +238,12 @@ configuration ⟨M-19⟩⟨M-23⟩, and (c) payments/marketplace counsel ⟨M-20
 **A1. Roles.** A **client** pays; a **professional** performs and is an independent member, not\r
 our employee or contractor ⟨M-20⟩.\r
 \r
-**A2. Platform fee.** The intended launch fee is **5.99%** of the transaction, shown before you\r
-commit. \`[[P0 CONFLICT ⟨M-18⟩ — DO NOT PUBLISH THIS NUMBER YET: the live OneJob booking flow,\r
-checkout function, tests and customer copy currently charge **8.99%** (\`PublicJobBooking.tsx\`\r
-\`PLATFORM_FEE_RATE = 0.0899\`, verified in staged source). 5.99% is a desired launch migration,\r
-not current behavior. Publish only after every source, DB function, Stripe amount, test and\r
-customer-visible surface agrees AND live payment UAT proves the charged amount. Fee/payment code\r
-is NOT changed in this legal lane.]]\`\r
-\r
-**A3a. Before work starts — cancellation and no-shows.** OneJob has **two cancellation\r
+**A2. Platform fee.** The launch fee is **5.99%** of the transaction, shown before you
+commit. \`[[PAYMENT VERIFICATION GATE: publish only after every source, DB function, Stripe
+amount, test and customer-visible surface agrees with 5.99% AND live payment UAT proves the
+charged amount. Fee/payment code is NOT changed in this legal lane.]]\`
+
+**A3a. Before work starts — cancellation and no-shows.** OneJob has **two cancellation
 contracts, and which one applies depends on how the job was set up.** Both ship at launch (VP\r
 architecture ruling, 5 Aug 2026); the applicable policy is always named and shown before you\r
 commit, stored with your transaction, and enforced from that stored copy — so the rule you agreed\r
