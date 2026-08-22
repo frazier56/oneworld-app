@@ -1,6 +1,0 @@
-import{a2 as d,r as p,j as s,s as u}from"./index-Bz2AZsRA.js";import{u as g}from"./LanguageContext-X3vIpx8m.js";import{C as f}from"./check-C7-6S9N5.js";import{S as m}from"./share-2-C94V94FH.js";/**
- * @license lucide-react v1.30.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */const l=[["path",{d:"M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16",key:"jecpp"}],["rect",{width:"20",height:"14",x:"2",y:"6",rx:"2",key:"i6l2r4"}]],S=d("briefcase",l);function b({type:e,id:n,title:r,className:c=""}){const{t}=g(),[a,i]=p.useState(!1),o=`${window.location.origin}/events/e/${n}`,h=async()=>{try{navigator.share?await navigator.share({title:r||"Event",url:o}):(await navigator.clipboard.writeText(o),i(!0),setTimeout(()=>i(!1),1600))}catch{}};return s.jsxs("button",{onClick:h,className:`btn-ghost ${c}`,children:[a?s.jsx(f,{size:16}):s.jsx(m,{size:16}),a?t("share.copied","Copied"):t("share.share","Share")]})}function j(e){u.functions.invoke("notify-new-message",{body:{recipient_id:e.recipientId,sender_id:e.senderId,message_preview:e.messagePreview,message_type:e.messageType||"text"}}).catch(()=>{})}export{S as B,b as S,j as n};
