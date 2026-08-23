@@ -1,0 +1,1 @@
+import{s}from"./index-lOcjfdxQ.js";function n(e){s.functions.invoke("notify-new-message",{body:{recipient_id:e.recipientId,sender_id:e.senderId,message_preview:e.messagePreview,message_type:e.messageType||"text"}}).catch(()=>{})}export{n};
