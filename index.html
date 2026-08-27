@@ -34,6 +34,40 @@
     <link rel="stylesheet" crossorigin href="/index-Dj3YPmrp.css">
   </head>
   <body class="ow-no-sideways">
-    <div id="root"></div>
+    <div id="root"></div>
+
+    <script>
+      // Preserve internal deep links while showing people a useful action label.
+      (() => {
+        const compactOneEventLinks = () => {
+          document.querySelectorAll('a[href]').forEach((link) => {
+            try {
+              const url = new URL(link.href, window.location.origin);
+              if (url.origin !== window.location.origin) return;
+
+              if (
+                url.pathname === '/events/events' &&
+                url.searchParams.get('tab') === 'attending'
+              ) {
+                link.textContent = 'View your request →';
+                link.setAttribute('aria-label', 'View your request in My Events');
+              } else if (
+                /^\/events\/events\/[^/]+\/manage$/.test(url.pathname) &&
+                url.searchParams.get('tab') === 'applicants'
+              ) {
+                link.textContent = 'Review application →';
+                link.setAttribute('aria-label', 'Review this event application');
+              }
+            } catch {
+              // Leave malformed or non-navigation links exactly as rendered.
+            }
+          });
+        };
+
+        const observer = new MutationObserver(compactOneEventLinks);
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        compactOneEventLinks();
+      })();
+    </script>
   </body>
 </html>
