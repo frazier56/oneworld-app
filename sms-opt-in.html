@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SMS Consent Form | One World Labs</title>
+    <style>
+      :root { color-scheme: light; font-family: Inter, Arial, sans-serif; color: #151923; background: #faf8f5; }
+      body { margin: 0; }
+      main { width: min(680px, calc(100% - 40px)); margin: 0 auto; padding: 44px 0 64px; }
+      header { display: flex; align-items: center; gap: 12px; margin-bottom: 34px; }
+      header img { width: 52px; height: 52px; object-fit: contain; }
+      h1 { font-size: clamp(28px, 6vw, 40px); line-height: 1.1; margin: 0 0 10px; }
+      p, label { font-size: 16px; line-height: 1.55; }
+      .muted { color: #667085; }
+      .card { background: white; border: 1px solid #ead8c8; border-radius: 16px; padding: 26px; }
+      .field-label { display: block; font-weight: 700; margin-bottom: 8px; }
+      input[type="tel"] { width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid #aeb4c0; border-radius: 10px; font: inherit; }
+      .consent { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start; margin-top: 20px; }
+      .consent input { width: 20px; height: 20px; margin: 2px 0 0; }
+      button { width: 100%; margin-top: 22px; padding: 14px; border: 0; border-radius: 10px; background: #9c4a0c; color: white; font: inherit; font-weight: 800; }
+      a { color: #9c4a0c; }
+      .note { margin-top: 20px; padding-top: 20px; border-top: 1px solid #ead8c8; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="/mark-oneworld.png" alt="One World Labs" />
+        <div><strong>One World Labs, Inc.</strong><div class="muted">One World applications</div></div>
+      </header>
+      <h1>SMS consent form</h1>
+      <p class="muted">Public carrier-review example of the web consent control used in One World registration and account flows.</p>
+      <form class="card" onsubmit="return false">
+        <label class="field-label" for="mobile">Mobile phone number</label>
+        <input id="mobile" name="mobile" type="tel" autocomplete="tel" placeholder="+1 (555) 555-0123" />
+
+        <div class="consent">
+          <input id="sms-consent" name="sms-consent" type="checkbox" />
+          <label for="sms-consent">
+            I agree to receive consent-based text messages from One World Labs about event invitations and reminders, application and ticket status, my account, and support replies. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help. Consent is not a condition of purchase.
+          </label>
+        </div>
+
+        <button type="submit">Save SMS preference</button>
+        <p class="note muted">See the <a href="/sms-terms.html">SMS Terms</a> and <a href="/sms-privacy.html">SMS Privacy Policy</a>. Mobile information is not sold or shared with third parties or affiliates for their marketing or promotional purposes.</p>
+      </form>
+    </main>
+  </body>
+</html>
