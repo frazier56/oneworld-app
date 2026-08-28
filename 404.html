@@ -4,6 +4,50 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#FAFAF8" />
+    <script>
+      // Anonymous event-application drafts must never bleed into the next visitor
+      // who uses the same browser. Keep back/refresh recovery within this tab, while
+      // preserving explicit emailed resume links through their URL token.
+      (() => {
+        const isAnonymousEventDraftKey = (key) =>
+          typeof key === 'string' &&
+          (key.startsWith('evt-apply-draft-') || key.startsWith('evt-apply-token-'));
+
+        try {
+          for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+            const key = localStorage.key(index);
+            if (isAnonymousEventDraftKey(key)) localStorage.removeItem(key);
+          }
+
+          const nativeGetItem = Storage.prototype.getItem;
+          const nativeSetItem = Storage.prototype.setItem;
+          const nativeRemoveItem = Storage.prototype.removeItem;
+
+          Storage.prototype.getItem = function (key) {
+            if (this === localStorage && isAnonymousEventDraftKey(key)) {
+              return nativeGetItem.call(sessionStorage, key);
+            }
+            return nativeGetItem.call(this, key);
+          };
+
+          Storage.prototype.setItem = function (key, value) {
+            if (this === localStorage && isAnonymousEventDraftKey(key)) {
+              return nativeSetItem.call(sessionStorage, key, value);
+            }
+            return nativeSetItem.call(this, key, value);
+          };
+
+          Storage.prototype.removeItem = function (key) {
+            if (this === localStorage && isAnonymousEventDraftKey(key)) {
+              nativeRemoveItem.call(sessionStorage, key);
+            }
+            return nativeRemoveItem.call(this, key);
+          };
+        } catch (error) {
+          console.warn('[OneEvent] Could not isolate anonymous application draft storage.', error);
+        }
+      })();
+    </script>
     <title>One World</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -30,10 +74,43 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="One World" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <script type="module" crossorigin src="/index-BWIVbrQg.js"></script>
-    <link rel="stylesheet" crossorigin href="/index-Dj3YPmrp.css">
+    <script type="module" crossorigin src="/index-DA_r_qGN.js"></script>
+    <link rel="stylesheet" crossorigin href="/index-BS4klppA.css">
   </head>
   <body class="ow-no-sideways">
-    <div id="root"></div>
+    <div id="root"></div>
+    <script>
+      // Preserve internal deep links while showing people a useful action label.
+      (() => {
+        const compactOneEventLinks = () => {
+          document.querySelectorAll('a[href]').forEach((link) => {
+            try {
+              const url = new URL(link.href, window.location.origin);
+              if (url.origin !== window.location.origin) return;
+
+              if (
+                url.pathname === '/events/events' &&
+                url.searchParams.get('tab') === 'attending'
+              ) {
+                link.textContent = 'View your request →';
+                link.setAttribute('aria-label', 'View your request in My Events');
+              } else if (
+                /^\/events\/events\/[^/]+\/manage$/.test(url.pathname) &&
+                url.searchParams.get('tab') === 'applicants'
+              ) {
+                link.textContent = 'Review application →';
+                link.setAttribute('aria-label', 'Review this event application');
+              }
+            } catch {
+              // Leave malformed or non-navigation links exactly as rendered.
+            }
+          });
+        };
+
+        const observer = new MutationObserver(compactOneEventLinks);
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        compactOneEventLinks();
+      })();
+    </script>
   </body>
 </html>
