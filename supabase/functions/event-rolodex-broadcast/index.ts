@@ -283,6 +283,7 @@ Deno.serve(async (req) => {
     const externalChannels = channels.filter((channel) => channel !== "in_app");
     const attestExternalPermission = body.attestExternalPermission === true;
     const controlledTest = body.controlledTest === true;
+    const preflightOnly = body.preflightOnly === true;
     const requestId = typeof body.requestId === "string" ? body.requestId.trim() : "";
 
     if (!eventId) return json({ error: "eventId required" }, 400);
@@ -294,7 +295,7 @@ Deno.serve(async (req) => {
     if (controlledTest && (rolodexIds.length !== 1 || channels.length !== 1 || channels[0] !== "whatsapp")) {
       return json({ error: "A controlled test must target exactly one Rolodex contact through WhatsApp only" }, 400);
     }
-    if (externalChannels.length > 0 && !attestExternalPermission) {
+    if (externalChannels.length > 0 && !attestExternalPermission && !preflightOnly) {
       return json({ error: "External channel permission attestation required" }, 400);
     }
 
@@ -398,6 +399,94 @@ Deno.serve(async (req) => {
       emailProfileMap.get(normalizeEmail(row.email)) ||
       phoneProfileMap.get(normalizePhone(row.phone)) ||
       null;
+
+    // A production-safe planning path. It exercises the same authentication, event,
+    // contact selection, profile resolution, destination normalization, and dedupe
+    // rules as a real broadcast without writing an attestation/broadcast/recipient row
+    // or invoking the worker. This is intentionally safe to run against a 200+ contact
+    // selection before an internal canary or a host send.
+    if (preflightOnly) {
+      const seenDestinations = new Set<string>();
+      const channelPlan = Object.fromEntries(channels.map((channel) => [channel, {
+        selected_contacts: contacts.length,
+        destination_present: 0,
+        missing_destination: 0,
+        duplicate_destination: 0,
+        unique_destinations: 0,
+      }])) as Record<Channel, {
+        selected_contacts: number;
+        destination_present: number;
+        missing_destination: number;
+        duplicate_destination: number;
+        unique_destinations: number;
+      }>;
+
+      for (const row of contacts) {
+        const profile = resolveProfile(row);
+        const linkedContactId = row.contact_id || profile?.id || null;
+        const destinations: Record<Channel, string> = {
+          in_app: linkedContactId || "",
+          email: normalizeEmail(row.email || profile?.email),
+          sms: normalizePhone(row.phone || profile?.phone),
+          whatsapp: whatsappDestination(row, profile?.phone),
+        };
+
+        for (const channel of channels) {
+          const destination = destinations[channel];
+          const plan = channelPlan[channel];
+          if (!destination) {
+            plan.missing_destination += 1;
+            continue;
+          }
+          plan.destination_present += 1;
+          const key = `${channel}:${destination}`;
+          if (seenDestinations.has(key)) {
+            plan.duplicate_destination += 1;
+            continue;
+          }
+          seenDestinations.add(key);
+          plan.unique_destinations += 1;
+        }
+      }
+
+      const plannedRecipientRows = contacts.length * channels.length;
+      const batchSize = 50;
+      const channelGates: Record<string, boolean> = {
+        external_sends_enabled: envFlag("EVENT_ROLODEX_EXTERNAL_SENDS_ENABLED", false),
+        email_sends_enabled: EMAIL_SENDS_ENABLED,
+        sms_sends_enabled: envFlag("EVENT_ROLODEX_SMS_SENDS_ENABLED", false),
+        whatsapp_sends_enabled: envFlag("EVENT_ROLODEX_WHATSAPP_SENDS_ENABLED", false),
+        whatsapp_approved: envFlag("EVENT_ROLODEX_WHATSAPP_APPROVED", false),
+      };
+      const channelEnabled = (channel: Channel) => {
+        if (channel === "in_app") return true;
+        if (!channelGates.external_sends_enabled) return false;
+        if (channel === "email") return channelGates.email_sends_enabled;
+        if (channel === "sms") return channelGates.sms_sends_enabled;
+        return channelGates.whatsapp_sends_enabled && channelGates.whatsapp_approved;
+      };
+
+      return json({
+        ok: true,
+        preflight_only: true,
+        event_id: eventId,
+        selected_contacts: rolodexIds.length,
+        matched_contacts: contacts.length,
+        unmatched_contacts: Math.max(rolodexIds.length - contacts.length, 0),
+        channels,
+        channel_plan: channelPlan,
+        planned_recipient_rows: plannedRecipientRows,
+        processing_batch_size: batchSize,
+        expected_worker_batches: Math.ceil(plannedRecipientRows / batchSize),
+        permission_attestation_required: externalChannels.length > 0,
+        permission_attestation_present: attestExternalPermission,
+        channel_gates: channelGates,
+        channels_currently_enabled: Object.fromEntries(channels.map((channel) => [channel, channelEnabled(channel)])),
+        can_queue_safely: contacts.length > 0 && plannedRecipientRows <= MAX_ROLODEX_RECIPIENTS * channels.length,
+        writes_performed: false,
+        messages_sent: false,
+      });
+    }
 
     let attestationId: string | null = null;
     if (externalChannels.length > 0) {
