@@ -77,6 +77,25 @@ Deno.serve(async (req) => {
       Number(event.vip_ticket_price || 0) > 0;
     const hasPaymentAuthorization = !!(app.stripe_session_id || app.stripe_payment_method_id);
 
+    // Fail closed if a previously paid event has somehow lost its pricing. Without
+    // this guard, approving the next application would silently create a $0 ticket.
+    if (!eventRequiresPayment) {
+      const { count: activePaidTicketCount, error: paidHistoryError } = await serviceClient
+        .from("event_registrations")
+        .select("id", { count: "exact", head: true })
+        .eq("event_id", event.id)
+        .eq("payment_status", "paid")
+        .not("status", "in", '("cancelled","canceled")');
+
+      if (paidHistoryError) throw paidHistoryError;
+      if ((activePaidTicketCount || 0) > 0) {
+        return json({
+          error: "This event already has paid tickets, but its ticket price is missing. Restore the ticket price before approving another applicant.",
+          code: "event_pricing_inconsistent",
+        }, 409);
+      }
+    }
+
     // A paid event application is not an admission until Stripe has authorized it.
     // Previously, a host could approve a paid application with no authorization; that
     // incremented sold inventory without a paid registration and made every KPI disagree.
@@ -261,6 +280,7 @@ Deno.serve(async (req) => {
         .from("event_applications")
         .update({
           approval_status: "approved",
+          payment_status: "free",
           approved_at: new Date().toISOString(),
           approved_by: user.id,
         })
