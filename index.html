@@ -83,7 +83,18 @@
         document.head.append(reviewStyles);
         import('/onehome-review-app.js');
       } else {
-        import('/index-CkwkYrti.js');
+        // The production entry filename is intentionally stable while targeted
+        // fixes are rolled into it. Version the import with the live build id so
+        // Refresh loads the new bytes instead of the browser's cached entry file.
+        fetch(`/app-version.json?_=${Date.now()}`, { cache: 'no-store' })
+          .then((response) => response.ok ? response.json() : null)
+          .then((version) => {
+            const buildId = typeof version?.buildId === 'string'
+              ? version.buildId.trim()
+              : String(Date.now());
+            return import(`/index-CkwkYrti.js?_v=${encodeURIComponent(buildId)}`);
+          })
+          .catch(() => import(`/index-CkwkYrti.js?_v=${Date.now()}`));
       }
     </script>
     <link rel="stylesheet" crossorigin href="/index-D2W4Azsu.css">
