@@ -75,13 +75,13 @@
     <meta name="apple-mobile-web-app-title" content="One World" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script type="module">
-      const ownerReview = /^\/rentals\/review\/[a-f0-9]{48}\/?$/i.test(location.pathname);
-      if (ownerReview) {
+      const oneHomeHandoff = /^\/rentals\/(?:review|inspection)\/[a-f0-9]{48}\/?$/i.test(location.pathname);
+      if (oneHomeHandoff) {
         const reviewStyles = document.createElement('link');
         reviewStyles.rel = 'stylesheet';
-        reviewStyles.href = '/onehome-review-app.css';
+        reviewStyles.href = '/onehome-review-app.css?v=20260831-walkthrough1';
         document.head.append(reviewStyles);
-        import('/onehome-review-app.js');
+        import('/onehome-review-app.js?v=20260831-walkthrough1');
       } else {
         import('/index-CkwkYrti.js');
       }
