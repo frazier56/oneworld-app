@@ -33,7 +33,7 @@ const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (c) => ({
 async function publicPacket(token: string) {
   const { data: contract, error: contractError } = await service
     .from("rental_contracts")
-    .select("id, property_id, agent_id, status, inspection_order, share_token")
+    .select("id, property_id, agent_id, status, inspection_order, share_token, rent_amount, currency, first_payment_claimed_at, first_payment_rail, first_payment_reference, first_payment_claim_note")
     .eq("share_token", token.toLowerCase())
     .maybeSingle();
   if (contractError || !contract) return { error: "That walkthrough link is not valid.", status: 404 };
@@ -81,6 +81,15 @@ async function publicPacket(token: string) {
       approved_at: inspection.settled_at,
       property: property ?? { title: "OneHome walkthrough" },
       owner_name: owner?.full_name ?? "The owner",
+      contract: {
+        status: contract.status,
+        rent_amount: contract.rent_amount,
+        currency: contract.currency,
+        payment_claimed_at: contract.first_payment_claimed_at,
+        payment_rail: contract.first_payment_rail,
+        payment_reference: contract.first_payment_reference,
+        payment_note: contract.first_payment_claim_note,
+      },
       items: (rows ?? []).map((row) => ({
         id: row.id,
         ordinal: row.ordinal,
@@ -123,6 +132,29 @@ Deno.serve(async (req) => {
       const { data, error } = await service.rpc("rental_inspection_approve_all", { p_token: token });
       if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
       return json(Array.isArray(data) ? data[0] : data);
+    }
+
+    if (action === "claim_payment") {
+      const token = String(payload?.t ?? "").trim();
+      const rail = String(payload?.rail ?? "").trim().toLowerCase();
+      const reference = String(payload?.reference ?? "").trim();
+      const note = String(payload?.note ?? "").trim();
+      if (!validToken(token)) return json({ message: "That walkthrough link is not valid." }, 400);
+      const { data, error } = await service.rpc("rental_payment_claim_by_token", {
+        p_token: token,
+        p_rail: rail,
+        p_reference: reference || null,
+        p_note: note || null,
+      });
+      if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
+      const claimed = Array.isArray(data) ? data[0] : data;
+      return json({
+        contract_id: claimed?.contract_id,
+        payment_claimed_at: claimed?.claimed_at,
+        payment_rail: rail,
+        payment_reference: reference || null,
+        payment_note: note || null,
+      });
     }
 
     if (action === "send") {
@@ -193,4 +225,3 @@ Deno.serve(async (req) => {
     return json({ message: "Something went wrong. Please try again." }, 500);
   }
 });
-
