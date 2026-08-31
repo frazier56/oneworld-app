@@ -76,10 +76,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script type="module">
       const ownerReview = /^\/rentals\/review\/[a-f0-9]{48}\/?$/i.test(location.pathname);
-      if (ownerReview) import('/onehome-review.js');
-      else import('/index-CkwkYrti.js');
+      if (ownerReview) {
+        const reviewStyles = document.createElement('link');
+        reviewStyles.rel = 'stylesheet';
+        reviewStyles.href = '/onehome-review-app.css';
+        document.head.append(reviewStyles);
+        import('/onehome-review-app.js');
+      } else {
+        import('/index-CkwkYrti.js');
+      }
     </script>
-    <link rel="stylesheet" href="/onehome-review.css">
     <link rel="stylesheet" crossorigin href="/index-D2W4Azsu.css">
   </head>
   <body class="ow-no-sideways">
