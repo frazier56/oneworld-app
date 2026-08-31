@@ -54,7 +54,7 @@ Deno.serve(async (req) => {
     // Load application + event
     const { data: app, error: appErr } = await serviceClient
       .from("event_applications")
-      .select("*, events!inner(id, host_id, title, ticket_type, ticket_price, ga_ticket_price, vip_ticket_price, currency, requires_application, application_requires_approval)")
+      .select("*, events!inner(id, host_id, title, ticket_type, ticket_price, ga_ticket_price, vip_ticket_price, currency, discount_code, discount_percent, requires_application, application_requires_approval)")
       .eq("id", applicationId)
       .single();
 
@@ -70,16 +70,41 @@ Deno.serve(async (req) => {
     }
 
     const event = (app as any).events;
-    const eventRequiresPayment =
+    const eventHasPaidPricing =
       event.ticket_type === "paid" ||
       Number(event.ticket_price || 0) > 0 ||
       Number(event.ga_ticket_price || 0) > 0 ||
       Number(event.vip_ticket_price || 0) > 0;
+    const normalizedApplicationPromo = String(app.promo_code || "").trim().toLowerCase();
+    let applicationPromoPercent = 0;
+
+    if (normalizedApplicationPromo) {
+      const { data: eventPromo, error: eventPromoError } = await serviceClient
+        .from("event_discount_codes")
+        .select("discount_percent")
+        .eq("event_id", event.id)
+        .ilike("code", normalizedApplicationPromo)
+        .maybeSingle();
+
+      if (eventPromoError) throw eventPromoError;
+      applicationPromoPercent = Number(eventPromo?.discount_percent || 0);
+
+      // Keep legacy single-code events working while the multi-code table is rolled out.
+      if (!eventPromo) {
+        const normalizedLegacyPromo = String(event.discount_code || "").trim().toLowerCase();
+        if (normalizedApplicationPromo === normalizedLegacyPromo) {
+          applicationPromoPercent = Number(event.discount_percent || 0);
+        }
+      }
+    }
+
+    const hasFullEventPromo = applicationPromoPercent >= 100;
+    const eventRequiresPayment = eventHasPaidPricing && !hasFullEventPromo;
     const hasPaymentAuthorization = !!(app.stripe_session_id || app.stripe_payment_method_id);
 
     // Fail closed if a previously paid event has somehow lost its pricing. Without
     // this guard, approving the next application would silently create a $0 ticket.
-    if (!eventRequiresPayment) {
+    if (!eventHasPaidPricing) {
       const { count: activePaidTicketCount, error: paidHistoryError } = await serviceClient
         .from("event_registrations")
         .select("id", { count: "exact", head: true })
@@ -280,7 +305,7 @@ Deno.serve(async (req) => {
         .from("event_applications")
         .update({
           approval_status: "approved",
-          payment_status: "free",
+          payment_status: hasFullEventPromo ? "complimentary" : "free",
           approved_at: new Date().toISOString(),
           approved_by: user.id,
         })
@@ -298,8 +323,8 @@ Deno.serve(async (req) => {
       qr_valid: true,
       quantity: app.quantity || 1,
       ticket_type: app.ticket_type || "ga",
-      registration_source: eventRequiresPayment ? "paid" : "free",
-      payment_status: eventRequiresPayment ? "paid" : "free",
+      registration_source: hasFullEventPromo ? "promo" : "free",
+      payment_status: hasFullEventPromo ? "complimentary" : "free",
       amount_paid: eventRequiresPayment ? ticketAmount : 0,
       amount_paid_cents: eventRequiresPayment ? Math.round(ticketAmount * 100) : 0,
       platform_fee_paid: eventRequiresPayment ? platformFee : 0,
@@ -361,7 +386,9 @@ Deno.serve(async (req) => {
         title: `🎉 You're in: ${event.title}`,
         body: eventRequiresPayment
           ? `Your application was approved and your ticket is confirmed. Your card has been charged.`
-          : `Your application was approved! Your ticket is ready.`,
+          : hasFullEventPromo
+            ? `Your application was approved and your complimentary ticket is ready.`
+            : `Your application was approved! Your ticket is ready.`,
         action_url: `/discover-events/${event.id}`,
       });
     }
