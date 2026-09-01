@@ -81,7 +81,12 @@
         reviewStyles.rel = 'stylesheet';
         reviewStyles.href = '/onehome-review-app.css?v=20260831-receipt1';
         document.head.append(reviewStyles);
-        import('/onehome-review-app.js?v=20260831-receipt1');
+        const ownerQaStyles = document.createElement('link');
+        ownerQaStyles.rel = 'stylesheet';
+        ownerQaStyles.href = '/onehome-owner-qa.css?v=20260901-owner-media1';
+        document.head.append(ownerQaStyles);
+        import('/onehome-review-app.js?v=20260901-owner-media1')
+          .then(() => import('/onehome-owner-qa.js?v=20260901-owner-media1'));
       } else {
         import('/index-CkwkYrti.js');
       }
