@@ -44,7 +44,7 @@ async function publicPacket(token: string) {
 
   const [{ data: inspection }, { data: property }, { data: owner }] = await Promise.all([
     service.from("rental_inspections")
-      .select("id, state, kind, round, sent_at, settled_at")
+      .select("id, state, kind, round, sent_at, settled_at, evidence_version, evidence_manifest_sha256, evidence_frozen_at")
       .eq("contract_id", contract.id).eq("kind", "move_in")
       .order("round", { ascending: false }).limit(1).maybeSingle(),
     service.from("rental_properties")
@@ -58,7 +58,7 @@ async function publicPacket(token: string) {
 
   const { data: rows, error: itemError } = await service
     .from("rental_inspection_items")
-    .select("id, ordinal, photo_url, host_note, verdict, tenant_note, responded_at")
+    .select("id, ordinal, photo_url, host_note, verdict, tenant_note, responded_at, media_kind, mime_type, byte_size, original_name, room, width, height")
     .eq("inspection_id", inspection.id)
     .order("ordinal", { ascending: true });
   if (itemError) return { error: "The walkthrough could not be opened.", status: 500 };
@@ -79,6 +79,9 @@ async function publicPacket(token: string) {
       state: inspection.state,
       sent_at: inspection.sent_at,
       approved_at: inspection.settled_at,
+      evidence_version: inspection.evidence_version,
+      evidence_manifest_sha256: inspection.evidence_manifest_sha256,
+      evidence_frozen_at: inspection.evidence_frozen_at,
       property: property ?? { title: "OneHome walkthrough" },
       owner_name: owner?.full_name ?? "The owner",
       contract: {
@@ -94,6 +97,13 @@ async function publicPacket(token: string) {
         id: row.id,
         ordinal: row.ordinal,
         note: row.host_note,
+        room: row.room,
+        media_kind: row.media_kind ?? "image",
+        mime_type: row.mime_type,
+        byte_size: row.byte_size,
+        original_name: row.original_name,
+        width: row.width,
+        height: row.height,
         verdict: row.verdict,
         tenant_note: row.tenant_note,
         responded_at: row.responded_at,
@@ -101,6 +111,69 @@ async function publicPacket(token: string) {
       })),
     },
   };
+}
+
+async function authenticated(req: Request) {
+  const authorization = req.headers.get("authorization") ?? "";
+  const jwt = authorization.replace(/^Bearer\s+/i, "").trim();
+  if (!jwt) return { error: "Sign in as the property owner.", status: 401 } as const;
+  const userClient = createClient(SUPABASE_URL, ANON_KEY, {
+    global: { headers: { Authorization: `Bearer ${jwt}` } },
+  });
+  const { data, error } = await userClient.auth.getUser(jwt);
+  if (error || !data.user) return { error: "Your session expired. Sign in again.", status: 401 } as const;
+  return { userClient, user: data.user, jwt } as const;
+}
+
+async function ownerPacket(userClient: ReturnType<typeof createClient>, userId: string, token: string) {
+  if (!validToken(token)) return { error: "That owner link is not valid.", status: 400 } as const;
+  const { data: handoff, error: handoffError } = await userClient.rpc("rental_owner_handoff_status", { p_token: token });
+  if (handoffError || !handoff?.inspection_id) {
+    return { error: handoffError?.message || "This owner handoff is not connected to your account.", status: 403 } as const;
+  }
+  const [{ data: inspection }, { data: items }, { data: claim }] = await Promise.all([
+    service.from("rental_inspections")
+      .select("id, state, round, evidence_version, evidence_manifest_sha256, evidence_frozen_at")
+      .eq("id", handoff.inspection_id).single(),
+    service.from("rental_inspection_items")
+      .select("id, ordinal, photo_url, host_note, verdict, tenant_note, media_kind, mime_type, byte_size, original_name, room, width, height, upload_state")
+      .eq("inspection_id", handoff.inspection_id).order("ordinal", { ascending: true }),
+    service.from("rental_property_claims")
+      .select("id, claimed_by, note, rental_properties!inner(listing_no)")
+      .eq("claim_token", token.toLowerCase()).single(),
+  ]);
+  if (!inspection) return { error: "That walkthrough was not found.", status: 404 } as const;
+  const paths = (items ?? []).map((item) => item.photo_url).filter((path) => path && !/^https?:/i.test(path));
+  const signedByPath: Record<string, string> = {};
+  if (paths.length) {
+    const { data: signed } = await service.storage.from("rental-evidence").createSignedUrls(paths, 3600);
+    for (const item of signed ?? []) if (item.signedUrl) signedByPath[String(item.path)] = item.signedUrl;
+  }
+  const listingNo = Number((claim as any)?.rental_properties?.listing_no ?? 0);
+  return {
+    data: {
+      ...handoff,
+      claim_id: claim?.id ?? null,
+      listing_no: listingNo,
+      inspection,
+      items: (items ?? []).map((item) => ({
+        ...item,
+        preview_url: /^https?:/i.test(item.photo_url) ? item.photo_url : signedByPath[item.photo_url] ?? null,
+      })),
+      upload: {
+        bucket: "rental-evidence",
+        path_prefix: `${handoff.contract_id}/${userId}/${handoff.inspection_id}/`,
+        max_file_bytes: 26214400,
+        max_items: 100,
+        max_queue_bytes: 524288000,
+        concurrency: 3,
+        allowed_mime_types: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"],
+        video_supported: false,
+      },
+      qa_reset_allowed: listingNo === 10518 && claim?.claimed_by === userId && /(safe|qa|test)/i.test(String(claim?.note ?? "")),
+    },
+    status: 200,
+  } as const;
 }
 
 function emailBodies(propertyTitle: string, ownerName: string, url: string) {
@@ -127,6 +200,101 @@ Deno.serve(async (req) => {
     if (req.method !== "POST") return json({ message: "Method not allowed." }, 405);
     const payload = await req.json().catch(() => ({}));
     const action = String(payload?.action ?? "");
+
+    if (["owner_packet", "add_item", "update_item", "reorder_items", "delete_item", "cleanup_upload", "start_correction", "qa_reset"].includes(action)) {
+      const auth = await authenticated(req);
+      if ("error" in auth) return json({ message: auth.error }, auth.status);
+      const ownerToken = String(payload?.owner_token ?? "").trim().toLowerCase();
+      const packet = await ownerPacket(auth.userClient, auth.user.id, ownerToken);
+      if ("error" in packet) return json({ message: packet.error }, packet.status);
+      const handoff = packet.data;
+
+      if (action === "owner_packet") return json(handoff);
+
+      if (action === "add_item") {
+        const { data, error } = await auth.userClient.rpc("rental_inspection_item_add", {
+          p_inspection_id: handoff.inspection_id,
+          p_storage_path: String(payload?.storage_path ?? ""),
+          p_original_name: String(payload?.original_name ?? ""),
+          p_mime_type: String(payload?.mime_type ?? ""),
+          p_byte_size: Number(payload?.byte_size ?? 0),
+          p_room: String(payload?.room ?? "") || null,
+          p_caption: String(payload?.caption ?? "") || null,
+          p_width: Number(payload?.width ?? 0) || null,
+          p_height: Number(payload?.height ?? 0) || null,
+        });
+        if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
+        return json(data);
+      }
+
+      if (action === "update_item") {
+        const { data, error } = await auth.userClient.rpc("rental_inspection_item_update", {
+          p_item_id: String(payload?.item_id ?? ""),
+          p_room: String(payload?.room ?? "") || null,
+          p_caption: String(payload?.caption ?? "") || null,
+        });
+        if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
+        return json(data);
+      }
+
+      if (action === "reorder_items") {
+        const { data, error } = await auth.userClient.rpc("rental_inspection_items_reorder", {
+          p_inspection_id: handoff.inspection_id,
+          p_item_ids: Array.isArray(payload?.item_ids) ? payload.item_ids : [],
+        });
+        if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
+        return json({ count: data });
+      }
+
+      if (action === "delete_item") {
+        const { data: path, error } = await auth.userClient.rpc("rental_inspection_item_delete", {
+          p_item_id: String(payload?.item_id ?? ""),
+        });
+        if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
+        const { error: storageError } = await service.storage.from("rental-evidence").remove([String(path)]);
+        return json({ deleted: true, storage_removed: !storageError, cleanup_warning: storageError?.message ?? null });
+      }
+
+      if (action === "cleanup_upload") {
+        const path = String(payload?.storage_path ?? "");
+        if (!path.startsWith(handoff.upload.path_prefix)) return json({ message: "That upload path does not belong to this walkthrough." }, 403);
+        const { error } = await service.storage.from("rental-evidence").remove([path]);
+        return json({ removed: !error, message: error?.message ?? null }, error ? 400 : 200);
+      }
+
+      if (action === "start_correction") {
+        const { data, error } = await auth.userClient.rpc("rental_inspection_start_correction", {
+          p_inspection_id: handoff.inspection_id,
+        });
+        if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
+        return json({ inspection_id: data });
+      }
+
+      if (action === "qa_reset") {
+        if (!handoff.qa_reset_allowed || handoff.listing_no !== 10518) return json({ message: "Reset is restricted to the marked QA listing 10518." }, 403);
+        if (String(payload?.confirm ?? "") !== "RESET 10518") return json({ message: "Type RESET 10518 exactly." }, 400);
+        if (String(payload?.claim_id ?? "") !== handoff.claim_id || String(payload?.contract_id ?? "") !== handoff.contract_id) {
+          return json({ message: "The reset identifiers changed. Refresh and review them before trying again." }, 409);
+        }
+        const { data: reset, error: resetError } = await service.rpc("onehome_qa_reset_10518", {
+          p_claim_id: handoff.claim_id,
+          p_contract_id: handoff.contract_id,
+          p_actor_id: auth.user.id,
+        });
+        if (resetError) return json({ message: resetError.message }, resetError.code === "42501" ? 403 : 400);
+        const paths = Array.isArray(reset?.storage_paths) ? reset.storage_paths.map(String) : [];
+        const storageResult = paths.length ? await service.storage.from("rental-evidence").remove(paths) : { error: null };
+        const { error: authDeleteError } = await service.auth.admin.deleteUser(auth.user.id);
+        return json({
+          listing_no: 10518,
+          restored_state: reset?.restored_state,
+          removed_storage_objects: storageResult.error ? 0 : paths.length,
+          storage_cleanup_error: storageResult.error?.message ?? null,
+          qa_account_deleted: !authDeleteError,
+          account_cleanup_error: authDeleteError?.message ?? null,
+        });
+      }
+    }
 
     if (action === "approve") {
       const token = String(payload?.t ?? "").trim();
