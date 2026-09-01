@@ -158,3 +158,16 @@
   .owal-detail-row dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .owal-pagination { justify-content: space-between; }
 }
+
+.owal-section-heading h2 { font-size: 1.1rem; font-weight: 900; }
+.owal-section-heading p { margin-top: .15rem; font-size: .72rem; opacity: .52; }
+.owal-section-kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .75rem; }
+.owal-section-kpis article { min-height: 8rem; display: flex; flex-direction: column; }
+.owal-section-kpis small { font-size: .62rem; font-weight: 850; text-transform: uppercase; letter-spacing: .08em; opacity: .48; }
+.owal-section-kpis strong { margin-top: auto; font-size: 1.75rem; line-height: 1; }
+.owal-section-kpis p { margin-top: .45rem; font-size: .65rem; line-height: 1.35; opacity: .52; }
+.owal-disclosure { font-size: .7rem; color: #b45309; border-color: #d9770640; }
+
+@media (max-width: 900px) {
+  .owal-section-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
