@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" class="ow-no-sideways">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#FAFAF8" />
+    <script>
+      // Anonymous event-application drafts must never bleed into the next visitor
+      // who uses the same browser. Keep back/refresh recovery within this tab, while
+      // preserving explicit emailed resume links through their URL token.
+      (() => {
+        const isAnonymousEventDraftKey = (key) =>
+          typeof key === 'string' &&
+          (key.startsWith('evt-apply-draft-') || key.startsWith('evt-apply-token-'));
+
+        try {
+          for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+            const key = localStorage.key(index);
+            if (isAnonymousEventDraftKey(key)) localStorage.removeItem(key);
+          }
+
+          const nativeGetItem = Storage.prototype.getItem;
+          const nativeSetItem = Storage.prototype.setItem;
+          const nativeRemoveItem = Storage.prototype.removeItem;
+
+          Storage.prototype.getItem = function (key) {
+            if (this === localStorage && isAnonymousEventDraftKey(key)) {
+              return nativeGetItem.call(sessionStorage, key);
+            }
+            return nativeGetItem.call(this, key);
+          };
+
+          Storage.prototype.setItem = function (key, value) {
+            if (this === localStorage && isAnonymousEventDraftKey(key)) {
+              return nativeSetItem.call(sessionStorage, key, value);
+            }
+            return nativeSetItem.call(this, key, value);
+          };
+
+          Storage.prototype.removeItem = function (key) {
+            if (this === localStorage && isAnonymousEventDraftKey(key)) {
+              nativeRemoveItem.call(sessionStorage, key);
+            }
+            return nativeRemoveItem.call(this, key);
+          };
+        } catch (error) {
+          console.warn('[OneEvent] Could not isolate anonymous application draft storage.', error);
+        }
+      })();
+    </script>
+    <title>One World</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- ── INSTALLABLE ────────────────────────────────────────────────────────────────────
+         Max asked for this twice and it did not exist. Without a manifest the browser never
+         offers "Add to Home Screen", so every decision made for the installed-app case — the
+         start_url, the sign-out behaviour, the standalone check on the front door — was code
+         for a state the app could not reach.
+
+         `start_url` and `scope` are the bare origin because all eight products are ROUTES under
+         one origin: one install, one icon, and the switcher can reach every product without
+         leaving the installed window. Scoping to a product would trap the install in that
+         product and break the thing the single-origin decision was made for.
+
+         The marks sit at the ROOT rather than in /marks/ for one blunt reason: this repo is
+         updated through GitHub's web uploader, which cannot create a directory from a file input.
+         A folder would have meant the logo could not ship at all. Flat and live beats tidy and
+         missing; move them when the deploy gets a real push. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/mark-oneworld.png" />
+    <link rel="icon" href="/mark-oneworld.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="One World" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script type="module">
+      const oneHomeHandoff = /^\/rentals\/(?:review|inspection)\/[a-f0-9]{48}\/?$/i.test(location.pathname);
+      if (oneHomeHandoff) {
+        const reviewStyles = document.createElement('link');
+        reviewStyles.rel = 'stylesheet';
+        reviewStyles.href = '/onehome-review-app.css?v=20260831-receipt1';
+        document.head.append(reviewStyles);
+        const ownerQaStyles = document.createElement('link');
+        ownerQaStyles.rel = 'stylesheet';
+        ownerQaStyles.href = '/onehome-owner-qa.css?v=20260901-owner-media1';
+        document.head.append(ownerQaStyles);
+        import('/onehome-review-app.js?v=20260901-owner-media1')
+          .then(() => import('/onehome-owner-qa.js?v=20260901-owner-media1'));
+      } else {
+        // The production entry filename is intentionally stable while targeted
+        // fixes are rolled into it. Version the import with the live build id so
+        // Refresh loads the new bytes instead of the browser's cached entry file.
+        fetch(`/app-version.json?_=${Date.now()}`, { cache: 'no-store' })
+          .then((response) => response.ok ? response.json() : null)
+          .then((version) => {
+            const buildId = typeof version?.buildId === 'string'
+              ? version.buildId.trim()
+              : String(Date.now());
+            return import(`/index-CkwkYrti.js?_v=${encodeURIComponent(buildId)}`);
+          })
+          .catch(() => import(`/index-CkwkYrti.js?_v=${Date.now()}`));
+      }
+    </script>
+    <link rel="stylesheet" crossorigin href="/index-D2W4Azsu.css">
+    <link rel="stylesheet" crossorigin href="/admin-dashboard.css">
+    <script type="module" crossorigin src="/admin-dashboard.js"></script>
+    <script defer src="/analytics-live.js"></script>
+  </head>
+  <body class="ow-no-sideways">
+    <div id="root"></div>
+    <script>
+      // Preserve internal deep links while showing people a useful action label.
+      (() => {
+        const compactOneEventLinks = () => {
+          document.querySelectorAll('a[href]').forEach((link) => {
+            try {
+              const url = new URL(link.href, window.location.origin);
+              if (url.origin !== window.location.origin) return;
+
+              if (
+                url.pathname === '/events/events' &&
+                url.searchParams.get('tab') === 'attending'
+              ) {
+                link.textContent = 'View your request →';
+                link.setAttribute('aria-label', 'View your request in My Events');
+              } else if (
+                /^\/events\/events\/[^/]+\/manage$/.test(url.pathname) &&
+                url.searchParams.get('tab') === 'applicants'
+              ) {
+                link.textContent = 'Review application →';
+                link.setAttribute('aria-label', 'Review this event application');
+              }
+            } catch {
+              // Leave malformed or non-navigation links exactly as rendered.
+            }
+          });
+        };
+
+        const observer = new MutationObserver(compactOneEventLinks);
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        compactOneEventLinks();
+      })();
+    </script>
+  </body>
+</html>
+
