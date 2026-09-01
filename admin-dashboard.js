@@ -23244,6 +23244,10 @@ async function rw() {
   if (!t) return;
   const { data: e, error: r } = await Ti.rpc("is_platform_admin");
   if (r || e !== !0) return;
+  try {
+    localStorage.setItem("ow_platform_admin_v1", "true");
+  } catch {
+  }
   let n = null;
   for (let s = 0; s < 80 && !n; s++)
     n = document.querySelector("#root main"), n || await new Promise((i) => setTimeout(i, 50));
