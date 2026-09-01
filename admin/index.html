@@ -75,8 +75,13 @@
     <meta name="apple-mobile-web-app-title" content="One World" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <script type="module">
+      const adminRoute = window.location.pathname.replace(/\/$/, '') === '/admin';
       const oneHomeHandoff = /^\/rentals\/(?:review|inspection)\/[a-f0-9]{48}\/?$/i.test(location.pathname);
-      if (oneHomeHandoff) {
+      if (adminRoute) {
+        // The administrator dashboard has its own React root below. Loading the
+        // public app here would make two renderers compete for the same DOM on
+        // refresh, which can leave the page blank.
+      } else if (oneHomeHandoff) {
         const reviewStyles = document.createElement('link');
         reviewStyles.rel = 'stylesheet';
         reviewStyles.href = '/onehome-review-app.css?v=20260831-receipt1';
@@ -108,7 +113,7 @@
     <script defer src="/analytics-live.js"></script>
   </head>
   <body class="ow-no-sideways">
-    <div id="root"></div>
+    <div id="root"><main></main></div>
     <script>
       // Preserve internal deep links while showing people a useful action label.
       (() => {
@@ -144,4 +149,3 @@
     </script>
   </body>
 </html>
-
