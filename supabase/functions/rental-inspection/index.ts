@@ -58,7 +58,7 @@ async function publicPacket(token: string) {
 
   const { data: rows, error: itemError } = await service
     .from("rental_inspection_items")
-    .select("id, ordinal, photo_url, host_note, verdict, responded_at")
+    .select("id, ordinal, photo_url, host_note, verdict, tenant_note, responded_at")
     .eq("inspection_id", inspection.id)
     .order("ordinal", { ascending: true });
   if (itemError) return { error: "The walkthrough could not be opened.", status: 500 };
@@ -95,6 +95,8 @@ async function publicPacket(token: string) {
         ordinal: row.ordinal,
         note: row.host_note,
         verdict: row.verdict,
+        tenant_note: row.tenant_note,
+        responded_at: row.responded_at,
         photo_url: /^https?:/i.test(row.photo_url) ? row.photo_url : signedByPath[row.photo_url] ?? null,
       })),
     },
@@ -107,8 +109,8 @@ function emailBodies(propertyTitle: string, ownerName: string, url: string) {
   const safeUrl = escapeHtml(url);
   return {
     subject: `${ownerName} sent the move-in walkthrough for ${propertyTitle}`,
-    text: `${ownerName} sent you the move-in walkthrough photos for ${propertyTitle}. Review every photo and approve the set here: ${url}`,
-    html: `<!doctype html><html><body style="margin:0;background:#f3fbfb;font-family:Inter,Arial,sans-serif;color:#262321"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:32px 16px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#fff;border:1px solid #d9ecea;border-radius:22px"><tr><td style="padding:30px"><div style="font-size:26px;font-weight:800;color:#178f8a">OneHome</div><div style="margin-top:5px;font-size:11px;font-weight:700;letter-spacing:1.6px;color:#645d57">ARRIENDO CON CONTRATO</div><h1 style="font-size:24px;line-height:1.25;margin:28px 0 14px">Review the move-in walkthrough</h1><p style="font-size:15px;line-height:1.65;color:#5d5752">${safeOwner} sent you the move-in photos for <strong style="color:#262321">${safeTitle}</strong>.</p><p style="font-size:15px;line-height:1.65;color:#5d5752">Review every photo, then use the one approval button to confirm the complete set.</p><p style="text-align:center;margin:28px 0"><a href="${safeUrl}" style="display:inline-block;background:#332C26;color:#fff;text-decoration:none;font-weight:800;padding:14px 26px;border-radius:999px">Review walkthrough</a></p><p style="font-size:12px;line-height:1.55;color:#817a74">If the button does not open, copy this link:<br><a href="${safeUrl}" style="color:#178f8a;word-break:break-all">${safeUrl}</a></p></td></tr></table></td></tr></table></body></html>`,
+    text: `${ownerName} sent you the move-in walkthrough photos for ${propertyTitle}. Review each photo, approve it or request a change, then approve the complete walkthrough here: ${url}`,
+    html: `<!doctype html><html><body style="margin:0;background:#f3fbfb;font-family:Inter,Arial,sans-serif;color:#262321"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:32px 16px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#fff;border:1px solid #d9ecea;border-radius:22px"><tr><td style="padding:30px"><div style="font-size:26px;font-weight:800;color:#178f8a">OneHome</div><div style="margin-top:5px;font-size:11px;font-weight:700;letter-spacing:1.6px;color:#645d57">ARRIENDO CON CONTRATO</div><h1 style="font-size:24px;line-height:1.25;margin:28px 0 14px">Review the move-in walkthrough</h1><p style="font-size:15px;line-height:1.65;color:#5d5752">${safeOwner} sent you the move-in photos for <strong style="color:#262321">${safeTitle}</strong>.</p><p style="font-size:15px;line-height:1.65;color:#5d5752">Review each photo. Mark it as correct or request a change, then approve the complete walkthrough.</p><p style="text-align:center;margin:28px 0"><a href="${safeUrl}" style="display:inline-block;background:#332C26;color:#fff;text-decoration:none;font-weight:800;padding:14px 26px;border-radius:999px">Review walkthrough</a></p><p style="font-size:12px;line-height:1.55;color:#817a74">If the button does not open, copy this link:<br><a href="${safeUrl}" style="color:#178f8a;word-break:break-all">${safeUrl}</a></p></td></tr></table></td></tr></table></body></html>`,
   };
 }
 
@@ -132,6 +134,42 @@ Deno.serve(async (req) => {
       const { data, error } = await service.rpc("rental_inspection_approve_all", { p_token: token });
       if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
       return json(Array.isArray(data) ? data[0] : data);
+    }
+
+    if (action === "respond_item") {
+      const token = String(payload?.t ?? "").trim().toLowerCase();
+      const itemId = String(payload?.item_id ?? "").trim();
+      const verdict = String(payload?.verdict ?? "").trim();
+      const note = String(payload?.note ?? "").trim();
+      if (!validToken(token)) return json({ message: "That walkthrough link is not valid." }, 400);
+      if (!/^[0-9a-f-]{36}$/i.test(itemId)) return json({ message: "That walkthrough photo is not valid." }, 400);
+      if (!["agreed", "disputed"].includes(verdict)) return json({ message: "Choose Looks right or Request a change." }, 400);
+      if (verdict === "disputed" && !note) return json({ message: "Tell the owner what needs to change." }, 400);
+
+      const { data, error } = await service.rpc("rental_inspection_respond", {
+        p_token: token,
+        p_item_id: itemId,
+        p_verdict: verdict,
+        p_note: note || null,
+        p_tenant_photo_url: null,
+      });
+      if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
+
+      const { data: contract } = await service.from("rental_contracts")
+        .select("id, agent_id").eq("share_token", token).maybeSingle();
+      if (contract?.agent_id) {
+        try {
+          await service.rpc("notify_rental", {
+            p_user: contract.agent_id,
+            p_type: verdict === "disputed" ? "rental_inspection_change_requested" : "rental_inspection_photo_approved",
+            p_title: verdict === "disputed" ? "A walkthrough photo needs a change" : "A walkthrough photo was approved",
+            p_body: verdict === "disputed" ? note : "The tenant marked one move-in photo as correct.",
+            p_url: `/rentals/c/${contract.id}`,
+          });
+        } catch (_) { /* A saved response must survive a notification outage. */ }
+      }
+      const result = Array.isArray(data) ? data[0] : data;
+      return json({ ...result, responded_at: new Date().toISOString() });
     }
 
     if (action === "claim_payment") {
@@ -179,6 +217,45 @@ Deno.serve(async (req) => {
       if (!handoff?.share_token) return json({ message: "The walkthrough link could not be created." }, 500);
 
       const shareUrl = `${SITE_URL}/rentals/inspection/${handoff.share_token}`;
+      let messageSent = false;
+      let conversationId: string | null = null;
+      if (!recipientEmail) {
+        const { data: contract } = await service.from("rental_contracts")
+          .select("agent_id, tenant_id, conversation_id")
+          .eq("id", handoff.contract_id).maybeSingle();
+        if (contract?.tenant_id && contract.tenant_id !== contract.agent_id) {
+          conversationId = contract.conversation_id ?? null;
+          if (!conversationId) {
+            const { data: existing } = await service.from("conversations")
+              .select("id").contains("participant_ids", [contract.agent_id, contract.tenant_id])
+              .eq("category", "rentals").limit(1);
+            conversationId = existing?.[0]?.id ?? null;
+          }
+          if (!conversationId) {
+            const { data: made } = await service.from("conversations").insert({
+              participant_ids: [contract.agent_id, contract.tenant_id],
+              category: "rentals",
+              metadata: { contract_id: handoff.contract_id },
+            }).select("id").single();
+            conversationId = made?.id ?? null;
+          }
+          if (conversationId) {
+            const preview = `Move-in walkthrough: ${handoff.property_title || "OneHome"} — ${shareUrl}`;
+            const { error: messageError } = await service.from("messages").insert({
+              conversation_id: conversationId,
+              sender_id: authData.user.id,
+              content: preview,
+              message_type: "text",
+              metadata: { contract_id: handoff.contract_id, inspection_id: handoff.inspection_id, share_url: shareUrl, product: "onehome" },
+            });
+            if (!messageError) {
+              await service.from("conversations").update({ last_message_text: preview, last_message_at: new Date().toISOString() }).eq("id", conversationId);
+              await service.from("rental_contracts").update({ conversation_id: conversationId }).eq("id", handoff.contract_id);
+              messageSent = true;
+            }
+          }
+        }
+      }
       let emailQueued = false;
       if (recipientEmail) {
         const { data: owner } = await service.from("profiles")
@@ -215,6 +292,8 @@ Deno.serve(async (req) => {
         state: handoff.inspection_state,
         photo_count: handoff.photo_count,
         share_url: shareUrl,
+        message_sent: messageSent,
+        conversation_id: conversationId,
         email_queued: emailQueued,
       });
     }
