@@ -7,7 +7,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const PLATFORM_TERMS_VERSION = "oneworld-platform-owner-review-2026-09-01";
-const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-01-v2";
+const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-01-v3";
 
 const CORS = {
   "access-control-allow-origin": "*",

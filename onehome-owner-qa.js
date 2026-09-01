@@ -3,7 +3,7 @@ const ONEHOME_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 const REVIEW_API = `${ONEHOME_SUPABASE_URL}/functions/v1/listing-review`;
 const INSPECTION_API = `${ONEHOME_SUPABASE_URL}/functions/v1/rental-inspection`;
 const PLATFORM_TERMS_VERSION = "oneworld-platform-owner-review-2026-09-01";
-const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-01-v2";
+const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-01-v3";
 const CLAIM_TOKEN = location.pathname.match(/^\/rentals\/review\/([0-9a-f]{48})\/?$/i)?.[1]?.toLowerCase() || "";
 const FIXTURE_MODE = new URLSearchParams(location.search).get("onehomeQaFixture") === "owner-media";
 
@@ -59,10 +59,10 @@ function termsPanel() {
           <li>The owner handles necessary or structural repairs. The tenant handles damage caused by the tenant or guests and reports owner repairs in writing.</li>
           <li>Water, electricity, gas, internet, television and building administration are included. Extra services requested by the tenant are the tenant’s responsibility.</li>
           <li>No alterations, assignment or subletting without the owner’s prior written approval.</li>
-          <li>Temporary travel is not abandonment while rent is current and personal belongings remain. A support animal is permitted; the tenant is responsible for animal-caused damage.</li>
-          <li>After twelve months, any annual rent adjustment follows the prior contract’s CPI approach. Lawful late-payment and breach remedies remain subject to the final lease and applicable law.</li>
+          <li>Temporary travel is not treated as abandonment while rent is current and personal belongings remain.</li>
         </ul>
       </div>
+      <p class="ohqa-pending-note"><strong>Not accepted yet:</strong> cancellation and notice periods, annual rent adjustments, late-payment interest, penalties and collection costs, repainting beyond ordinary wear, owner entry after alleged abandonment, support-animal wording, and any deposit or replacement security. Those items require a separate final decision before the lease can be signed.</p>
       <p class="ohqa-source-note"><strong>Not copied from the old contract:</strong> its expired dates, old rent amounts, deposit, bank and payee details, portable-air-conditioner deal, signatures, identity numbers and private contact details.</p>
       <p>This acknowledgment records review only. It stays separate from OneWorld’s terms and does not sign the final lease.</p>
     </details>
