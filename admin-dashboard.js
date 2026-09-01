@@ -23087,7 +23087,7 @@ function Zy({ data: t }) {
     ] }, s)) })
   ] }, r)) });
 }
-function ew() {
+function ew({ growthOnly: B = !1 } = {}) {
   const [t, e] = Z.useState(30), [r, n] = Z.useState(""), [s, i] = Z.useState("human"), [o, a] = Z.useState(null), [l, u] = Z.useState("");
   return Z.useEffect(() => {
     let c = !0;
@@ -23138,8 +23138,64 @@ function ew() {
         /* @__PURE__ */ _.jsx(Kt, { title: "Landing pages", rows: o.landing_pages }),
         s !== "human" && /* @__PURE__ */ _.jsx(Kt, { title: "Search & discovery crawlers", rows: o.bots })
       ] }),
-      /* @__PURE__ */ _.jsx(Zy, { data: o.operations })
+      !B && /* @__PURE__ */ _.jsx(Zy, { data: o.operations })
     ] })
+  ] });
+}
+function ow({ mode: t }) {
+  const [e, r] = Z.useState(null), [n, s] = Z.useState("");
+  Z.useEffect(() => {
+    let i = !0;
+    return Ti.rpc("admin_dashboard_sections").then(({ data: o, error: a }) => {
+      i && (a ? s(a.message) : (s(""), r(o)));
+    }), () => {
+      i = !1;
+    };
+  }, []);
+  if (n)
+    return /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-warn", children: [
+      /* @__PURE__ */ _.jsx("b", { children: `${t === "money" ? "Money" : "Operations"} data is unavailable.` }),
+      /* @__PURE__ */ _.jsx("p", { children: n })
+    ] });
+  if (!e)
+    return /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-loading", children: `Loading ${t === "money" ? "money" : "operations"} data…` });
+  if (t === "money") {
+    const i = e.money;
+    return /* @__PURE__ */ _.jsxs("section", { className: "owal-stack", children: [
+      /* @__PURE__ */ _.jsxs("div", { className: "owal-section-heading", children: [
+        /* @__PURE__ */ _.jsx("h2", { children: "Money" }),
+        /* @__PURE__ */ _.jsx("p", { children: "Stripe activity, paid work and promotional access." })
+      ] }),
+      /* @__PURE__ */ _.jsx("div", { className: "owal-section-kpis", children: [
+        ["Paid agreements", i.paid_agreements, "Completed agreement payments"],
+        ["Paid bookings", i.paid_bookings, "Completed booking payments"],
+        ["Active promos", i.active_promos, "Promotional access passes"],
+        ["Refunds", i.refunds, "Stripe refund totals are not connected to this secure overview yet"],
+        ["MRR", i.mrr, "Recurring revenue is not connected to this secure overview yet"]
+      ].map(([o, a, l]) => /* @__PURE__ */ _.jsxs("article", { className: "owal-card", children: [
+        /* @__PURE__ */ _.jsx("small", { children: o }),
+        /* @__PURE__ */ _.jsx("strong", { children: a == null ? "—" : Xn(a) }),
+        /* @__PURE__ */ _.jsx("p", { children: l })
+      ] }, o)) }),
+      /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-disclosure", children: "Established parity preserved: Refunds and MRR remain explicitly unwired rather than showing invented values." })
+    ] });
+  }
+  const i = e.ops, o = i.last_aws_sync || {};
+  return /* @__PURE__ */ _.jsxs("section", { className: "owal-stack", children: [
+    /* @__PURE__ */ _.jsxs("div", { className: "owal-section-heading", children: [
+      /* @__PURE__ */ _.jsx("h2", { children: "Operations" }),
+      /* @__PURE__ */ _.jsx("p", { children: "Incidents, security controls and infrastructure synchronization." })
+    ] }),
+    /* @__PURE__ */ _.jsx("div", { className: "owal-section-kpis", children: [
+      ["Open incidents", i.open_incidents, "Needs attention"],
+      ["Total incidents", i.total_incidents, "Accountability log"],
+      ["Blocked IPs", i.blocked_ips, "Security block list"],
+      ["Last AWS sync", o.status || "—", o.started_at ? `${kc(o.started_at)} · ${Xn(o.records_synced)} records` : "No synchronization run recorded"]
+    ].map(([a, l, u]) => /* @__PURE__ */ _.jsxs("article", { className: "owal-card", children: [
+      /* @__PURE__ */ _.jsx("small", { children: a }),
+      /* @__PURE__ */ _.jsx("strong", { children: typeof l === "number" ? Xn(l) : l }),
+      /* @__PURE__ */ _.jsx("p", { children: u })
+    ] }, a)) })
   ] });
 }
 function Sc({ compact: t = !1, viewAll: e }) {
@@ -23222,19 +23278,26 @@ function Sc({ compact: t = !1, viewAll: e }) {
 }
 function tw() {
   const [t, e] = Z.useState("overview");
+  const r = {
+    overview: "Growth · People · Money · Ops",
+    growth: "Visitors, sources, devices and product demand",
+    people: "Real accounts, signup details and connected products",
+    money: "Payments, paid work and promotional access",
+    ops: "Incidents, security and infrastructure health"
+  }[t];
   return /* @__PURE__ */ _.jsxs("div", { className: "ow-admin-live", children: [
     /* @__PURE__ */ _.jsxs("header", { children: [
       /* @__PURE__ */ _.jsx("h1", { children: /* @__PURE__ */ _.jsx("span", { children: "Admin Dashboard" }) }),
-      /* @__PURE__ */ _.jsx("p", { children: "Growth · People · Money · Ops" })
+      /* @__PURE__ */ _.jsx("p", { children: r })
     ] }),
-    /* @__PURE__ */ _.jsx("nav", { "aria-label": "Admin sections", children: ["Overview", "Growth", "People", "Money", "Ops"].map((r) => {
-      const n = r === "Overview" || r === "People", s = t === r.toLowerCase();
-      return /* @__PURE__ */ _.jsx("button", { disabled: !n, "aria-current": s ? "page" : void 0, onClick: () => n && e(r.toLowerCase()), children: r }, r);
+    /* @__PURE__ */ _.jsx("nav", { "aria-label": "Admin sections", children: ["Overview", "Growth", "People", "Money", "Ops"].map((n) => {
+      const s = t === n.toLowerCase();
+      return /* @__PURE__ */ _.jsx("button", { "aria-current": s ? "page" : void 0, onClick: () => e(n.toLowerCase()), children: n }, n);
     }) }),
     t === "overview" ? /* @__PURE__ */ _.jsxs(_.Fragment, { children: [
       /* @__PURE__ */ _.jsx(ew, {}),
       /* @__PURE__ */ _.jsx(Sc, { compact: !0, viewAll: () => e("people") })
-    ] }) : /* @__PURE__ */ _.jsx(Sc, {}),
+    ] }) : t === "growth" ? /* @__PURE__ */ _.jsx(ew, { growthOnly: !0 }) : t === "people" ? /* @__PURE__ */ _.jsx(Sc, {}) : t === "money" ? /* @__PURE__ */ _.jsx(ow, { mode: "money" }) : /* @__PURE__ */ _.jsx(ow, { mode: "ops" }),
     /* @__PURE__ */ _.jsx("footer", { children: "Read-only · Server-authorized · Sensitive views are audited" })
   ] });
 }
