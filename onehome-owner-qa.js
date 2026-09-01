@@ -3,7 +3,7 @@ const ONEHOME_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 const REVIEW_API = `${ONEHOME_SUPABASE_URL}/functions/v1/listing-review`;
 const INSPECTION_API = `${ONEHOME_SUPABASE_URL}/functions/v1/rental-inspection`;
 const PLATFORM_TERMS_VERSION = "oneworld-platform-owner-review-2026-09-01";
-const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-01";
+const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-01-v2";
 const CLAIM_TOKEN = location.pathname.match(/^\/rentals\/review\/([0-9a-f]{48})\/?$/i)?.[1]?.toLowerCase() || "";
 const FIXTURE_MODE = new URLSearchParams(location.search).get("onehomeQaFixture") === "owner-media";
 
@@ -42,9 +42,29 @@ function termsPanel() {
       <span>I agree to the OneWorld / OneHome platform terms shown above.</span>
     </label>
     <details open>
-      <summary>2. Property-owner supplemental terms — review draft</summary>
-      <p><strong>9,000,000 COP</strong> for every monthly period, month-to-month. The listing separately shows a <strong>300,000 COP</strong> cleaning charge when the lease starts.</p>
-      <p>This acknowledgment records review only. It does not merge these terms with OneWorld’s terms, settle the remaining legal choices, or create a signed final lease.</p>
+      <summary>2. Property-owner supplemental terms — current review draft</summary>
+      <div class="ohqa-term-group">
+        <strong>Current listing terms</strong>
+        <ul>
+          <li><strong>9,000,000 COP</strong> for each monthly rental period.</li>
+          <li>A separate, one-time <strong>300,000 COP cleaning charge</strong> is due when the lease starts.</li>
+          <li><strong>No security deposit.</strong> The start date and tenant identity are added when the tenant packet is prepared.</li>
+        </ul>
+      </div>
+      <div class="ohqa-term-group">
+        <strong>Property rules carried forward from the prior five-page contract</strong>
+        <ul>
+          <li>Residential, lawful use only.</li>
+          <li>The furnished home and furniture are returned in the condition documented at move-in, allowing for ordinary wear.</li>
+          <li>The owner handles necessary or structural repairs. The tenant handles damage caused by the tenant or guests and reports owner repairs in writing.</li>
+          <li>Water, electricity, gas, internet, television and building administration are included. Extra services requested by the tenant are the tenant’s responsibility.</li>
+          <li>No alterations, assignment or subletting without the owner’s prior written approval.</li>
+          <li>Temporary travel is not abandonment while rent is current and personal belongings remain. A support animal is permitted; the tenant is responsible for animal-caused damage.</li>
+          <li>After twelve months, any annual rent adjustment follows the prior contract’s CPI approach. Lawful late-payment and breach remedies remain subject to the final lease and applicable law.</li>
+        </ul>
+      </div>
+      <p class="ohqa-source-note"><strong>Not copied from the old contract:</strong> its expired dates, old rent amounts, deposit, bank and payee details, portable-air-conditioner deal, signatures, identity numbers and private contact details.</p>
+      <p>This acknowledgment records review only. It stays separate from OneWorld’s terms and does not sign the final lease.</p>
     </details>
     <label class="ohqa-check">
       <input id="ohqa-property-terms" type="checkbox">
