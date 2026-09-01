@@ -23064,13 +23064,13 @@ function Yy({ overview: t }) {
   }) });
 }
 function Xy({ rows: t = [] }) {
-  const e = t.map((s) => Number(s.visitors || 0)), r = Math.max(1, ...e), n = e.map((s, i) => `${i / Math.max(1, e.length - 1) * 100},${38 - s / r * 32}`).join(" ");
+  const e = t.map((s) => Number(s.visitors || 0)), r = Math.max(1, ...e), n = e.map((s, i) => `${i / Math.max(1, e.length - 1) * 100},${38 - s / r * 32}`).join(" "), o = e.some((s) => s > 0);
   return /* @__PURE__ */ _.jsxs("section", { className: "owal-card owal-trend", children: [
     /* @__PURE__ */ _.jsxs("div", { children: [
       /* @__PURE__ */ _.jsx("h3", { children: "Audience trend" }),
       /* @__PURE__ */ _.jsx("p", { children: "Unique visitors per day" })
     ] }),
-    n ? /* @__PURE__ */ _.jsx("svg", { viewBox: "0 0 100 42", preserveAspectRatio: "none", "aria-label": "Daily visitors trend", children: /* @__PURE__ */ _.jsx("polyline", { points: n }) }) : /* @__PURE__ */ _.jsx("p", { className: "owal-empty", children: "Collection is ready; history begins with this release." })
+    o ? /* @__PURE__ */ _.jsx("svg", { viewBox: "0 0 100 42", preserveAspectRatio: "none", "aria-label": "Daily visitors trend", children: /* @__PURE__ */ _.jsx("polyline", { points: n }) }) : /* @__PURE__ */ _.jsx("p", { className: "owal-empty", children: "No visitor history yet. Privacy-safe collection is active and this trend will populate with new visits." })
   ] });
 }
 function Zy({ data: t }) {
@@ -23117,6 +23117,10 @@ function ew() {
         /* @__PURE__ */ _.jsx("option", { value: "all", children: "All traffic" })
       ] })
     ] }),
+    o && /* @__PURE__ */ _.jsxs("div", { className: `owal-card owal-collection ${Number(o.collection && o.collection.event_count || 0) > 0 ? "is-live" : "is-new"}`, children: [
+      /* @__PURE__ */ _.jsx("b", { children: Number(o.collection && o.collection.event_count || 0) > 0 ? "Live visitor collection is active" : "Visitor collection is live — history starts now" }),
+      /* @__PURE__ */ _.jsx("span", { children: Number(o.collection && o.collection.event_count || 0) > 0 ? `${Xn(o.collection.event_count)} privacy-safe events collected since ${kc(o.collection.first_event_at)}` : "No historical visitor events were available before this release. New visits will appear here automatically." })
+    ] }),
     l && /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-warn", children: [
       /* @__PURE__ */ _.jsx("b", { children: "Dashboard data is unavailable." }),
       /* @__PURE__ */ _.jsx("p", { children: l })
@@ -23139,30 +23143,33 @@ function ew() {
   ] });
 }
 function Sc({ compact: t = !1, viewAll: e }) {
-  const [r, n] = Z.useState(""), [s, i] = Z.useState(""), [o, a] = Z.useState(""), [l, u] = Z.useState(""), [c, h] = Z.useState(null), [d, g] = Z.useState(null), [v, y] = Z.useState("");
+  const [r, n] = Z.useState(""), [s, i] = Z.useState(""), [o, a] = Z.useState(""), [l, u] = Z.useState(""), [c, h] = Z.useState(null), [d, g] = Z.useState(null), [v, y] = Z.useState(""), [f, p] = Z.useState(0), m = 50;
   Z.useEffect(() => {
-    const f = setTimeout(() => i(r.trim()), 250);
-    return () => clearTimeout(f);
-  }, [r]), Z.useEffect(() => {
-    let f = !0;
-    return Ti.rpc("admin_user_directory", { p_search: s || null, p_product: o || null, p_status: l || null, p_limit: t ? 6 : 100, p_offset: 0 }).then(({ data: p, error: m }) => {
-      f && (m ? y(m.message) : (y(""), h(p)));
+    const w = setTimeout(() => i(r.trim()), 250);
+    return () => clearTimeout(w);
+  }, [r]), Z.useEffect(() => p(0), [s, o, l]), Z.useEffect(() => {
+    let w = !0;
+    return h(null), Ti.rpc("admin_user_directory", { p_search: s || null, p_product: o || null, p_status: l || null, p_limit: t ? 1 : m, p_offset: t ? 0 : f * m }).then(({ data: b, error: x }) => {
+      w && (x ? y(x.message) : (y(""), h(b)));
     }), () => {
-      f = !1;
+      w = !1;
     };
-  }, [s, o, l, t]);
-  const k = Z.useMemo(() => [["", "All products"], ["onejob", "OneJob"], ["oneevent", "OneEvent"], ["onehome", "OneHome"], ["onesocial", "OneSocial"], ["onescore", "OneScore"]], []);
-  return /* @__PURE__ */ _.jsxs("section", { className: "owal-stack", children: [
-    t ? /* @__PURE__ */ _.jsxs("div", { className: "owal-section-title", children: [
+  }, [s, o, l, t, f]);
+  const k = Z.useMemo(() => [["", "All products"], ["onejob", "OneJob"], ["oneevent", "OneEvent"], ["onehome", "OneHome"], ["onesocial", "OneSocial"], ["onescore", "OneScore"], ["oneagent", "OneAgent"]], []), S = c ? Math.max(1, Math.ceil(Number(c.total || 0) / m)) : 1;
+  if (t)
+    return /* @__PURE__ */ _.jsxs("section", { className: "owal-card owal-people-summary", children: [
       /* @__PURE__ */ _.jsxs("div", { children: [
-        /* @__PURE__ */ _.jsx("h2", { children: "Members" }),
-        /* @__PURE__ */ _.jsx("p", { children: "One ID, claim state and connected products" })
+        /* @__PURE__ */ _.jsx("small", { children: "People directory" }),
+        /* @__PURE__ */ _.jsx("strong", { children: c ? Xn(c.total) : "—" }),
+        /* @__PURE__ */ _.jsx("span", { children: "real accounts · sensitive access audited" })
       ] }),
-      /* @__PURE__ */ _.jsx("button", { onClick: e, children: "View all" })
-    ] }) : /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-people-filters", children: [
-      /* @__PURE__ */ _.jsx("input", { value: r, onChange: (f) => n(f.target.value), placeholder: "Name, email or phone" }),
-      /* @__PURE__ */ _.jsx("select", { value: o, onChange: (f) => a(f.target.value), children: k.map(([f, p]) => /* @__PURE__ */ _.jsx("option", { value: f, children: p }, f)) }),
-      /* @__PURE__ */ _.jsxs("select", { value: l, onChange: (f) => u(f.target.value), children: [
+      /* @__PURE__ */ _.jsx("button", { onClick: e, children: "Open directory" })
+    ] });
+  return /* @__PURE__ */ _.jsxs("section", { className: "owal-stack", children: [
+    /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-people-filters", children: [
+      /* @__PURE__ */ _.jsx("input", { value: r, onChange: (w) => n(w.target.value), placeholder: "Name, email or phone", "aria-label": "Search people" }),
+      /* @__PURE__ */ _.jsx("select", { value: o, onChange: (w) => a(w.target.value), "aria-label": "Filter people by product", children: k.map(([w, b]) => /* @__PURE__ */ _.jsx("option", { value: w, children: b }, w)) }),
+      /* @__PURE__ */ _.jsxs("select", { value: l, onChange: (w) => u(w.target.value), "aria-label": "Filter people by account state", children: [
         /* @__PURE__ */ _.jsx("option", { value: "", children: "All account states" }),
         /* @__PURE__ */ _.jsx("option", { value: "claimed", children: "Claimed" }),
         /* @__PURE__ */ _.jsx("option", { value: "invited", children: "Invited" }),
@@ -23171,38 +23178,46 @@ function Sc({ compact: t = !1, viewAll: e }) {
       ] })
     ] }),
     /* @__PURE__ */ _.jsxs("div", { className: "owal-meta", children: [
-      /* @__PURE__ */ _.jsx("span", { children: c ? `${Xn(c.total)} people` : "Loading people…" }),
+      /* @__PURE__ */ _.jsx("span", { children: c ? `${Xn(c.total)} people · newest first` : "Loading people…" }),
       /* @__PURE__ */ _.jsx("span", { children: "PII access audited" })
     ] }),
-    v && /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-warn", children: v }),
-    /* @__PURE__ */ _.jsx("div", { className: "owal-people", children: c == null ? void 0 : c.rows.map((f) => {
-      const p = d === f.user_id;
-      return /* @__PURE__ */ _.jsxs("article", { className: "owal-card", children: [
-        /* @__PURE__ */ _.jsxs("button", { className: "owal-person", onClick: () => g(p ? null : f.user_id), children: [
-          /* @__PURE__ */ _.jsx("span", { className: "owal-avatar", children: (f.full_name || "?").slice(0, 1).toUpperCase() }),
-          /* @__PURE__ */ _.jsxs("span", { children: [
-            /* @__PURE__ */ _.jsx("b", { children: f.full_name || "No name" }),
-            /* @__PURE__ */ _.jsx("small", { children: f.email || "—" })
+    v && /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-warn", children: [
+      /* @__PURE__ */ _.jsx("b", { children: "People directory is unavailable." }),
+      /* @__PURE__ */ _.jsx("p", { children: v })
+    ] }),
+    !c && !v && /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-loading", children: "Loading the administrator directory…" }),
+    c && !c.rows.length && /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-empty", children: "No people match these filters." }),
+    c && c.rows.length > 0 && /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-table-card", children: /* @__PURE__ */ _.jsx("div", { className: "owal-table-wrap", children: /* @__PURE__ */ _.jsxs("table", { className: "owal-people-table", children: [
+      /* @__PURE__ */ _.jsx("thead", { children: /* @__PURE__ */ _.jsx("tr", { children: ["Person", "Signup date", "Email address", "Phone number", "App / product context", "Account state", "Score", "Last sign-in", "Profile"].map((w) => /* @__PURE__ */ _.jsx("th", { scope: "col", children: w }, w)) }) }),
+      /* @__PURE__ */ _.jsx("tbody", { children: c.rows.map((w) => {
+        const b = d === w.user_id, x = (w.products || []).filter((M) => M.status === "active");
+        return /* @__PURE__ */ _.jsxs(_.Fragment, { children: [
+          /* @__PURE__ */ _.jsxs("tr", { className: b ? "is-open" : "", onClick: () => g(b ? null : w.user_id), tabIndex: 0, onKeyDown: (M) => (M.key === "Enter" || M.key === " ") && g(b ? null : w.user_id), children: [
+            /* @__PURE__ */ _.jsxs("td", { children: [
+              /* @__PURE__ */ _.jsx("span", { className: "owal-table-avatar", children: (w.full_name || "?").slice(0, 1).toUpperCase() }),
+              /* @__PURE__ */ _.jsxs("span", { children: [
+                /* @__PURE__ */ _.jsx("b", { children: w.full_name || "No name" }),
+                /* @__PURE__ */ _.jsx("small", { children: w.profession || w.location || "—" })
+              ] })
+            ] }),
+            /* @__PURE__ */ _.jsx("td", { children: kc(w.created_at) }),
+            /* @__PURE__ */ _.jsx("td", { children: w.email || "—" }),
+            /* @__PURE__ */ _.jsx("td", { children: w.phone || "—" }),
+            /* @__PURE__ */ _.jsx("td", { children: x.length ? /* @__PURE__ */ _.jsx("div", { className: "owal-products", children: x.map((M) => /* @__PURE__ */ _.jsxs("span", { children: [M.product.replace(/^one/, "One"), M.plan ? ` · ${M.plan}` : ""] }, M.product)) }) : "—" }),
+            /* @__PURE__ */ _.jsx("td", { children: /* @__PURE__ */ _.jsx("mark", { children: w.onboarding_incomplete ? "onboarding" : w.membership }) }),
+            /* @__PURE__ */ _.jsx("td", { children: w.score == null ? "—" : Math.round(w.score) }),
+            /* @__PURE__ */ _.jsx("td", { children: kc(w.last_sign_in_at) }),
+            /* @__PURE__ */ _.jsx("td", { children: w.is_public ? "Public" : "Private" })
           ] }),
-          /* @__PURE__ */ _.jsx("mark", { children: f.membership }),
-          /* @__PURE__ */ _.jsxs("strong", { children: [
-            f.score == null ? "—" : Math.round(f.score),
-            /* @__PURE__ */ _.jsx("small", { children: "score" })
-          ] })
-        ] }),
-        p && /* @__PURE__ */ _.jsxs("div", { className: "owal-detail", children: [
-          /* @__PURE__ */ _.jsx("dl", { children: [["Phone", f.phone || "—"], ["Profession", f.profession || "—"], ["Location", f.location || "—"], ["Last sign-in", kc(f.last_sign_in_at)], ["Joined", kc(f.created_at)], ["Profile", f.is_public ? "Public" : "Private"]].map(([m, w]) => /* @__PURE__ */ _.jsxs("div", { children: [
-            /* @__PURE__ */ _.jsx("dt", { children: m }),
-            /* @__PURE__ */ _.jsx("dd", { children: w })
-          ] }, m)) }),
-          /* @__PURE__ */ _.jsx("div", { className: "owal-products", children: (f.products || []).filter((m) => m.status === "active").map((m) => /* @__PURE__ */ _.jsxs("span", { children: [
-            m.product.replace(/^one/, "One"),
-            m.plan ? ` · ${m.plan}` : ""
-          ] }, m.product)) }),
-          f.onboarding_incomplete && /* @__PURE__ */ _.jsx("p", { className: "owal-note", children: "Onboarding is incomplete" })
-        ] })
-      ] }, f.user_id);
-    }) })
+          b && /* @__PURE__ */ _.jsx("tr", { className: "owal-detail-row", children: /* @__PURE__ */ _.jsx("td", { colSpan: 9, children: /* @__PURE__ */ _.jsx("dl", { children: [["Profession", w.profession || "—"], ["Location", w.location || "—"], ["Connected apps", Xn(w.apps_connected)], ["Onboarding", w.onboarding_incomplete ? "Incomplete" : "Complete"]].map(([M, C]) => /* @__PURE__ */ _.jsxs("div", { children: [/* @__PURE__ */ _.jsx("dt", { children: M }), /* @__PURE__ */ _.jsx("dd", { children: C })] }, M)) }) }) })
+        ] }, w.user_id);
+      }) })
+    ] }) }) }),
+    c && c.total > m && /* @__PURE__ */ _.jsxs("div", { className: "owal-pagination", children: [
+      /* @__PURE__ */ _.jsx("button", { disabled: f === 0, onClick: () => p(Math.max(0, f - 1)), children: "Previous" }),
+      /* @__PURE__ */ _.jsxs("span", { children: ["Page ", f + 1, " of ", S] }),
+      /* @__PURE__ */ _.jsx("button", { disabled: f + 1 >= S, onClick: () => p(Math.min(S - 1, f + 1)), children: "Next" })
+    ] })
   ] });
 }
 function tw() {
@@ -23217,8 +23232,8 @@ function tw() {
       return /* @__PURE__ */ _.jsx("button", { disabled: !n, "aria-current": s ? "page" : void 0, onClick: () => n && e(r.toLowerCase()), children: r }, r);
     }) }),
     t === "overview" ? /* @__PURE__ */ _.jsxs(_.Fragment, { children: [
-      /* @__PURE__ */ _.jsx(Sc, { compact: !0, viewAll: () => e("people") }),
-      /* @__PURE__ */ _.jsx(ew, {})
+      /* @__PURE__ */ _.jsx(ew, {}),
+      /* @__PURE__ */ _.jsx(Sc, { compact: !0, viewAll: () => e("people") })
     ] }) : /* @__PURE__ */ _.jsx(Sc, {}),
     /* @__PURE__ */ _.jsx("footer", { children: "Read-only · Server-authorized · Sensitive views are audited" })
   ] });
