@@ -1,0 +1,160 @@
+.owal-host {
+  display: block !important;
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  margin: 0 auto !important;
+  padding: 1.25rem !important;
+  min-height: 100vh !important;
+  overflow: visible !important;
+}
+
+.owal-collection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .75rem 1rem;
+  border-color: #0d94884d;
+}
+
+.owal-collection b { font-size: .78rem; color: #0d9488; }
+.owal-collection span { font-size: .68rem; opacity: .62; text-align: right; }
+.owal-collection.is-new { border-color: #d977064d; }
+.owal-collection.is-new b { color: #b45309; }
+
+.owal-people-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: .75rem;
+}
+
+.owal-people-summary > div {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: .18rem .65rem;
+}
+
+.owal-people-summary small {
+  grid-column: 1 / -1;
+  font-size: .62rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  opacity: .45;
+}
+
+.owal-people-summary strong { font-size: 1.45rem; }
+.owal-people-summary span { font-size: .68rem; opacity: .52; }
+.owal-people-summary button,
+.owal-pagination button {
+  border: 0;
+  border-radius: .7rem;
+  background: var(--brand, #0b7f74);
+  color: #fff;
+  padding: .55rem .75rem;
+  font-size: .7rem;
+  font-weight: 850;
+}
+
+.owal-table-card { padding: 0; overflow: hidden; }
+.owal-table-wrap { max-width: 100%; overflow: auto; }
+.owal-people-table {
+  width: 100%;
+  min-width: 76rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: .7rem;
+}
+
+.owal-people-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: .65rem .7rem;
+  text-align: left;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--card, #fff) 96%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  font-size: .58rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  opacity: .65;
+}
+
+.owal-people-table td {
+  padding: .64rem .7rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 7%, transparent);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.owal-people-table tbody tr:not(.owal-detail-row) { cursor: pointer; transition: background .15s; }
+.owal-people-table tbody tr:not(.owal-detail-row):hover,
+.owal-people-table tbody tr.is-open { background: color-mix(in srgb, var(--brand, #0b7f74) 6%, transparent); }
+.owal-people-table th:first-child,
+.owal-people-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: color-mix(in srgb, var(--card, #fff) 96%, transparent);
+}
+
+.owal-people-table th:first-child { z-index: 3; }
+.owal-people-table td:first-child { display: flex; align-items: center; gap: .55rem; min-width: 13rem; }
+.owal-people-table td:first-child > span:last-child { display: grid; min-width: 0; }
+.owal-people-table td b,
+.owal-people-table td small { display: block; max-width: 12rem; overflow: hidden; text-overflow: ellipsis; }
+.owal-people-table td small { font-size: .6rem; opacity: .5; }
+
+.owal-table-avatar {
+  display: grid !important;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand, #0b7f74) 15%, transparent);
+  color: var(--brand, #0b7f74);
+  font-weight: 900;
+}
+
+.owal-people-table mark {
+  border-radius: 999px;
+  padding: .2rem .42rem;
+  background: color-mix(in srgb, var(--brand, #0b7f74) 13%, transparent);
+  color: var(--brand, #0b7f74);
+  font-size: .55rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.owal-people-table .owal-products { margin-top: 0; min-width: 9rem; }
+.owal-detail-row td {
+  position: static !important;
+  display: table-cell !important;
+  background: color-mix(in srgb, var(--brand, #0b7f74) 4%, transparent) !important;
+  white-space: normal;
+}
+
+.owal-detail-row dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin: 0; }
+.owal-detail-row dt { font-size: .55rem; font-weight: 850; text-transform: uppercase; opacity: .45; }
+.owal-detail-row dd { font-size: .7rem; font-weight: 700; }
+.owal-pagination { display: flex; align-items: center; justify-content: flex-end; gap: .65rem; padding: .25rem; }
+.owal-pagination span { font-size: .68rem; opacity: .55; }
+.owal-pagination button:disabled { opacity: .3; cursor: not-allowed; }
+
+@media (max-width: 800px) {
+  .owal-host { padding: .75rem !important; }
+  .owal-collection { align-items: flex-start; flex-direction: column; }
+  .owal-collection span { text-align: left; }
+  .owal-people-summary { align-items: flex-start; }
+  .owal-people-summary > div { grid-template-columns: auto; }
+  .owal-people-summary small { grid-column: auto; }
+  .owal-people-summary button { white-space: nowrap; }
+  .owal-people-table { min-width: 68rem; }
+  .owal-detail-row dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .owal-pagination { justify-content: space-between; }
+}
