@@ -17,6 +17,61 @@ const termsState = window.__onehomeOwnerTerms || {
 };
 window.__onehomeOwnerTerms = termsState;
 
+const signupState = window.__onehomeOwnerSignup || {
+  email: "",
+  busy: false,
+  allowOriginal: false,
+  suppressNextOtp: false,
+  verifyType: "signup",
+};
+window.__onehomeOwnerSignup = signupState;
+
+// The bundled owner flow originally requested an email OTP and then tried to add
+// the password with updateUser after verification. Supabase correctly rejects
+// that password mutation when MFA assurance is enforced. Preserve the React
+// screen sequence while using the documented signup contract underneath:
+// create email+password first, verify as type=signup, then update metadata only.
+if (!window.__onehomeOwnerAuthFlowPatched) {
+  window.__onehomeOwnerAuthFlowPatched = true;
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = async (input, init = {}) => {
+    const url = typeof input === "string" ? input : input?.url || "";
+    const method = String(init.method || input?.method || "GET").toUpperCase();
+    let body = init.body;
+    if (body == null && input instanceof Request && method !== "GET" && method !== "HEAD") {
+      body = await input.clone().text().catch(() => "");
+    }
+    let parsed = null;
+    if (typeof body === "string") {
+      try { parsed = JSON.parse(body); } catch { /* Not a JSON Auth request. */ }
+    }
+
+    if (url.includes("/auth/v1/otp") && method === "POST" && signupState.suppressNextOtp && parsed?.email?.toLowerCase() === signupState.email) {
+      signupState.suppressNextOtp = false;
+      return new Response("{}", { status: 200, headers: { "content-type": "application/json" } });
+    }
+
+    let nextBody = parsed;
+    let clearSignupAfterRequest = false;
+    if (url.includes("/auth/v1/verify") && method === "POST" && signupState.verifyType === "signup" && parsed?.email?.toLowerCase() === signupState.email && parsed?.type === "email") {
+      nextBody = { ...parsed, type: "signup" };
+    }
+    if (url.includes("/auth/v1/user") && method === "PUT" && parsed?.password && signupState.email) {
+      const { password: _password, ...metadataOnly } = parsed;
+      nextBody = metadataOnly;
+      clearSignupAfterRequest = true;
+    }
+
+    if (nextBody !== parsed) {
+      const nextInit = { ...init, body: JSON.stringify(nextBody) };
+      const nextInput = input instanceof Request ? new Request(input, nextInit) : input;
+      try { return await nativeFetch(nextInput, input instanceof Request ? undefined : nextInit); }
+      finally { if (clearSignupAfterRequest) signupState.email = ""; }
+    }
+    return nativeFetch(input, init);
+  };
+}
+
 function currentLocale() {
   const stored = localStorage.getItem("oneworld-lang");
   const clean = String(stored || "").replace(/^"|"$/g, "");
@@ -42,13 +97,13 @@ function fieldValue(labelPattern) {
 
 function termDocument(kind) {
   if (kind === "platform") return `
-    <h2>${tr("OneHome Terms", "Términos de OneHome")}</h2>
+    <h2 id="ohqa-document-title">${tr("OneHome Terms", "Términos de OneHome")}</h2>
     <p>${tr("OneHome provides the account, electronic records, messaging, payment-record status and support tools. OneHome is not the property owner and does not supply the home.", "OneHome proporciona la cuenta, los registros electrónicos, la mensajería, el estado de los registros de pago y las herramientas de soporte. OneHome no es el propietario ni suministra el inmueble.")}</p>
     <p>${tr("Your OneHome consent is recorded separately from the property owner's terms.", "Su consentimiento a OneHome se registra por separado de los términos del propietario.")}</p>
     <p>${tr("Accepting these terms does not sign the lease or confirm a payment.", "Aceptar estos términos no firma el contrato ni confirma un pago.")}</p>
     <p class="ohqa-source-note">${tr("This current OneHome terms version is approved by the owner for use now. A future counsel review is planned; until then, unresolved lease clauses listed in the Property Owner Terms remain excluded and require separate final decisions.", "Esta versión actual de los Términos de OneHome está aprobada por el propietario para su uso desde ahora. Se planea una revisión futura por un abogado; mientras tanto, las cláusulas no resueltas enumeradas en los Términos del propietario permanecen excluidas y requieren decisiones finales por separado.")}</p>`;
   return `
-    <h2>${tr("Property Owner Terms", "Términos del propietario")}</h2>
+    <h2 id="ohqa-document-title">${tr("Property Owner Terms", "Términos del propietario")}</h2>
     <h3>${tr("Current listing terms", "Términos actuales del inmueble")}</h3>
     <ul>
       <li><strong>9,000,000 COP</strong> ${tr("for each monthly rental period.", "por cada período mensual de arriendo.")}</li>
@@ -70,38 +125,64 @@ function termDocument(kind) {
 
 function openTermsDocument(kind) {
   document.querySelector("#ohqa-document-modal")?.remove();
+  const returnFocus = document.activeElement;
+  const alreadyAccepted = !!termsState[kind];
   const modal = document.createElement("div");
   modal.id = "ohqa-document-modal";
   modal.className = "ohqa-document-modal";
-  modal.innerHTML = `<div class="ohqa-document-card" role="dialog" aria-modal="true" aria-labelledby="ohqa-document-title">
+  modal.innerHTML = `<div class="ohqa-document-card" role="dialog" aria-modal="true" aria-labelledby="ohqa-document-title" aria-describedby="ohqa-read-status">
     <button type="button" class="ohqa-document-close" aria-label="${tr("Close", "Cerrar")}">×</button>
     <div class="ohqa-document-scroll" tabindex="0">${termDocument(kind)}<div class="ohqa-document-end">${tr("End of document", "Fin del documento")}</div></div>
-    <p class="ohqa-read-status">${tr("Scroll to the bottom to unlock this acknowledgment.", "Desplácese hasta el final para habilitar este reconocimiento.")}</p>
-    <button type="button" class="ohqa-document-done" disabled>${tr("Return to the form", "Volver al formulario")}</button>
+    <p id="ohqa-read-status" class="ohqa-read-status">${alreadyAccepted ? tr("You have already agreed to this document.", "Ya aceptó este documento.") : tr("Scroll to the bottom to enable I Agree.", "Desplácese hasta el final para habilitar Acepto.")}</p>
+    <button type="button" class="ohqa-document-done" disabled>${alreadyAccepted ? tr("Agreed ✓", "Aceptado ✓") : tr("I Agree", "Acepto")}</button>
   </div>`;
   document.body.append(modal);
   const scroller = modal.querySelector(".ohqa-document-scroll");
   const done = modal.querySelector(".ohqa-document-done");
   const status = modal.querySelector(".ohqa-read-status");
+  let userScrolled = false;
   const markRead = () => {
+    if (alreadyAccepted) return;
     if (scroller.scrollTop + scroller.clientHeight < scroller.scrollHeight - 8) return;
+    if (scroller.scrollHeight > scroller.clientHeight + 8 && !userScrolled) return;
     termsState[`${kind}Read`] = true;
     done.disabled = false;
-    status.textContent = tr("Document read. Return to the form to select the acknowledgment.", "Documento leído. Vuelva al formulario para seleccionar el reconocimiento.");
+    status.textContent = tr("You reached the end. Select I Agree to accept this document.", "Llegó al final. Seleccione Acepto para aceptar este documento.");
   };
   const endMarker = scroller.querySelector(".ohqa-document-end");
   const endObserver = new IntersectionObserver((entries) => {
     if (entries.some((entry) => entry.isIntersecting)) markRead();
   }, { root: scroller, threshold: 0.95 });
   endObserver.observe(endMarker);
-  scroller.addEventListener("scroll", markRead, { passive: true });
-  scroller.addEventListener("wheel", markRead, { passive: true });
-  scroller.addEventListener("touchend", markRead, { passive: true });
+  scroller.addEventListener("scroll", () => { userScrolled = true; markRead(); }, { passive: true });
+  scroller.addEventListener("wheel", () => { userScrolled = true; markRead(); }, { passive: true });
+  scroller.addEventListener("touchend", () => { userScrolled = true; markRead(); }, { passive: true });
   requestAnimationFrame(markRead);
-  const close = () => { endObserver.disconnect(); modal.remove(); refreshTermsPanel(); };
+  const close = () => {
+    endObserver.disconnect();
+    modal.remove();
+    refreshTermsPanel();
+    const replacement = document.querySelector(`[data-document="${kind}"]`);
+    if (replacement instanceof HTMLElement) replacement.focus();
+    else if (returnFocus instanceof HTMLElement) returnFocus.focus();
+  };
   modal.querySelector(".ohqa-document-close").addEventListener("click", close);
-  done.addEventListener("click", close);
+  done.addEventListener("click", () => {
+    if (done.disabled || alreadyAccepted) return;
+    termsState[kind] = true;
+    close();
+  });
   modal.addEventListener("click", (event) => { if (event.target === modal) close(); });
+  modal.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") { event.preventDefault(); close(); return; }
+    if (event.key !== "Tab") return;
+    const focusable = [...modal.querySelectorAll('button:not([disabled]),[tabindex="0"]')].filter((element) => element.offsetParent !== null);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  });
   scroller.focus();
 }
 
@@ -112,32 +193,16 @@ function termsPanel() {
   panel.dataset.locale = currentLocale();
   panel.innerHTML = `
     <div class="ohqa-term-row">
-      <div class="ohqa-term-title"><strong>${tr("OneHome Terms", "Términos de OneHome")}</strong><button type="button" class="ohqa-document-open" data-document="platform">${termsState.platformRead ? tr("Read ✓", "Leído ✓") : tr("View to unlock", "Ver para habilitar")}</button></div>
-      <label class="ohqa-check ${termsState.platformRead ? "is-unlocked" : "is-locked"}">
-        <input id="ohqa-platform-terms" type="checkbox" ${termsState.platformRead ? "" : "disabled"}>
-        <span>${tr("I agree", "Acepto")}</span>
-      </label>
+      <strong>${tr("OneHome Terms", "Términos de OneHome")}</strong>
+      <button type="button" class="ohqa-document-open" data-document="platform">${tr("View", "Ver")}</button>
+      <span class="ohqa-term-status ${termsState.platform ? "is-complete" : "is-empty"}" role="status" aria-label="${termsState.platform ? tr("OneHome Terms completed", "Términos de OneHome completados") : tr("OneHome Terms not completed", "Términos de OneHome no completados")}">${termsState.platform ? `✓ ${tr("Completed", "Completado")}` : "○"}</span>
     </div>
     <div class="ohqa-term-row">
-      <div class="ohqa-term-title"><strong>${tr("Property Owner Terms", "Términos del propietario")}</strong><button type="button" class="ohqa-document-open" data-document="property">${termsState.propertyRead ? tr("Read ✓", "Leído ✓") : tr("View to unlock", "Ver para habilitar")}</button></div>
-      <label class="ohqa-check ${termsState.propertyRead ? "is-unlocked" : "is-locked"}">
-        <input id="ohqa-property-terms" type="checkbox" ${termsState.propertyRead ? "" : "disabled"}>
-        <span>${tr("I agree", "Acepto")}</span>
-      </label>
+      <strong>${tr("Property Owner Terms", "Términos del propietario")}</strong>
+      <button type="button" class="ohqa-document-open" data-document="property">${tr("View", "Ver")}</button>
+      <span class="ohqa-term-status ${termsState.property ? "is-complete" : "is-empty"}" role="status" aria-label="${termsState.property ? tr("Property Owner Terms completed", "Términos del propietario completados") : tr("Property Owner Terms not completed", "Términos del propietario no completados")}">${termsState.property ? `✓ ${tr("Completed", "Completado")}` : "○"}</span>
     </div>
-    <p class="ohqa-terms-error" role="alert" hidden>${tr("Open each document, scroll to the end, and agree before continuing.", "Abra cada documento, desplácese hasta el final y acepte antes de continuar.")}</p>`;
-  const platform = panel.querySelector("#ohqa-platform-terms");
-  const property = panel.querySelector("#ohqa-property-terms");
-  platform.checked = termsState.platform;
-  property.checked = termsState.property;
-  platform.addEventListener("change", () => {
-    termsState.platform = platform.checked;
-    panel.querySelector(".ohqa-terms-error").hidden = true;
-  });
-  property.addEventListener("change", () => {
-    termsState.property = property.checked;
-    panel.querySelector(".ohqa-terms-error").hidden = true;
-  });
+    <p class="ohqa-terms-error" role="alert" hidden>${tr("Open and agree to both documents before continuing.", "Abra y acepte ambos documentos antes de continuar.")}</p>`;
   panel.querySelectorAll("[data-document]").forEach((button) => button.addEventListener("click", () => openTermsDocument(button.dataset.document)));
   return panel;
 }
@@ -176,7 +241,7 @@ function showTermsError(message) {
   const panel = document.querySelector("#onehome-separate-terms");
   const error = panel?.querySelector(".ohqa-terms-error");
   if (error) {
-    error.textContent = message || tr("Open each document, scroll to the end, and agree before continuing.", "Abra cada documento, desplácese hasta el final y acepte antes de continuar.");
+    error.textContent = message || tr("Open and agree to both documents before continuing.", "Abra y acepte ambos documentos antes de continuar.");
     error.hidden = false;
     panel.scrollIntoView({ behavior: "smooth", block: "center" });
   }
@@ -209,6 +274,75 @@ async function acknowledgeExistingApproval(name) {
     return false;
   } finally {
     termsState.busy = false;
+  }
+}
+
+function syncCreateTermsGate() {
+  const email = document.querySelector('input[type="email"][autocomplete="email"]');
+  const button = email?.closest("div.mt-4")?.parentElement?.querySelector("button.btn-primary") ||
+    [...document.querySelectorAll("button.btn-primary")].find((candidate) => candidate.parentElement?.querySelector?.('input[type="email"][autocomplete="email"]'));
+  if (!button) return;
+  const complete = termsState.platform && termsState.property;
+  button.classList.toggle("ohqa-terms-blocked", !complete);
+  if (!complete) button.setAttribute("aria-disabled", "true");
+  else button.removeAttribute("aria-disabled");
+}
+
+function showSignupError(message) {
+  let error = document.querySelector("#ohqa-signup-error");
+  if (!error) {
+    error = document.createElement("p");
+    error.id = "ohqa-signup-error";
+    error.className = "ohqa-signup-error";
+    error.setAttribute("role", "alert");
+    const createButton = [...document.querySelectorAll("button.btn-primary")].find((button) =>
+      button.parentElement?.querySelector?.('input[type="email"][autocomplete="email"]'));
+    createButton?.insertAdjacentElement("beforebegin", error);
+  }
+  if (error) error.textContent = message;
+}
+
+async function startCorrectOwnerSignup(button) {
+  if (signupState.busy) return;
+  const email = document.querySelector('input[type="email"][autocomplete="email"]')?.value?.trim().toLowerCase() || "";
+  const passwords = [...document.querySelectorAll('input[autocomplete="new-password"]')];
+  const password = passwords[0]?.value || "";
+  const fullName = document.querySelector('input[autocomplete="name"]')?.value?.trim() || "";
+  const phone = document.querySelector('input[type="tel"][autocomplete="tel"]')?.value?.trim() || "";
+  const captchaToken = [...document.querySelectorAll('[name="cf-turnstile-response"]')]
+    .map((input) => input.value?.trim() || "").find(Boolean) || "";
+  if (!email || !password || !fullName || !phone || !captchaToken) {
+    showSignupError(tr("Complete the form and human check before creating the account.", "Complete el formulario y la verificación humana antes de crear la cuenta."));
+    return;
+  }
+  signupState.busy = true;
+  button.disabled = true;
+  showSignupError("");
+  try {
+    const response = await fetch(`${ONEHOME_SUPABASE_URL}/auth/v1/signup`, {
+      method: "POST",
+      headers: { apikey: ONEHOME_ANON_KEY, Authorization: `Bearer ${ONEHOME_ANON_KEY}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        email,
+        password,
+        data: { full_name: fullName, phone, signup_app: "onerental", signup_intent: "rental_owner", entry_product: "onerental" },
+        gotrue_meta_security: { captcha_token: captchaToken },
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.msg || result.message || result.error_description || result.error || tr("The account could not be created.", "No se pudo crear la cuenta."));
+    signupState.email = email;
+    signupState.suppressNextOtp = true;
+    signupState.verifyType = "signup";
+    signupState.allowOriginal = true;
+    button.disabled = false;
+    button.click();
+  } catch (error) {
+    button.disabled = false;
+    showSignupError(error?.message || String(error));
+  } finally {
+    signupState.allowOriginal = false;
+    signupState.busy = false;
   }
 }
 
@@ -252,6 +386,13 @@ document.addEventListener("click", async (event) => {
     }
     const saved = await acknowledgeExistingApproval(name);
     if (saved) button.click();
+    return;
+  }
+  if (isCreate && termsState.existingSaved && !signupState.allowOriginal) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    await startCorrectOwnerSignup(button);
+    return;
   }
 }, true);
 
@@ -666,6 +807,7 @@ const observer = new MutationObserver(() => {
   if (!FIXTURE_MODE) mountTerms();
   mountCountryPhone();
   mountOtpHelp();
+  syncCreateTermsGate();
   translateReviewFlow();
   void maybeMountUploader();
 });
@@ -673,5 +815,6 @@ observer.observe(document.documentElement, { childList: true, subtree: true, att
 mountTerms();
 mountCountryPhone();
 mountOtpHelp();
+syncCreateTermsGate();
 translateReviewFlow();
 void maybeMountUploader();
