@@ -12,3 +12,10 @@
 .ohqa-document-close{width:40px;height:40px}.ohqa-document-scroll{height:min(56vh,430px);scrollbar-gutter:stable}.ohqa-document-scroll:focus{outline:3px solid rgba(23,143,138,.18);outline-offset:2px}.ohqa-read-status{margin:12px 0 9px}.ohqa-document-done{width:100%;min-height:48px;padding:13px 16px;font-size:14px;font-weight:900;box-shadow:0 9px 22px -13px rgba(23,143,138,.8)}.ohqa-document-done:disabled{box-shadow:none}
 @media (max-width:640px){.ohqa-term-row{grid-template-columns:minmax(0,1fr) auto auto;gap:7px;padding:10px}.ohqa-term-status{padding:5px 7px}.ohqa-term-status.is-complete{font-size:0}.ohqa-term-status.is-complete::after{content:"✓";font-size:13px}.ohqa-document-card{max-height:96vh;padding:16px}.ohqa-document-scroll{height:60vh}}
 .ohqa-signup-error{margin:10px 0 0;border-radius:12px;background:#fff0ee;padding:9px 10px;color:#b42318;font-size:11.5px;font-weight:750;line-height:1.4}.ohqa-signup-error:empty{display:none}.ohqa-terms-blocked{cursor:not-allowed;opacity:.42}
+
+.ohqa-document-end{height:1px;margin-top:24px;border:0;padding:0;font-size:0}
+.ohqa-document-accept{display:flex;align-items:center;gap:9px;margin-top:12px;border-radius:12px;background:#f4f8f7;padding:10px 12px;color:#2b2724;font-size:12px;font-weight:750}.ohqa-document-accept input{width:17px;height:17px;margin:0;accent-color:#178f8a}.ohqa-document-accept:has(input:disabled){color:#817a74}.ohqa-term-status.is-empty{visibility:hidden}.ohqa-term-status.is-complete{min-width:30px;text-align:center;font-size:13px}
+.dark .ohqa-document-accept{background:#292521;color:#fafaf8}
+
+@font-face{font-family:"Twemoji Country Flags";src:url("/TwemojiCountryFlags.woff2?v=20260902-flags1") format("woff2");font-style:normal;font-weight:400;font-display:swap}
+.ohqa-phone-country>span:first-child,.ohqa-phone-options button>span:first-child{font-family:"Twemoji Country Flags","Segoe UI Emoji","Apple Color Emoji",sans-serif;font-style:normal;font-weight:400;line-height:1}

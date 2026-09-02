@@ -130,24 +130,24 @@ function openTermsDocument(kind) {
   const modal = document.createElement("div");
   modal.id = "ohqa-document-modal";
   modal.className = "ohqa-document-modal";
-  modal.innerHTML = `<div class="ohqa-document-card" role="dialog" aria-modal="true" aria-labelledby="ohqa-document-title" aria-describedby="ohqa-read-status">
+  modal.innerHTML = `<div class="ohqa-document-card" role="dialog" aria-modal="true" aria-labelledby="ohqa-document-title">
     <button type="button" class="ohqa-document-close" aria-label="${tr("Close", "Cerrar")}">×</button>
-    <div class="ohqa-document-scroll" tabindex="0">${termDocument(kind)}<div class="ohqa-document-end">${tr("End of document", "Fin del documento")}</div></div>
-    <p id="ohqa-read-status" class="ohqa-read-status">${alreadyAccepted ? tr("You have already agreed to this document.", "Ya aceptó este documento.") : tr("Scroll to the bottom to enable I Agree.", "Desplácese hasta el final para habilitar Acepto.")}</p>
-    <button type="button" class="ohqa-document-done" disabled>${alreadyAccepted ? tr("Agreed ✓", "Aceptado ✓") : tr("I Agree", "Acepto")}</button>
+    <div class="ohqa-document-scroll" tabindex="0">${termDocument(kind)}<div class="ohqa-document-end" aria-hidden="true"></div></div>
+    <label class="ohqa-document-accept">
+      <input type="checkbox" ${alreadyAccepted ? "checked disabled" : "disabled"}>
+      <span>${tr("I agree to accept", "Acepto")}</span>
+    </label>
   </div>`;
   document.body.append(modal);
   const scroller = modal.querySelector(".ohqa-document-scroll");
-  const done = modal.querySelector(".ohqa-document-done");
-  const status = modal.querySelector(".ohqa-read-status");
+  const accept = modal.querySelector(".ohqa-document-accept input");
   let userScrolled = false;
   const markRead = () => {
     if (alreadyAccepted) return;
     if (scroller.scrollTop + scroller.clientHeight < scroller.scrollHeight - 8) return;
     if (scroller.scrollHeight > scroller.clientHeight + 8 && !userScrolled) return;
     termsState[`${kind}Read`] = true;
-    done.disabled = false;
-    status.textContent = tr("You reached the end. Select I Agree to accept this document.", "Llegó al final. Seleccione Acepto para aceptar este documento.");
+    accept.disabled = false;
   };
   const endMarker = scroller.querySelector(".ohqa-document-end");
   const endObserver = new IntersectionObserver((entries) => {
@@ -167,8 +167,8 @@ function openTermsDocument(kind) {
     else if (returnFocus instanceof HTMLElement) returnFocus.focus();
   };
   modal.querySelector(".ohqa-document-close").addEventListener("click", close);
-  done.addEventListener("click", () => {
-    if (done.disabled || alreadyAccepted) return;
+  accept.addEventListener("change", () => {
+    if (accept.disabled || alreadyAccepted || !accept.checked) return;
     termsState[kind] = true;
     close();
   });
@@ -176,7 +176,7 @@ function openTermsDocument(kind) {
   modal.addEventListener("keydown", (event) => {
     if (event.key === "Escape") { event.preventDefault(); close(); return; }
     if (event.key !== "Tab") return;
-    const focusable = [...modal.querySelectorAll('button:not([disabled]),[tabindex="0"]')].filter((element) => element.offsetParent !== null);
+    const focusable = [...modal.querySelectorAll('button:not([disabled]),input:not([disabled]),[tabindex="0"]')].filter((element) => element.offsetParent !== null);
     if (!focusable.length) return;
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
@@ -195,12 +195,12 @@ function termsPanel() {
     <div class="ohqa-term-row">
       <strong>${tr("OneHome Terms", "Términos de OneHome")}</strong>
       <button type="button" class="ohqa-document-open" data-document="platform">${tr("View", "Ver")}</button>
-      <span class="ohqa-term-status ${termsState.platform ? "is-complete" : "is-empty"}" role="status" aria-label="${termsState.platform ? tr("OneHome Terms completed", "Términos de OneHome completados") : tr("OneHome Terms not completed", "Términos de OneHome no completados")}">${termsState.platform ? `✓ ${tr("Completed", "Completado")}` : "○"}</span>
+      <span class="ohqa-term-status ${termsState.platform ? "is-complete" : "is-empty"}" role="status" aria-label="${termsState.platform ? tr("OneHome Terms completed", "Términos de OneHome completados") : tr("OneHome Terms not completed", "Términos de OneHome no completados")}">${termsState.platform ? "✓" : ""}</span>
     </div>
     <div class="ohqa-term-row">
       <strong>${tr("Property Owner Terms", "Términos del propietario")}</strong>
       <button type="button" class="ohqa-document-open" data-document="property">${tr("View", "Ver")}</button>
-      <span class="ohqa-term-status ${termsState.property ? "is-complete" : "is-empty"}" role="status" aria-label="${termsState.property ? tr("Property Owner Terms completed", "Términos del propietario completados") : tr("Property Owner Terms not completed", "Términos del propietario no completados")}">${termsState.property ? `✓ ${tr("Completed", "Completado")}` : "○"}</span>
+      <span class="ohqa-term-status ${termsState.property ? "is-complete" : "is-empty"}" role="status" aria-label="${termsState.property ? tr("Property Owner Terms completed", "Términos del propietario completados") : tr("Property Owner Terms not completed", "Términos del propietario no completados")}">${termsState.property ? "✓" : ""}</span>
     </div>
     <p class="ohqa-terms-error" role="alert" hidden>${tr("Open and agree to both documents before continuing.", "Abra y acepte ambos documentos antes de continuar.")}</p>`;
   panel.querySelectorAll("[data-document]").forEach((button) => button.addEventListener("click", () => openTermsDocument(button.dataset.document)));
@@ -331,6 +331,12 @@ async function startCorrectOwnerSignup(button) {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.msg || result.message || result.error_description || result.error || tr("The account could not be created.", "No se pudo crear la cuenta."));
+    if (Array.isArray(result?.user?.identities) && result.user.identities.length === 0) {
+      throw new Error(tr(
+        "This email already has a OneWorld account. Sign in or use a different email.",
+        "Este correo ya tiene una cuenta de OneWorld. Inicie sesión o use otro correo."
+      ));
+    }
     signupState.email = email;
     signupState.suppressNextOtp = true;
     signupState.verifyType = "signup";
