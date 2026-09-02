@@ -338,6 +338,7 @@ async function startCorrectOwnerSignup(button) {
       ));
     }
     signupState.email = email;
+    signupState.resendAvailableAt = Date.now() + 60000;
     signupState.suppressNextOtp = true;
     signupState.verifyType = "signup";
     signupState.allowOriginal = true;
@@ -799,14 +800,75 @@ document.addEventListener("click", (event) => {
   }
 }, true);
 
-function mountOtpHelp() {
+function updateResendControl(button, status) {
+  window.clearInterval(signupState.resendTimer);
+  const tick = () => {
+    const seconds = Math.max(0, Math.ceil(((signupState.resendAvailableAt || 0) - Date.now()) / 1000));
+    button.disabled = signupState.resendBusy || seconds > 0;
+    button.textContent = seconds > 0
+      ? tr(`Resend code in ${seconds}s`, `Reenviar código en ${seconds}s`)
+      : tr("Resend code", "Reenviar código");
+    if (!seconds) window.clearInterval(signupState.resendTimer);
+  };
+  tick();
+  signupState.resendTimer = window.setInterval(tick, 1000);
+  status.hidden = !status.textContent;
+}
+
+async function resendOwnerSignupCode(button, status) {
+  const email = signupState.email?.trim().toLowerCase() || "";
+  if (!email || signupState.resendBusy || Date.now() < (signupState.resendAvailableAt || 0)) return;
+  signupState.resendBusy = true;
+  status.textContent = "";
+  updateResendControl(button, status);
+  try {
+    const response = await fetch(`${ONEHOME_SUPABASE_URL}/auth/v1/resend`, {
+      method: "POST",
+      headers: { apikey: ONEHOME_ANON_KEY, Authorization: `Bearer ${ONEHOME_ANON_KEY}`, "content-type": "application/json" },
+      body: JSON.stringify({ type: "signup", email }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.msg || result.message || result.error_description || result.error || tr("The code could not be resent.", "No se pudo reenviar el código."));
+    signupState.resendAvailableAt = Date.now() + 60000;
+    status.textContent = tr("A new code was sent.", "Se envió un código nuevo.");
+  } catch (error) {
+    status.textContent = error?.message || String(error);
+  } finally {
+    signupState.resendBusy = false;
+    updateResendControl(button, status);
+  }
+}
+
+function mountVerificationPage() {
   const code = document.querySelector('input[autocomplete="one-time-code"]');
-  if (!code || document.querySelector("#ohqa-otp-help")) return;
-  const help = document.createElement("div");
-  help.id = "ohqa-otp-help";
-  help.className = "ohqa-otp-help";
-  help.innerHTML = `<strong>${tr("Still waiting for the email?", "¿Todavía espera el correo?")}</strong><span>${tr("Check Inbox, Spam and Promotions, then search for 'One World Labs'. Delivery can be accepted by your email provider before it appears in the visible inbox.", "Revise Recibidos, Spam y Promociones; luego busque 'One World Labs'. Su proveedor puede aceptar el correo antes de que aparezca en la bandeja visible.")}</span>`;
-  code.insertAdjacentElement("afterend", help);
+  if (!code) {
+    document.body.classList.remove("ohqa-verification-page");
+    document.querySelector(".ohqa-verification-card")?.classList.remove("ohqa-verification-card");
+    window.clearInterval(signupState.resendTimer);
+    return;
+  }
+  const section = code.closest("section");
+  if (!section) return;
+  document.body.classList.add("ohqa-verification-page");
+  section.classList.add("ohqa-verification-card");
+  const heading = section.querySelector("h2");
+  const headingText = tr("Check your email", "Revise su correo");
+  if (heading && heading.textContent !== headingText) heading.textContent = headingText;
+  const changeEmail = [...section.querySelectorAll("button")].find((button) => /Use a different email|Usar otro correo/i.test(button.textContent || ""));
+  if (!changeEmail || section.querySelector("#ohqa-resend-code")) return;
+  const resend = document.createElement("button");
+  resend.id = "ohqa-resend-code";
+  resend.type = "button";
+  resend.className = "btn-ghost mt-2 w-full";
+  const status = document.createElement("p");
+  status.id = "ohqa-resend-status";
+  status.className = "ohqa-resend-status";
+  status.setAttribute("role", "status");
+  status.hidden = true;
+  changeEmail.insertAdjacentElement("beforebegin", resend);
+  resend.insertAdjacentElement("afterend", status);
+  resend.addEventListener("click", () => void resendOwnerSignupCode(resend, status));
+  updateResendControl(resend, status);
 }
 
 let observedLocale = currentLocale();
@@ -818,7 +880,7 @@ const observer = new MutationObserver(() => {
   }
   if (!FIXTURE_MODE) mountTerms();
   mountCountryPhone();
-  mountOtpHelp();
+  mountVerificationPage();
   syncCreateTermsGate();
   translateReviewFlow();
   void maybeMountUploader();
@@ -826,7 +888,7 @@ const observer = new MutationObserver(() => {
 observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["lang"] });
 mountTerms();
 mountCountryPhone();
-mountOtpHelp();
+mountVerificationPage();
 syncCreateTermsGate();
 translateReviewFlow();
 void maybeMountUploader();

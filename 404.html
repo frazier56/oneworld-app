@@ -83,12 +83,12 @@
         document.head.append(reviewStyles);
         const ownerQaStyles = document.createElement('link');
         ownerQaStyles.rel = 'stylesheet';
-        ownerQaStyles.href = '/onehome-owner-qa.css?v=20260902-terms1';
+        ownerQaStyles.href = '/onehome-owner-qa.css?v=20260902-verify1';
         document.head.append(ownerQaStyles);
         import('/onehome-flow-i18n.js?v=20260901-language1')
           .then(() => import('/onehome-review-app.js?v=20260901-language1'))
           .then(() => import('/onehome-phone-canonical.js?v=20260902-phone1'))
-          .then(() => import('/onehome-owner-qa.js?v=20260902-terms1'));
+          .then(() => import('/onehome-owner-qa.js?v=20260902-verify1'));
       } else {
         import('/index-CkwkYrti.js');
       }
