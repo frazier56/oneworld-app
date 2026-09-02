@@ -19,58 +19,19 @@ window.__onehomeOwnerTerms = termsState;
 
 const signupState = window.__onehomeOwnerSignup || {
   email: "",
-  busy: false,
-  allowOriginal: false,
-  suppressNextOtp: false,
-  verifyType: "signup",
+  resendBusy: false,
+  resendAvailableAt: 0,
+  resendCaptchaToken: "",
+  resendWidgetId: null,
 };
 window.__onehomeOwnerSignup = signupState;
 
-// The bundled owner flow originally requested an email OTP and then tried to add
-// the password with updateUser after verification. Supabase correctly rejects
-// that password mutation when MFA assurance is enforced. Preserve the React
-// screen sequence while using the documented signup contract underneath:
-// create email+password first, verify as type=signup, then update metadata only.
-if (!window.__onehomeOwnerAuthFlowPatched) {
-  window.__onehomeOwnerAuthFlowPatched = true;
-  const nativeFetch = window.fetch.bind(window);
-  window.fetch = async (input, init = {}) => {
-    const url = typeof input === "string" ? input : input?.url || "";
-    const method = String(init.method || input?.method || "GET").toUpperCase();
-    let body = init.body;
-    if (body == null && input instanceof Request && method !== "GET" && method !== "HEAD") {
-      body = await input.clone().text().catch(() => "");
-    }
-    let parsed = null;
-    if (typeof body === "string") {
-      try { parsed = JSON.parse(body); } catch { /* Not a JSON Auth request. */ }
-    }
-
-    if (url.includes("/auth/v1/otp") && method === "POST" && signupState.suppressNextOtp && parsed?.email?.toLowerCase() === signupState.email) {
-      signupState.suppressNextOtp = false;
-      return new Response("{}", { status: 200, headers: { "content-type": "application/json" } });
-    }
-
-    let nextBody = parsed;
-    let clearSignupAfterRequest = false;
-    if (url.includes("/auth/v1/verify") && method === "POST" && signupState.verifyType === "signup" && parsed?.email?.toLowerCase() === signupState.email && parsed?.type === "email") {
-      nextBody = { ...parsed, type: "signup" };
-    }
-    if (url.includes("/auth/v1/user") && method === "PUT" && parsed?.password && signupState.email) {
-      const { password: _password, ...metadataOnly } = parsed;
-      nextBody = metadataOnly;
-      clearSignupAfterRequest = true;
-    }
-
-    if (nextBody !== parsed) {
-      const nextInit = { ...init, body: JSON.stringify(nextBody) };
-      const nextInput = input instanceof Request ? new Request(input, nextInit) : input;
-      try { return await nativeFetch(nextInput, input instanceof Request ? undefined : nextInit); }
-      finally { if (clearSignupAfterRequest) signupState.email = ""; }
-    }
-    return nativeFetch(input, init);
-  };
-}
+// Keep OneHome on the same proven email-code contract as the shared OneWorld
+// signup: POST /auth/v1/otp without a PKCE challenge, verify type=email, then
+// set the password on the authenticated session. Do not replace that flow with
+// /signup or rewrite verification to type=signup; repeated /signup responses
+// are intentionally obfuscated and may not dispatch any email.
+const ONEHOME_TURNSTILE_SITE_KEY = "0x4AAAAAAEAsMHkBsF_CmIVg";
 
 function currentLocale() {
   const stored = localStorage.getItem("oneworld-lang");
@@ -302,57 +263,6 @@ function showSignupError(message) {
   if (error) error.textContent = message;
 }
 
-async function startCorrectOwnerSignup(button) {
-  if (signupState.busy) return;
-  const email = document.querySelector('input[type="email"][autocomplete="email"]')?.value?.trim().toLowerCase() || "";
-  const passwords = [...document.querySelectorAll('input[autocomplete="new-password"]')];
-  const password = passwords[0]?.value || "";
-  const fullName = document.querySelector('input[autocomplete="name"]')?.value?.trim() || "";
-  const phone = document.querySelector('input[type="tel"][autocomplete="tel"]')?.value?.trim() || "";
-  const captchaToken = [...document.querySelectorAll('[name="cf-turnstile-response"]')]
-    .map((input) => input.value?.trim() || "").find(Boolean) || "";
-  if (!email || !password || !fullName || !phone || !captchaToken) {
-    showSignupError(tr("Complete the form and human check before creating the account.", "Complete el formulario y la verificación humana antes de crear la cuenta."));
-    return;
-  }
-  signupState.busy = true;
-  button.disabled = true;
-  showSignupError("");
-  try {
-    const response = await fetch(`${ONEHOME_SUPABASE_URL}/auth/v1/signup`, {
-      method: "POST",
-      headers: { apikey: ONEHOME_ANON_KEY, Authorization: `Bearer ${ONEHOME_ANON_KEY}`, "content-type": "application/json" },
-      body: JSON.stringify({
-        email,
-        password,
-        data: { full_name: fullName, phone, signup_app: "onerental", signup_intent: "rental_owner", entry_product: "onerental" },
-        gotrue_meta_security: { captcha_token: captchaToken },
-      }),
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.msg || result.message || result.error_description || result.error || tr("The account could not be created.", "No se pudo crear la cuenta."));
-    if (Array.isArray(result?.user?.identities) && result.user.identities.length === 0) {
-      throw new Error(tr(
-        "This email already has a OneWorld account. Sign in or use a different email.",
-        "Este correo ya tiene una cuenta de OneWorld. Inicie sesión o use otro correo."
-      ));
-    }
-    signupState.email = email;
-    signupState.resendAvailableAt = Date.now() + 60000;
-    signupState.suppressNextOtp = true;
-    signupState.verifyType = "signup";
-    signupState.allowOriginal = true;
-    button.disabled = false;
-    button.click();
-  } catch (error) {
-    button.disabled = false;
-    showSignupError(error?.message || String(error));
-  } finally {
-    signupState.allowOriginal = false;
-    signupState.busy = false;
-  }
-}
-
 document.addEventListener("click", async (event) => {
   const button = event.target.closest?.("button");
   if (!button || !CLAIM_TOKEN) return;
@@ -363,6 +273,8 @@ document.addEventListener("click", async (event) => {
   const isReviewDecision = !!reviewArea && button.classList.contains("btn-primary");
   if (!isCreate && !isReviewDecision) return;
   if (isCreate) {
+    signupState.email = accountArea.value?.trim().toLowerCase() || "";
+    signupState.resendAvailableAt = Date.now() + 60000;
     const phone = document.querySelector(".ohqa-phone-canonical");
     if (phone && phone.dataset.valid !== "true") {
       event.preventDefault();
@@ -393,12 +305,6 @@ document.addEventListener("click", async (event) => {
     }
     const saved = await acknowledgeExistingApproval(name);
     if (saved) button.click();
-    return;
-  }
-  if (isCreate && termsState.existingSaved && !signupState.allowOriginal) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    await startCorrectOwnerSignup(button);
     return;
   }
 }, true);
@@ -804,7 +710,11 @@ function updateResendControl(button, status) {
   window.clearInterval(signupState.resendTimer);
   const tick = () => {
     const seconds = Math.max(0, Math.ceil(((signupState.resendAvailableAt || 0) - Date.now()) / 1000));
-    button.disabled = signupState.resendBusy || seconds > 0;
+    const section = button.closest("section");
+    const captchaHost = section?.querySelector("#ohqa-resend-captcha");
+    if (captchaHost) captchaHost.hidden = seconds > 0;
+    if (!seconds && section) mountResendCaptcha(section, button, status);
+    button.disabled = signupState.resendBusy || seconds > 0 || !signupState.resendCaptchaToken;
     button.textContent = seconds > 0
       ? tr(`Resend code in ${seconds}s`, `Reenviar código en ${seconds}s`)
       : tr("Resend code", "Reenviar código");
@@ -815,17 +725,53 @@ function updateResendControl(button, status) {
   status.hidden = !status.textContent;
 }
 
+function mountResendCaptcha(section, button, status) {
+  let host = section.querySelector("#ohqa-resend-captcha");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "ohqa-resend-captcha";
+    host.className = "mt-2 flex justify-center";
+    button.insertAdjacentElement("beforebegin", host);
+  }
+  host.hidden = false;
+  if (signupState.resendWidgetId != null || !window.turnstile) return;
+  try {
+    signupState.resendWidgetId = window.turnstile.render(host, {
+      sitekey: ONEHOME_TURNSTILE_SITE_KEY,
+      theme: "auto",
+      callback: (token) => {
+        signupState.resendCaptchaToken = token;
+        updateResendControl(button, status);
+      },
+      "expired-callback": () => {
+        signupState.resendCaptchaToken = "";
+        updateResendControl(button, status);
+      },
+      "error-callback": () => {
+        signupState.resendCaptchaToken = "";
+        status.textContent = tr("The human check could not load. Reload and try again.", "No se pudo cargar la verificación humana. Recargue e intente de nuevo.");
+        updateResendControl(button, status);
+      },
+    });
+  } catch { /* The shared Turnstile script may still be loading. */ }
+}
+
 async function resendOwnerSignupCode(button, status) {
   const email = signupState.email?.trim().toLowerCase() || "";
-  if (!email || signupState.resendBusy || Date.now() < (signupState.resendAvailableAt || 0)) return;
+  const captchaToken = signupState.resendCaptchaToken || "";
+  if (!email || !captchaToken || signupState.resendBusy || Date.now() < (signupState.resendAvailableAt || 0)) return;
   signupState.resendBusy = true;
   status.textContent = "";
   updateResendControl(button, status);
   try {
-    const response = await fetch(`${ONEHOME_SUPABASE_URL}/auth/v1/resend`, {
+    const response = await fetch(`${ONEHOME_SUPABASE_URL}/auth/v1/otp`, {
       method: "POST",
       headers: { apikey: ONEHOME_ANON_KEY, Authorization: `Bearer ${ONEHOME_ANON_KEY}`, "content-type": "application/json" },
-      body: JSON.stringify({ type: "signup", email }),
+      body: JSON.stringify({
+        email,
+        create_user: true,
+        gotrue_meta_security: { captcha_token: captchaToken },
+      }),
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.msg || result.message || result.error_description || result.error || tr("The code could not be resent.", "No se pudo reenviar el código."));
@@ -834,6 +780,11 @@ async function resendOwnerSignupCode(button, status) {
   } catch (error) {
     status.textContent = error?.message || String(error);
   } finally {
+    signupState.resendCaptchaToken = "";
+    if (signupState.resendWidgetId != null && window.turnstile) {
+      try { window.turnstile.remove(signupState.resendWidgetId); } catch { /* Widget may have expired. */ }
+    }
+    signupState.resendWidgetId = null;
     signupState.resendBusy = false;
     updateResendControl(button, status);
   }
@@ -849,6 +800,9 @@ function mountVerificationPage() {
   }
   const section = code.closest("section");
   if (!section) return;
+  if (!signupState.email) {
+    signupState.email = section.textContent?.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0]?.toLowerCase() || "";
+  }
   document.body.classList.add("ohqa-verification-page");
   section.classList.add("ohqa-verification-card");
   const heading = section.querySelector("h2");
