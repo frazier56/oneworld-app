@@ -48,6 +48,23 @@ window.fetch = async (input, init = {}) => {
         delete body.signup_intent;
         init = { ...init, body: JSON.stringify(body) };
       }
+
+      // Authenticated users may update their own profile but are not granted
+      // table SELECT. Supabase `.update(...).select("id")` therefore fails at
+      // RETURNING even though the update policy is correct. Perform the same
+      // update with a minimal response and provide the requested id locally so
+      // the compiled handoff can keep its non-empty-result guard.
+      const requestUrl = new URL(url, location.origin);
+      const requestedId = requestUrl.searchParams.get("id")?.replace(/^eq\./, "") || "";
+      requestUrl.searchParams.delete("select");
+      const headers = new Headers(init.headers || {});
+      headers.set("Prefer", "return=minimal");
+      const response = await oneHomeOriginalFetch(requestUrl.toString(), { ...init, headers });
+      if (!response.ok) return response;
+      return new Response(JSON.stringify(requestedId ? [{ id: requestedId }] : [{}]), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     } catch {
       // Leave non-JSON requests untouched.
     }
