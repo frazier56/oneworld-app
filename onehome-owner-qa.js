@@ -33,6 +33,28 @@ window.__onehomeOwnerSignup = signupState;
 // are intentionally obfuscated and may not dispatch any email.
 const ONEHOME_TURNSTILE_SITE_KEY = "0x4AAAAAAEAsMHkBsF_CmIVg";
 
+// The shared profiles table intentionally restricts signup_intent to the
+// OneJob values (`hiring` and `working`). OneRental ownership is represented
+// by signup_app and entry_product, so remove the legacy rental_owner intent
+// before the compiled handoff screen updates the profile.
+const oneHomeOriginalFetch = window.fetch.bind(window);
+window.fetch = async (input, init = {}) => {
+  const url = typeof input === "string" ? input : input?.url || "";
+  const method = String(init?.method || (typeof input !== "string" ? input?.method : "GET") || "GET").toUpperCase();
+  if (method === "PATCH" && url.includes("/rest/v1/profiles") && typeof init?.body === "string") {
+    try {
+      const body = JSON.parse(init.body);
+      if (body?.signup_intent === "rental_owner") {
+        delete body.signup_intent;
+        init = { ...init, body: JSON.stringify(body) };
+      }
+    } catch {
+      // Leave non-JSON requests untouched.
+    }
+  }
+  return oneHomeOriginalFetch(input, init);
+};
+
 function currentLocale() {
   const stored = localStorage.getItem("oneworld-lang");
   const clean = String(stored || "").replace(/^"|"$/g, "");
