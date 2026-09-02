@@ -397,6 +397,7 @@ document.addEventListener("click", async (event) => {
 }, true);
 
 const flowTextOriginal = new WeakMap();
+const flowTextRendered = new WeakMap();
 const flowAttributeOriginal = new WeakMap();
 function translateReviewFlow(root = document.body) {
   const locale = currentLocale();
@@ -404,14 +405,19 @@ function translateReviewFlow(root = document.body) {
   let node;
   while ((node = walker.nextNode())) {
     if (node.parentElement?.closest("#onehome-separate-terms,#ohqa-document-modal,#onehome-owner-media")) continue;
-    if (!flowTextOriginal.has(node)) flowTextOriginal.set(node, node.nodeValue);
+    const lastRendered = flowTextRendered.get(node);
+    if (!flowTextOriginal.has(node) || (lastRendered != null && node.nodeValue !== lastRendered)) {
+      flowTextOriginal.set(node, node.nodeValue);
+    }
     const original = flowTextOriginal.get(node);
     const trimmed = original.trim();
     if (!trimmed) continue;
     const translated = window.__onehomeFlowTranslate?.(locale, trimmed, trimmed) || trimmed;
     const leading = original.match(/^\s*/)?.[0] || "";
     const trailing = original.match(/\s*$/)?.[0] || "";
-    node.nodeValue = `${leading}${translated}${trailing}`;
+    const rendered = `${leading}${translated}${trailing}`;
+    node.nodeValue = rendered;
+    flowTextRendered.set(node, rendered);
   }
   root.querySelectorAll?.("[placeholder],[aria-label],[title]").forEach((element) => {
     let originals = flowAttributeOriginal.get(element);
