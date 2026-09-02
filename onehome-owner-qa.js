@@ -10,10 +10,25 @@ const FIXTURE_MODE = new URLSearchParams(location.search).get("onehomeQaFixture"
 const termsState = window.__onehomeOwnerTerms || {
   platform: false,
   property: false,
+  platformRead: false,
+  propertyRead: false,
   existingSaved: false,
   busy: false,
 };
 window.__onehomeOwnerTerms = termsState;
+
+function currentLocale() {
+  const stored = localStorage.getItem("oneworld-lang");
+  const clean = String(stored || "").replace(/^"|"$/g, "");
+  if (["en", "co", "es", "de", "ru", "zh", "pt"].includes(clean)) return clean;
+  const html = document.documentElement.lang?.toLowerCase() || "en";
+  return html.startsWith("es") ? "co" : html.split("-")[0];
+}
+
+function tr(english, spanish) {
+  return window.__onehomeFlowTranslate?.(currentLocale(), english, spanish) ||
+    ((currentLocale() === "co" || currentLocale() === "es") ? spanish : english);
+}
 
 function textMatches(element, pattern) {
   return pattern.test((element?.textContent || "").trim());
@@ -25,52 +40,85 @@ function fieldValue(labelPattern) {
   return label?.querySelector("input")?.value?.trim() || "";
 }
 
+function termDocument(kind) {
+  if (kind === "platform") return `
+    <h2>${tr("OneHome Terms", "Términos de OneHome")}</h2>
+    <p>${tr("OneHome provides the account, electronic records, messaging, payment-record status and support tools. OneHome is not the property owner and does not supply the home.", "OneHome proporciona la cuenta, los registros electrónicos, la mensajería, el estado de los registros de pago y las herramientas de soporte. OneHome no es el propietario ni suministra el inmueble.")}</p>
+    <p>${tr("Your OneHome consent is recorded separately from the property owner's supplemental terms.", "Su consentimiento a OneHome se registra por separado de los términos adicionales del propietario.")}</p>
+    <p>${tr("Accepting these terms does not sign the lease or confirm a payment.", "Aceptar estos términos no firma el contrato ni confirma un pago.")}</p>
+    <p>${tr("Privacy, electronic records and signatures, messaging, fees, support and disputes remain governed by the complete approved OneHome legal document linked to this version.", "La privacidad, los registros y firmas electrónicos, la mensajería, las tarifas, el soporte y las disputas siguen regidos por el documento legal completo y aprobado de OneHome vinculado a esta versión.")}</p>`;
+  return `
+    <h2>${tr("Property Owner Supplemental Terms", "Términos adicionales del propietario")}</h2>
+    <h3>${tr("Current listing terms", "Términos actuales del inmueble")}</h3>
+    <ul>
+      <li><strong>9,000,000 COP</strong> ${tr("for each monthly rental period.", "por cada período mensual de arriendo.")}</li>
+      <li>${tr("A separate, one-time 300,000 COP cleaning charge is due when the lease starts.", "Se debe pagar un cargo único y separado de limpieza de 300.000 COP cuando comience el contrato.")}</li>
+      <li>${tr("No security deposit. The start date and tenant identity are added when the tenant packet is prepared.", "No hay depósito de garantía. La fecha de inicio y la identidad del inquilino se agregan cuando se prepare el paquete del inquilino.")}</li>
+    </ul>
+    <h3>${tr("Property rules carried forward from the prior five-page contract", "Reglas del inmueble conservadas del contrato anterior de cinco páginas")}</h3>
+    <ul>
+      <li>${tr("Residential, lawful use only.", "Uso residencial y lícito únicamente.")}</li>
+      <li>${tr("The furnished home and furniture are returned in the condition documented at move-in, allowing for ordinary wear.", "El inmueble amoblado y sus muebles se devuelven en el estado documentado al ingreso, salvo el desgaste normal.")}</li>
+      <li>${tr("The owner handles necessary or structural repairs. The tenant handles damage caused by the tenant or guests and reports owner repairs in writing.", "El propietario se encarga de las reparaciones necesarias o estructurales. El inquilino responde por los daños causados por él o sus invitados y reporta por escrito las reparaciones que correspondan al propietario.")}</li>
+      <li>${tr("Water, electricity, gas, internet, television and building administration are included. Extra services requested by the tenant are the tenant's responsibility.", "Se incluyen agua, electricidad, gas, internet, televisión y administración del edificio. Los servicios adicionales solicitados por el inquilino son su responsabilidad.")}</li>
+      <li>${tr("No alterations, assignment or subletting without the owner's prior written approval.", "No se permiten modificaciones, cesión ni subarriendo sin la autorización previa y escrita del propietario.")}</li>
+      <li>${tr("Temporary travel is not treated as abandonment while rent is current and personal belongings remain.", "Un viaje temporal no se considera abandono mientras el arriendo esté al día y permanezcan las pertenencias personales.")}</li>
+    </ul>
+    <p class="ohqa-pending-note"><strong>${tr("Not accepted yet:", "Aún no aceptado:")}</strong> ${tr("cancellation and notice periods, annual rent adjustments, late-payment interest, penalties and collection costs, repainting beyond ordinary wear, owner entry after alleged abandonment, support-animal wording, and any deposit or replacement security. These items require a separate final decision before the lease can be signed.", "los períodos de cancelación y aviso, los ajustes anuales del canon, los intereses por mora, las sanciones y costos de cobro, la pintura más allá del desgaste normal, el ingreso del propietario después de un supuesto abandono, la redacción sobre animales de apoyo y cualquier depósito o garantía sustitutiva. Estos puntos requieren una decisión final separada antes de firmar el contrato.")}</p>
+    <p>${tr("This acknowledgment records review only. It stays separate from the OneHome Terms and does not sign the final lease.", "Este reconocimiento solo registra la revisión. Permanece separado de los Términos de OneHome y no firma el contrato final.")}</p>`;
+}
+
+function openTermsDocument(kind) {
+  document.querySelector("#ohqa-document-modal")?.remove();
+  const modal = document.createElement("div");
+  modal.id = "ohqa-document-modal";
+  modal.className = "ohqa-document-modal";
+  modal.innerHTML = `<div class="ohqa-document-card" role="dialog" aria-modal="true" aria-labelledby="ohqa-document-title">
+    <button type="button" class="ohqa-document-close" aria-label="${tr("Close", "Cerrar")}">×</button>
+    <div class="ohqa-document-scroll" tabindex="0">${termDocument(kind)}<div class="ohqa-document-end">${tr("End of document", "Fin del documento")}</div></div>
+    <p class="ohqa-read-status">${tr("Scroll to the bottom to unlock this acknowledgment.", "Desplácese hasta el final para habilitar este reconocimiento.")}</p>
+    <button type="button" class="ohqa-document-done" disabled>${tr("Return to the form", "Volver al formulario")}</button>
+  </div>`;
+  document.body.append(modal);
+  const scroller = modal.querySelector(".ohqa-document-scroll");
+  const done = modal.querySelector(".ohqa-document-done");
+  const status = modal.querySelector(".ohqa-read-status");
+  const markRead = () => {
+    if (scroller.scrollTop + scroller.clientHeight < scroller.scrollHeight - 8) return;
+    termsState[`${kind}Read`] = true;
+    done.disabled = false;
+    status.textContent = tr("Document read. Return to the form to select the acknowledgment.", "Documento leído. Vuelva al formulario para seleccionar el reconocimiento.");
+  };
+  scroller.addEventListener("scroll", markRead);
+  scroller.addEventListener("wheel", markRead);
+  scroller.addEventListener("touchend", markRead);
+  const close = () => { modal.remove(); refreshTermsPanel(); };
+  modal.querySelector(".ohqa-document-close").addEventListener("click", close);
+  done.addEventListener("click", close);
+  modal.addEventListener("click", (event) => { if (event.target === modal) close(); });
+  scroller.focus();
+}
+
 function termsPanel() {
   const panel = document.createElement("section");
   panel.id = "onehome-separate-terms";
   panel.className = "ohqa-terms";
+  panel.dataset.locale = currentLocale();
   panel.innerHTML = `
-    <div class="ohqa-eyebrow">Two separate acknowledgments</div>
-    <h3>Review platform terms and property-owner terms separately</h3>
-    <p class="ohqa-muted">These acceptances are recorded independently. Checking one never accepts the other.</p>
-    <details open>
-      <summary>1. OneWorld / OneHome platform terms</summary>
-      <p>Account use, privacy, electronic records and signatures, messaging, fees, payment-record status, support and disputes. OneWorld provides the platform; it is not the property owner or the party supplying the home.</p>
-    </details>
+    <div class="ohqa-eyebrow">${tr("Two separate acknowledgments", "Dos reconocimientos separados")}</div>
+    <h3>${tr("Read each document separately", "Lea cada documento por separado")}</h3>
+    <p class="ohqa-muted">${tr("Each consent is recorded independently. Opening or accepting one never accepts the other.", "Cada consentimiento se registra de forma independiente. Abrir o aceptar uno nunca acepta el otro.")}</p>
+    <button type="button" class="ohqa-document-open" data-document="platform"><span>1. ${tr("OneHome Terms", "Términos de OneHome")}</span><strong>${termsState.platformRead ? tr("Read", "Leído") : tr("Open and read", "Abrir y leer")}</strong></button>
     <label class="ohqa-check">
-      <input id="ohqa-platform-terms" type="checkbox">
-      <span>I agree to the OneWorld / OneHome platform terms shown above.</span>
+      <input id="ohqa-platform-terms" type="checkbox" ${termsState.platformRead ? "" : "disabled"}>
+      <span>${tr("I agree to the OneHome Terms.", "Acepto los Términos de OneHome.")}</span>
     </label>
-    <details open>
-      <summary>2. Property-owner supplemental terms — current review draft</summary>
-      <div class="ohqa-term-group">
-        <strong>Current listing terms</strong>
-        <ul>
-          <li><strong>9,000,000 COP</strong> for each monthly rental period.</li>
-          <li>A separate, one-time <strong>300,000 COP cleaning charge</strong> is due when the lease starts.</li>
-          <li><strong>No security deposit.</strong> The start date and tenant identity are added when the tenant packet is prepared.</li>
-        </ul>
-      </div>
-      <div class="ohqa-term-group">
-        <strong>Property rules carried forward from the prior five-page contract</strong>
-        <ul>
-          <li>Residential, lawful use only.</li>
-          <li>The furnished home and furniture are returned in the condition documented at move-in, allowing for ordinary wear.</li>
-          <li>The owner handles necessary or structural repairs. The tenant handles damage caused by the tenant or guests and reports owner repairs in writing.</li>
-          <li>Water, electricity, gas, internet, television and building administration are included. Extra services requested by the tenant are the tenant’s responsibility.</li>
-          <li>No alterations, assignment or subletting without the owner’s prior written approval.</li>
-          <li>Temporary travel is not treated as abandonment while rent is current and personal belongings remain.</li>
-        </ul>
-      </div>
-      <p class="ohqa-pending-note"><strong>Not accepted yet:</strong> cancellation and notice periods, annual rent adjustments, late-payment interest, penalties and collection costs, repainting beyond ordinary wear, owner entry after alleged abandonment, support-animal wording, and any deposit or replacement security. Those items require a separate final decision before the lease can be signed.</p>
-      <p class="ohqa-source-note"><strong>Not copied from the old contract:</strong> its expired dates, old rent amounts, deposit, bank and payee details, portable-air-conditioner deal, signatures, identity numbers and private contact details.</p>
-      <p>This acknowledgment records review only. It stays separate from OneWorld’s terms and does not sign the final lease.</p>
-    </details>
+    <button type="button" class="ohqa-document-open" data-document="property"><span>2. ${tr("Property Owner Supplemental Terms", "Términos adicionales del propietario")}</span><strong>${termsState.propertyRead ? tr("Read", "Leído") : tr("Open and read", "Abrir y leer")}</strong></button>
     <label class="ohqa-check">
-      <input id="ohqa-property-terms" type="checkbox">
-      <span>I acknowledge the property-owner supplemental terms snapshot shown above.</span>
+      <input id="ohqa-property-terms" type="checkbox" ${termsState.propertyRead ? "" : "disabled"}>
+      <span>${tr("I acknowledge the Property Owner Supplemental Terms.", "Reconozco los Términos adicionales del propietario.")}</span>
     </label>
-    <p class="ohqa-terms-error" role="alert" hidden>Please check both separate acknowledgments before continuing.</p>`;
+    <p class="ohqa-terms-error" role="alert" hidden>${tr("Read both documents and select both separate acknowledgments before continuing.", "Lea ambos documentos y seleccione los dos reconocimientos por separado antes de continuar.")}</p>`;
   const platform = panel.querySelector("#ohqa-platform-terms");
   const property = panel.querySelector("#ohqa-property-terms");
   platform.checked = termsState.platform;
@@ -83,29 +131,45 @@ function termsPanel() {
     termsState.property = property.checked;
     panel.querySelector(".ohqa-terms-error").hidden = true;
   });
+  panel.querySelectorAll("[data-document]").forEach((button) => button.addEventListener("click", () => openTermsDocument(button.dataset.document)));
   return panel;
 }
 
+function refreshTermsPanel() {
+  const existing = document.querySelector("#onehome-separate-terms");
+  if (!existing) return mountTerms();
+  const parent = existing.parentElement;
+  const next = existing.nextSibling;
+  existing.remove();
+  parent.insertBefore(termsPanel(), next);
+}
+
 function mountTerms() {
-  if (!CLAIM_TOKEN || document.querySelector("#onehome-separate-terms")) return;
-  const headings = [...document.querySelectorAll("h2")];
-  const reviewHeading = headings.find((node) => textMatches(node, /Review this home|Revise este inmueble/i));
-  const accountHeading = headings.find((node) => textMatches(node, /Approved|Aprobado/i));
-  if (reviewHeading) {
-    const cardBody = reviewHeading.closest("section")?.querySelector("div.space-y-3") || reviewHeading.parentElement?.parentElement;
-    const nameLabel = [...cardBody.querySelectorAll("label")].find((node) => textMatches(node, /Property owner's name|Nombre de la propietaria/i));
-    if (nameLabel) cardBody.insertBefore(termsPanel(), nameLabel);
-  } else if (accountHeading && document.querySelector("button")) {
-    const createButton = [...document.querySelectorAll("button")].find((node) => textMatches(node, /Create my account|Crear mi cuenta/i));
-    if (createButton) createButton.parentElement.insertBefore(termsPanel(), createButton);
+  if (!CLAIM_TOKEN) return;
+  const existing = document.querySelector("#onehome-separate-terms");
+  if (existing) {
+    if (existing.dataset.locale !== currentLocale()) refreshTermsPanel();
+    return;
   }
+  const accountEmail = document.querySelector('input[type="email"][autocomplete="email"]');
+  const nameInput = document.querySelector('input[autocomplete="name"]');
+  if (!nameInput) return;
+  if (accountEmail) {
+    const formArea = accountEmail.closest("div.mt-4") || accountEmail.parentElement?.parentElement;
+    const createButton = formArea?.parentElement?.querySelector("button.btn-primary");
+    if (createButton) createButton.parentElement.insertBefore(termsPanel(), createButton);
+    return;
+  }
+  const cardBody = nameInput.closest("div.space-y-3") || nameInput.parentElement?.parentElement;
+  const label = nameInput.closest("label");
+  if (cardBody && label) cardBody.insertBefore(termsPanel(), label);
 }
 
 function showTermsError(message) {
   const panel = document.querySelector("#onehome-separate-terms");
   const error = panel?.querySelector(".ohqa-terms-error");
   if (error) {
-    error.textContent = message || "Please check both separate acknowledgments before continuing.";
+    error.textContent = message || tr("Read both documents and select both separate acknowledgments before continuing.", "Lea ambos documentos y seleccione los dos reconocimientos por separado antes de continuar.");
     error.hidden = false;
     panel.scrollIntoView({ behavior: "smooth", block: "center" });
   }
@@ -126,11 +190,11 @@ async function acknowledgeExistingApproval(name) {
         property_terms_accepted: termsState.property,
         platform_terms_version: PLATFORM_TERMS_VERSION,
         property_terms_version: PROPERTY_TERMS_VERSION,
-        locale: document.documentElement.lang || "en",
+        locale: currentLocale(),
       }),
     });
     const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || "The acknowledgments could not be saved.");
+    if (!response.ok) throw new Error(result.message || tr("The acknowledgments could not be saved.", "No se pudieron guardar los reconocimientos."));
     termsState.existingSaved = true;
     return true;
   } catch (error) {
@@ -145,26 +209,98 @@ document.addEventListener("click", async (event) => {
   const button = event.target.closest?.("button");
   if (!button || !CLAIM_TOKEN) return;
   const label = (button.textContent || "").trim();
-  if (!/^(Approve|Aprobar|Yes, approve|Sí, aprobar|Create my account|Crear mi cuenta)$/.test(label)) return;
+  const accountArea = button.parentElement?.querySelector?.('input[type="email"][autocomplete="email"]');
+  const reviewArea = button.closest("section")?.querySelector?.('input[autocomplete="name"]');
+  const isCreate = !!accountArea && button.classList.contains("btn-primary");
+  const isReviewDecision = !!reviewArea && button.classList.contains("btn-primary");
+  if (!isCreate && !isReviewDecision) return;
   if (!termsState.platform || !termsState.property) {
     event.preventDefault();
     event.stopImmediatePropagation();
     showTermsError();
     return;
   }
-  if (/Create my account|Crear mi cuenta/.test(label) && !termsState.existingSaved) {
+  if (isCreate && !termsState.existingSaved) {
     event.preventDefault();
     event.stopImmediatePropagation();
     if (termsState.busy) return;
-    const name = fieldValue(/Full name|Nombre completo/i);
+    const name = document.querySelector('input[autocomplete="name"]')?.value?.trim() || "";
     if (!name) {
-      showTermsError("Add your full name before saving the acknowledgments.");
+      showTermsError(tr("Add your full name before saving the acknowledgments.", "Agregue su nombre completo antes de guardar los reconocimientos."));
       return;
     }
     const saved = await acknowledgeExistingApproval(name);
     if (saved) button.click();
   }
 }, true);
+
+const flowTextOriginal = new WeakMap();
+const flowAttributeOriginal = new WeakMap();
+function translateReviewFlow(root = document.body) {
+  const locale = currentLocale();
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    if (node.parentElement?.closest("#onehome-separate-terms,#ohqa-document-modal,#onehome-owner-media")) continue;
+    if (!flowTextOriginal.has(node)) flowTextOriginal.set(node, node.nodeValue);
+    const original = flowTextOriginal.get(node);
+    const trimmed = original.trim();
+    if (!trimmed) continue;
+    const translated = window.__onehomeFlowTranslate?.(locale, trimmed, trimmed) || trimmed;
+    const leading = original.match(/^\s*/)?.[0] || "";
+    const trailing = original.match(/\s*$/)?.[0] || "";
+    node.nodeValue = `${leading}${translated}${trailing}`;
+  }
+  root.querySelectorAll?.("[placeholder],[aria-label],[title]").forEach((element) => {
+    let originals = flowAttributeOriginal.get(element);
+    if (!originals) { originals = {}; flowAttributeOriginal.set(element, originals); }
+    for (const name of ["placeholder", "aria-label", "title"]) {
+      if (!element.hasAttribute(name)) continue;
+      if (!(name in originals)) originals[name] = element.getAttribute(name);
+      element.setAttribute(name, window.__onehomeFlowTranslate?.(locale, originals[name], originals[name]) || originals[name]);
+    }
+  });
+}
+
+const PHONE_COUNTRIES = [
+  ["CO", "🇨🇴", "+57"], ["US", "🇺🇸", "+1"], ["MX", "🇲🇽", "+52"], ["AR", "🇦🇷", "+54"],
+  ["PE", "🇵🇪", "+51"], ["CL", "🇨🇱", "+56"], ["EC", "🇪🇨", "+593"], ["VE", "🇻🇪", "+58"],
+  ["BR", "🇧🇷", "+55"], ["PA", "🇵🇦", "+507"], ["CR", "🇨🇷", "+506"], ["GT", "🇬🇹", "+502"],
+  ["DO", "🇩🇴", "+1"], ["ES", "🇪🇸", "+34"], ["CA", "🇨🇦", "+1"], ["GB", "🇬🇧", "+44"],
+  ["DE", "🇩🇪", "+49"], ["FR", "🇫🇷", "+33"], ["IT", "🇮🇹", "+39"], ["PT", "🇵🇹", "+351"],
+  ["RU", "🇷🇺", "+7"], ["CN", "🇨🇳", "+86"], ["IN", "🇮🇳", "+91"]
+];
+
+function setReactInput(input, value) {
+  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+  setter?.call(input, value);
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function mountCountryPhone() {
+  const source = document.querySelector('input[type="tel"][autocomplete="tel"]');
+  if (!source || source.dataset.ohqaPhone === "true") return;
+  source.dataset.ohqaPhone = "true";
+  source.classList.add("ohqa-phone-source");
+  source.setAttribute("aria-hidden", "true");
+  source.tabIndex = -1;
+  const localeDefault = { co: "CO", es: "ES", de: "DE", ru: "RU", zh: "CN", pt: "BR", en: "US" }[currentLocale()] || "US";
+  const wrap = document.createElement("div");
+  wrap.className = "ohqa-phone-field";
+  wrap.innerHTML = `<select aria-label="${tr("Country calling code", "Código de país")}">${PHONE_COUNTRIES.map(([iso, flag, dial]) => `<option value="${iso}" ${iso === localeDefault ? "selected" : ""}>${flag} ${dial}</option>`).join("")}</select><input type="tel" inputmode="tel" autocomplete="tel-national" aria-label="${tr("National phone number", "Número de teléfono nacional")}">`;
+  source.insertAdjacentElement("afterend", wrap);
+  const select = wrap.querySelector("select");
+  const national = wrap.querySelector("input");
+  const sync = () => {
+    const dial = PHONE_COUNTRIES.find(([iso]) => iso === select.value)?.[2] || "+1";
+    const digits = national.value.replace(/\D/g, "").slice(0, 15);
+    national.value = digits;
+    setReactInput(source, digits ? `${dial}${digits}` : "");
+  };
+  select.addEventListener("change", sync);
+  national.addEventListener("input", sync);
+}
 
 function accessToken() {
   for (let index = 0; index < localStorage.length; index += 1) {
@@ -518,10 +654,32 @@ document.addEventListener("click", (event) => {
   }
 }, true);
 
+function mountOtpHelp() {
+  const code = document.querySelector('input[autocomplete="one-time-code"]');
+  if (!code || document.querySelector("#ohqa-otp-help")) return;
+  const help = document.createElement("div");
+  help.id = "ohqa-otp-help";
+  help.className = "ohqa-otp-help";
+  help.innerHTML = `<strong>${tr("Still waiting for the email?", "¿Todavía espera el correo?")}</strong><span>${tr("Check Inbox, Spam and Promotions, then search for 'One World Labs'. Delivery can be accepted by your email provider before it appears in the visible inbox.", "Revise Recibidos, Spam y Promociones; luego busque 'One World Labs'. Su proveedor puede aceptar el correo antes de que aparezca en la bandeja visible.")}</span>`;
+  code.insertAdjacentElement("afterend", help);
+}
+
+let observedLocale = currentLocale();
 const observer = new MutationObserver(() => {
+  const locale = currentLocale();
+  if (locale !== observedLocale) {
+    observedLocale = locale;
+    document.querySelector("#ohqa-document-modal")?.remove();
+  }
   if (!FIXTURE_MODE) mountTerms();
+  mountCountryPhone();
+  mountOtpHelp();
+  translateReviewFlow();
   void maybeMountUploader();
 });
-observer.observe(document.documentElement, { childList: true, subtree: true });
+observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["lang"] });
 mountTerms();
+mountCountryPhone();
+mountOtpHelp();
+translateReviewFlow();
 void maybeMountUploader();
