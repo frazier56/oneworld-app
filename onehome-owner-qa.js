@@ -44,11 +44,11 @@ function termDocument(kind) {
   if (kind === "platform") return `
     <h2>${tr("OneHome Terms", "Términos de OneHome")}</h2>
     <p>${tr("OneHome provides the account, electronic records, messaging, payment-record status and support tools. OneHome is not the property owner and does not supply the home.", "OneHome proporciona la cuenta, los registros electrónicos, la mensajería, el estado de los registros de pago y las herramientas de soporte. OneHome no es el propietario ni suministra el inmueble.")}</p>
-    <p>${tr("Your OneHome consent is recorded separately from the property owner's supplemental terms.", "Su consentimiento a OneHome se registra por separado de los términos adicionales del propietario.")}</p>
+    <p>${tr("Your OneHome consent is recorded separately from the property owner's terms.", "Su consentimiento a OneHome se registra por separado de los términos del propietario.")}</p>
     <p>${tr("Accepting these terms does not sign the lease or confirm a payment.", "Aceptar estos términos no firma el contrato ni confirma un pago.")}</p>
-    <p class="ohqa-source-note">${tr("This current OneHome terms version is approved by the owner for use now. A future counsel review is planned; until then, unresolved lease clauses listed in the Property Owner Supplemental Terms remain excluded and require separate final decisions.", "Esta versión actual de los Términos de OneHome está aprobada por el propietario para su uso desde ahora. Se planea una revisión futura por un abogado; mientras tanto, las cláusulas no resueltas enumeradas en los Términos adicionales del propietario permanecen excluidas y requieren decisiones finales por separado.")}</p>`;
+    <p class="ohqa-source-note">${tr("This current OneHome terms version is approved by the owner for use now. A future counsel review is planned; until then, unresolved lease clauses listed in the Property Owner Terms remain excluded and require separate final decisions.", "Esta versión actual de los Términos de OneHome está aprobada por el propietario para su uso desde ahora. Se planea una revisión futura por un abogado; mientras tanto, las cláusulas no resueltas enumeradas en los Términos del propietario permanecen excluidas y requieren decisiones finales por separado.")}</p>`;
   return `
-    <h2>${tr("Property Owner Supplemental Terms", "Términos adicionales del propietario")}</h2>
+    <h2>${tr("Property Owner Terms", "Términos del propietario")}</h2>
     <h3>${tr("Current listing terms", "Términos actuales del inmueble")}</h3>
     <ul>
       <li><strong>9,000,000 COP</strong> ${tr("for each monthly rental period.", "por cada período mensual de arriendo.")}</li>
@@ -89,10 +89,16 @@ function openTermsDocument(kind) {
     done.disabled = false;
     status.textContent = tr("Document read. Return to the form to select the acknowledgment.", "Documento leído. Vuelva al formulario para seleccionar el reconocimiento.");
   };
-  scroller.addEventListener("scroll", markRead);
-  scroller.addEventListener("wheel", markRead);
-  scroller.addEventListener("touchend", markRead);
-  const close = () => { modal.remove(); refreshTermsPanel(); };
+  const endMarker = scroller.querySelector(".ohqa-document-end");
+  const endObserver = new IntersectionObserver((entries) => {
+    if (entries.some((entry) => entry.isIntersecting)) markRead();
+  }, { root: scroller, threshold: 0.95 });
+  endObserver.observe(endMarker);
+  scroller.addEventListener("scroll", markRead, { passive: true });
+  scroller.addEventListener("wheel", markRead, { passive: true });
+  scroller.addEventListener("touchend", markRead, { passive: true });
+  requestAnimationFrame(markRead);
+  const close = () => { endObserver.disconnect(); modal.remove(); refreshTermsPanel(); };
   modal.querySelector(".ohqa-document-close").addEventListener("click", close);
   done.addEventListener("click", close);
   modal.addEventListener("click", (event) => { if (event.target === modal) close(); });
@@ -105,20 +111,21 @@ function termsPanel() {
   panel.className = "ohqa-terms";
   panel.dataset.locale = currentLocale();
   panel.innerHTML = `
-    <div class="ohqa-eyebrow">${tr("Two separate acknowledgments", "Dos reconocimientos separados")}</div>
-    <h3>${tr("Read each document separately", "Lea cada documento por separado")}</h3>
-    <p class="ohqa-muted">${tr("Each consent is recorded independently. Opening or accepting one never accepts the other.", "Cada consentimiento se registra de forma independiente. Abrir o aceptar uno nunca acepta el otro.")}</p>
-    <button type="button" class="ohqa-document-open" data-document="platform"><span>1. ${tr("OneHome Terms", "Términos de OneHome")}</span><strong>${termsState.platformRead ? tr("Read", "Leído") : tr("Open and read", "Abrir y leer")}</strong></button>
-    <label class="ohqa-check">
-      <input id="ohqa-platform-terms" type="checkbox" ${termsState.platformRead ? "" : "disabled"}>
-      <span>${tr("I agree to the OneHome Terms.", "Acepto los Términos de OneHome.")}</span>
-    </label>
-    <button type="button" class="ohqa-document-open" data-document="property"><span>2. ${tr("Property Owner Supplemental Terms", "Términos adicionales del propietario")}</span><strong>${termsState.propertyRead ? tr("Read", "Leído") : tr("Open and read", "Abrir y leer")}</strong></button>
-    <label class="ohqa-check">
-      <input id="ohqa-property-terms" type="checkbox" ${termsState.propertyRead ? "" : "disabled"}>
-      <span>${tr("I acknowledge the Property Owner Supplemental Terms.", "Reconozco los Términos adicionales del propietario.")}</span>
-    </label>
-    <p class="ohqa-terms-error" role="alert" hidden>${tr("Read both documents and select both separate acknowledgments before continuing.", "Lea ambos documentos y seleccione los dos reconocimientos por separado antes de continuar.")}</p>`;
+    <div class="ohqa-term-row">
+      <div class="ohqa-term-title"><strong>${tr("OneHome Terms", "Términos de OneHome")}</strong><button type="button" class="ohqa-document-open" data-document="platform">${termsState.platformRead ? tr("Read ✓", "Leído ✓") : tr("View to unlock", "Ver para habilitar")}</button></div>
+      <label class="ohqa-check ${termsState.platformRead ? "is-unlocked" : "is-locked"}">
+        <input id="ohqa-platform-terms" type="checkbox" ${termsState.platformRead ? "" : "disabled"}>
+        <span>${tr("I agree", "Acepto")}</span>
+      </label>
+    </div>
+    <div class="ohqa-term-row">
+      <div class="ohqa-term-title"><strong>${tr("Property Owner Terms", "Términos del propietario")}</strong><button type="button" class="ohqa-document-open" data-document="property">${termsState.propertyRead ? tr("Read ✓", "Leído ✓") : tr("View to unlock", "Ver para habilitar")}</button></div>
+      <label class="ohqa-check ${termsState.propertyRead ? "is-unlocked" : "is-locked"}">
+        <input id="ohqa-property-terms" type="checkbox" ${termsState.propertyRead ? "" : "disabled"}>
+        <span>${tr("I agree", "Acepto")}</span>
+      </label>
+    </div>
+    <p class="ohqa-terms-error" role="alert" hidden>${tr("Open each document, scroll to the end, and agree before continuing.", "Abra cada documento, desplácese hasta el final y acepte antes de continuar.")}</p>`;
   const platform = panel.querySelector("#ohqa-platform-terms");
   const property = panel.querySelector("#ohqa-property-terms");
   platform.checked = termsState.platform;
@@ -169,7 +176,7 @@ function showTermsError(message) {
   const panel = document.querySelector("#onehome-separate-terms");
   const error = panel?.querySelector(".ohqa-terms-error");
   if (error) {
-    error.textContent = message || tr("Read both documents and select both separate acknowledgments before continuing.", "Lea ambos documentos y seleccione los dos reconocimientos por separado antes de continuar.");
+    error.textContent = message || tr("Open each document, scroll to the end, and agree before continuing.", "Abra cada documento, desplácese hasta el final y acepte antes de continuar.");
     error.hidden = false;
     panel.scrollIntoView({ behavior: "smooth", block: "center" });
   }
@@ -214,6 +221,20 @@ document.addEventListener("click", async (event) => {
   const isCreate = !!accountArea && button.classList.contains("btn-primary");
   const isReviewDecision = !!reviewArea && button.classList.contains("btn-primary");
   if (!isCreate && !isReviewDecision) return;
+  if (isCreate) {
+    const phone = document.querySelector(".ohqa-phone-canonical");
+    if (phone && phone.dataset.valid !== "true") {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const status = phone.querySelector(".ohqa-phone-status");
+      if (status) {
+        status.textContent = tr("Enter a valid phone number", "Ingrese un número de teléfono válido");
+        status.classList.add("is-invalid");
+      }
+      phone.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+  }
   if (!termsState.platform || !termsState.property) {
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -262,44 +283,15 @@ function translateReviewFlow(root = document.body) {
   });
 }
 
-const PHONE_COUNTRIES = [
-  ["CO", "🇨🇴", "+57"], ["US", "🇺🇸", "+1"], ["MX", "🇲🇽", "+52"], ["AR", "🇦🇷", "+54"],
-  ["PE", "🇵🇪", "+51"], ["CL", "🇨🇱", "+56"], ["EC", "🇪🇨", "+593"], ["VE", "🇻🇪", "+58"],
-  ["BR", "🇧🇷", "+55"], ["PA", "🇵🇦", "+507"], ["CR", "🇨🇷", "+506"], ["GT", "🇬🇹", "+502"],
-  ["DO", "🇩🇴", "+1"], ["ES", "🇪🇸", "+34"], ["CA", "🇨🇦", "+1"], ["GB", "🇬🇧", "+44"],
-  ["DE", "🇩🇪", "+49"], ["FR", "🇫🇷", "+33"], ["IT", "🇮🇹", "+39"], ["PT", "🇵🇹", "+351"],
-  ["RU", "🇷🇺", "+7"], ["CN", "🇨🇳", "+86"], ["IN", "🇮🇳", "+91"]
-];
-
-function setReactInput(input, value) {
-  const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
-  setter?.call(input, value);
-  input.dispatchEvent(new Event("input", { bubbles: true }));
-  input.dispatchEvent(new Event("change", { bubbles: true }));
-}
-
 function mountCountryPhone() {
   const source = document.querySelector('input[type="tel"][autocomplete="tel"]');
-  if (!source || source.dataset.ohqaPhone === "true") return;
-  source.dataset.ohqaPhone = "true";
-  source.classList.add("ohqa-phone-source");
-  source.setAttribute("aria-hidden", "true");
-  source.tabIndex = -1;
+  if (!source || source.dataset.ohqaPhone === "true" || !window.OneHomeCanonicalPhone) return;
   const localeDefault = { co: "CO", es: "ES", de: "DE", ru: "RU", zh: "CN", pt: "BR", en: "US" }[currentLocale()] || "US";
-  const wrap = document.createElement("div");
-  wrap.className = "ohqa-phone-field";
-  wrap.innerHTML = `<select aria-label="${tr("Country calling code", "Código de país")}">${PHONE_COUNTRIES.map(([iso, flag, dial]) => `<option value="${iso}" ${iso === localeDefault ? "selected" : ""}>${flag} ${dial}</option>`).join("")}</select><input type="tel" inputmode="tel" autocomplete="tel-national" aria-label="${tr("National phone number", "Número de teléfono nacional")}">`;
-  source.insertAdjacentElement("afterend", wrap);
-  const select = wrap.querySelector("select");
-  const national = wrap.querySelector("input");
-  const sync = () => {
-    const dial = PHONE_COUNTRIES.find(([iso]) => iso === select.value)?.[2] || "+1";
-    const digits = national.value.replace(/\D/g, "").slice(0, 15);
-    national.value = digits;
-    setReactInput(source, digits ? `${dial}${digits}` : "");
-  };
-  select.addEventListener("change", sync);
-  national.addEventListener("input", sync);
+  window.OneHomeCanonicalPhone.mount(source, {
+    defaultCountry: localeDefault,
+    validText: tr("Valid phone number", "Número de teléfono válido"),
+    invalidText: tr("Enter a valid phone number", "Ingrese un número de teléfono válido"),
+  });
 }
 
 function accessToken() {
