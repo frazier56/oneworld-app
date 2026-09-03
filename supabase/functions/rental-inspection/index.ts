@@ -29,6 +29,7 @@ const validToken = (value: string) => /^[0-9a-f]{48}$/i.test(value);
 const validEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const IMAGE_MIMES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
 const VIDEO_MIMES = ["video/mp4", "video/webm", "video/quicktime"];
+const DRAFT_PREFIX = "draft:";
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (c) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
 }[c]!));
@@ -37,6 +38,45 @@ async function sha256(value: string) {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function mediaLocation(reference: string) {
+  return reference.startsWith(DRAFT_PREFIX)
+    ? { bucket: "rental-walkthrough-drafts", path: reference.slice(DRAFT_PREFIX.length) }
+    : { bucket: "rental-evidence", path: reference };
+}
+
+async function signedMediaUrls(references: string[]) {
+  const output: Record<string, string> = {};
+  const groups = new Map<string, { reference: string; path: string }[]>();
+  for (const reference of references) {
+    const location = mediaLocation(reference);
+    const group = groups.get(location.bucket) ?? [];
+    group.push({ reference, path: location.path });
+    groups.set(location.bucket, group);
+  }
+  for (const [bucket, group] of groups) {
+    const { data, error } = await service.storage.from(bucket).createSignedUrls(group.map(item => item.path), 3600);
+    if (error) throw error;
+    (data ?? []).forEach((signed, index) => {
+      if (signed.signedUrl) output[group[index].reference] = signed.signedUrl;
+    });
+  }
+  return output;
+}
+
+async function removeMedia(references: string[]) {
+  const groups = new Map<string, string[]>();
+  for (const reference of references) {
+    const location = mediaLocation(reference);
+    groups.set(location.bucket, [...(groups.get(location.bucket) ?? []), location.path]);
+  }
+  const errors: string[] = [];
+  for (const [bucket, paths] of groups) {
+    const { error } = await service.storage.from(bucket).remove(paths);
+    if (error) errors.push(error.message);
+  }
+  return errors;
 }
 
 async function publicPacket(token: string) {
@@ -69,13 +109,9 @@ async function publicPacket(token: string) {
   if (itemError) return { error: "The walkthrough could not be opened.", status: 500 };
 
   const paths = (rows ?? []).flatMap((row) => [row.photo_url, row.tenant_photo_url]).filter((path): path is string => Boolean(path) && !/^https?:/i.test(path!));
-  const signedByPath: Record<string, string> = {};
-  if (paths.length) {
-    const { data: signed, error: signError } = await service.storage
-      .from("rental-evidence").createSignedUrls(paths, 3600);
-    if (signError) return { error: "The walkthrough photos could not be opened.", status: 500 };
-    for (const item of signed ?? []) if (item.signedUrl) signedByPath[String(item.path)] = item.signedUrl;
-  }
+  let signedByPath: Record<string, string> = {};
+  try { signedByPath = paths.length ? await signedMediaUrls(paths) : {}; }
+  catch (_) { return { error: "The walkthrough photos could not be opened.", status: 500 }; }
 
   return {
     status: 200,
@@ -169,11 +205,7 @@ async function ownerPacket(userClient: ReturnType<typeof createClient>, userId: 
   ]);
   if (!inspection) return { error: "That walkthrough was not found.", status: 404 } as const;
   const paths = (items ?? []).flatMap((item) => [item.photo_url, item.tenant_photo_url]).filter((path): path is string => Boolean(path) && !/^https?:/i.test(path!));
-  const signedByPath: Record<string, string> = {};
-  if (paths.length) {
-    const { data: signed } = await service.storage.from("rental-evidence").createSignedUrls(paths, 3600);
-    for (const item of signed ?? []) if (item.signedUrl) signedByPath[String(item.path)] = item.signedUrl;
-  }
+  const signedByPath = paths.length ? await signedMediaUrls(paths).catch(() => ({})) : {};
   const listingNo = Number((claim as any)?.rental_properties?.listing_no ?? 0);
   return {
     data: {
@@ -293,8 +325,8 @@ Deno.serve(async (req) => {
           p_item_id: String(payload?.item_id ?? ""),
         });
         if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
-        const { error: storageError } = await service.storage.from("rental-evidence").remove([String(path)]);
-        return json({ deleted: true, storage_removed: !storageError, cleanup_warning: storageError?.message ?? null });
+        const storageErrors = await removeMedia([String(path)]);
+        return json({ deleted: true, storage_removed: storageErrors.length === 0, cleanup_warning: storageErrors[0] ?? null });
       }
 
       if (action === "cleanup_upload") {
@@ -325,13 +357,13 @@ Deno.serve(async (req) => {
         });
         if (resetError) return json({ message: resetError.message }, resetError.code === "42501" ? 403 : 400);
         const paths = Array.isArray(reset?.storage_paths) ? reset.storage_paths.map(String) : [];
-        const storageResult = paths.length ? await service.storage.from("rental-evidence").remove(paths) : { error: null };
+        const storageErrors = paths.length ? await removeMedia(paths) : [];
         const { error: authDeleteError } = await service.auth.admin.deleteUser(auth.user.id);
         return json({
           listing_no: 10518,
           restored_state: reset?.restored_state,
-          removed_storage_objects: storageResult.error ? 0 : paths.length,
-          storage_cleanup_error: storageResult.error?.message ?? null,
+          removed_storage_objects: storageErrors.length ? 0 : paths.length,
+          storage_cleanup_error: storageErrors[0] ?? null,
           qa_account_deleted: !authDeleteError,
           account_cleanup_error: authDeleteError?.message ?? null,
         });
