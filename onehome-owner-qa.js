@@ -324,7 +324,7 @@ function translateReviewFlow(root = document.body) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
   let node;
   while ((node = walker.nextNode())) {
-    if (node.parentElement?.closest("#onehome-separate-terms,#ohqa-document-modal,#onehome-owner-media")) continue;
+    if (node.parentElement?.closest('#onehome-separate-terms,#ohqa-document-modal,#onehome-owner-media,a[aria-label="neHome"]')) continue;
     const lastRendered = flowTextRendered.get(node);
     if (!flowTextOriginal.has(node) || (lastRendered != null && node.nodeValue !== lastRendered)) {
       flowTextOriginal.set(node, node.nodeValue);
