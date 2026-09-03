@@ -61,7 +61,7 @@ function tr(english, spanish) {
 }
 
 function mountClaimedLinkGuard() {
-  if (!claimAvailabilityState.alreadyClaimed || document.querySelector("#ohqa-claim-used")) return;
+  if (!claimAvailabilityState.alreadyClaimed) return;
   const email = document.querySelector('input[type="email"][autocomplete="email"]');
   const createButton = email?.closest("section")?.querySelector("button.btn-primary") ||
     [...document.querySelectorAll("button.btn-primary")].find((button) =>
@@ -69,16 +69,20 @@ function mountClaimedLinkGuard() {
   const accountRoot = createButton?.parentElement;
   if (!email || !createButton || !accountRoot) return;
 
-  const notice = document.createElement("div");
-  notice.id = "ohqa-claim-used";
-  notice.className = "mt-4 rounded-2xl border border-amber-500/35 bg-amber-500/[0.08] p-4";
-  notice.setAttribute("role", "alert");
-  notice.innerHTML = `
-    <p class="text-[14px] font-black">${tr("This invitation has already been used", "Esta invitación ya se utilizó")}</p>
-    <p class="mt-1 text-[12.5px] leading-relaxed opacity-70">${tr(
-      "This home is already connected to its owner. Ask the sender for a new invitation.",
-      "Este inmueble ya está conectado a su propietaria. Pida al remitente una invitación nueva."
-    )}</p>`;
+  let notice = document.querySelector("#ohqa-claim-used");
+  if (!notice) {
+    notice = document.createElement("div");
+    notice.id = "ohqa-claim-used";
+    notice.className = "mt-4 rounded-2xl border border-amber-500/35 bg-amber-500/[0.08] p-4";
+    notice.setAttribute("role", "alert");
+    notice.innerHTML = `
+      <p class="text-[14px] font-black">${tr("This invitation has already been used", "Esta invitación ya se utilizó")}</p>
+      <p class="mt-1 text-[12.5px] leading-relaxed opacity-70">${tr(
+        "This home is already connected to its owner. Ask the sender for a new invitation.",
+        "Este inmueble ya está conectado a su propietaria. Pida al remitente una invitación nueva."
+      )}</p>`;
+    createButton.insertAdjacentElement("beforebegin", notice);
+  }
 
   const fields = email.closest("div.mt-4");
   if (fields) fields.hidden = true;
@@ -86,7 +90,6 @@ function mountClaimedLinkGuard() {
   if (terms) terms.hidden = true;
   accountRoot.querySelector("#ohqa-signup-error")?.remove();
   createButton.hidden = true;
-  createButton.insertAdjacentElement("beforebegin", notice);
 }
 
 async function checkClaimAvailability() {
