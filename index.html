@@ -85,10 +85,15 @@
         ownerQaStyles.rel = 'stylesheet';
         ownerQaStyles.href = '/onehome-owner-qa.css?v=20260903-media1';
         document.head.append(ownerQaStyles);
+        const walkthroughMediaStyles = document.createElement('link');
+        walkthroughMediaStyles.rel = 'stylesheet';
+        walkthroughMediaStyles.href = '/onehome-walkthrough-media.css?v=20260903-media1';
+        document.head.append(walkthroughMediaStyles);
         import('/onehome-flow-i18n.js?v=20260903-gate9')
           .then(() => import('/onehome-review-app.js?v=20260901-language1'))
           .then(() => import('/onehome-phone-canonical.js?v=20260903-phone2'))
-          .then(() => import('/onehome-owner-qa.js?v=20260903-media1'));
+          .then(() => import('/onehome-owner-qa.js?v=20260903-media1'))
+          .then(() => import('/onehome-walkthrough-media.js?v=20260903-media1'));
       } else {
         // The production entry filename is intentionally stable while targeted
         // fixes are rolled into it. Version the import with the live build id so
