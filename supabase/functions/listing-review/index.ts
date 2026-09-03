@@ -75,6 +75,9 @@ function friendly(parsed: any): { code: string; message: string } {
   if (/not ready for acknowledgement/i.test(raw)) {
     return { code: "already_claimed", message: "This invitation has already been used. Ask the sender for a new invitation." };
   }
+  if (/restricted to the current owner handoff listings/i.test(raw)) {
+    return { code: "handoff_not_enabled", message: "This owner invitation is not enabled for account creation. Ask the sender for a new invitation." };
+  }
   return { code: "error", message: "Something went wrong. Please try again." };
 }
 

@@ -67,6 +67,31 @@ function setReactInput(input, value) {
   input.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
+function normalizeEnteredNumber(value, selectedCountry) {
+  const raw = String(value || "").trim();
+  if (!raw) return { country: selectedCountry, national: "" };
+
+  const digits = raw.replace(/\D/g, "");
+  const callingCode = getCountryCallingCode(selectedCountry);
+  const looksInternational = raw.startsWith("+") ||
+    (digits.startsWith(callingCode) && digits.length > callingCode.length + 6);
+  const international = looksInternational
+    ? parsePhoneNumberFromString(raw.startsWith("+") ? raw : `+${digits}`)
+    : null;
+
+  if (international?.country && international.isPossible()) {
+    return {
+      country: international.country,
+      national: international.formatNational(),
+    };
+  }
+
+  return {
+    country: selectedCountry,
+    national: new AsYouType(selectedCountry).input(digits),
+  };
+}
+
 function mount(source, options = {}) {
   if (!source || source.dataset.ohqaPhone === "true") return source?.nextElementSibling || null;
   source.dataset.ohqaPhone = "true";
@@ -172,8 +197,12 @@ function mount(source, options = {}) {
 
   trigger.addEventListener("click", openMenu);
   input.addEventListener("input", () => {
-    national = new AsYouType(country).input(input.value);
+    const normalized = normalizeEnteredNumber(input.value, country);
+    const countryChanged = normalized.country !== country;
+    country = normalized.country;
+    national = normalized.national;
     input.value = national;
+    if (countryChanged) renderCountry();
     emit();
   });
   input.value = national;
