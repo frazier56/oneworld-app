@@ -339,10 +339,10 @@ function translateReviewFlow(root = document.body) {
     node.nodeValue = rendered;
     flowTextRendered.set(node, rendered);
   }
-  root.querySelectorAll?.("[placeholder],[aria-label],[title]").forEach((element) => {
+  root.querySelectorAll?.("[placeholder],[aria-label],[title],[alt]").forEach((element) => {
     let originals = flowAttributeOriginal.get(element);
     if (!originals) { originals = {}; flowAttributeOriginal.set(element, originals); }
-    for (const name of ["placeholder", "aria-label", "title"]) {
+    for (const name of ["placeholder", "aria-label", "title", "alt"]) {
       if (!element.hasAttribute(name)) continue;
       if (!(name in originals)) originals[name] = element.getAttribute(name);
       element.setAttribute(name, window.__onehomeFlowTranslate?.(locale, originals[name], originals[name]) || originals[name]);
