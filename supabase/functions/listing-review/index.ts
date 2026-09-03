@@ -72,6 +72,9 @@ function friendly(parsed: any): { code: string; message: string } {
   if (/platform terms separately/i.test(raw)) return { code: "platform_terms_required", message: "Review and accept the OneWorld / OneHome platform terms separately." };
   if (/property-owner supplemental terms separately/i.test(raw)) return { code: "property_terms_required", message: "Review and acknowledge the property-owner supplemental terms separately." };
   if (/terms version changed/i.test(raw)) return { code: "terms_changed", message: "The terms snapshot changed. Refresh and review it again." };
+  if (/not ready for acknowledgement/i.test(raw)) {
+    return { code: "already_claimed", message: "This invitation has already been used. Ask the sender for a new invitation." };
+  }
   return { code: "error", message: "Something went wrong. Please try again." };
 }
 
@@ -172,4 +175,3 @@ Deno.serve(async (req) => {
     return json({ code: "error", message: "Something went wrong. Please try again." }, 500);
   }
 });
-

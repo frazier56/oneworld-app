@@ -26,6 +26,11 @@ const signupState = window.__onehomeOwnerSignup || {
 };
 window.__onehomeOwnerSignup = signupState;
 
+const claimAvailabilityState = {
+  checked: false,
+  alreadyClaimed: false,
+};
+
 // Keep OneHome on the same proven email-code contract as the shared OneWorld
 // signup: POST /auth/v1/otp without a PKCE challenge, verify type=email, then
 // set the password on the authenticated session. Do not replace that flow with
@@ -53,6 +58,49 @@ function currentLocale() {
 function tr(english, spanish) {
   return window.__onehomeFlowTranslate?.(currentLocale(), english, spanish) ||
     ((currentLocale() === "co" || currentLocale() === "es") ? spanish : english);
+}
+
+function mountClaimedLinkGuard() {
+  if (!claimAvailabilityState.alreadyClaimed || document.querySelector("#ohqa-claim-used")) return;
+  const email = document.querySelector('input[type="email"][autocomplete="email"]');
+  const createButton = email?.closest("section")?.querySelector("button.btn-primary") ||
+    [...document.querySelectorAll("button.btn-primary")].find((button) =>
+      button.parentElement?.querySelector?.('input[type="email"][autocomplete="email"]'));
+  const accountRoot = createButton?.parentElement;
+  if (!email || !createButton || !accountRoot) return;
+
+  const notice = document.createElement("div");
+  notice.id = "ohqa-claim-used";
+  notice.className = "mt-4 rounded-2xl border border-amber-500/35 bg-amber-500/[0.08] p-4";
+  notice.setAttribute("role", "alert");
+  notice.innerHTML = `
+    <p class="text-[14px] font-black">${tr("This invitation has already been used", "Esta invitación ya se utilizó")}</p>
+    <p class="mt-1 text-[12.5px] leading-relaxed opacity-70">${tr(
+      "This home is already connected to its owner. Ask the sender for a new invitation.",
+      "Este inmueble ya está conectado a su propietaria. Pida al remitente una invitación nueva."
+    )}</p>`;
+
+  const fields = email.closest("div.mt-4");
+  if (fields) fields.hidden = true;
+  const terms = accountRoot.querySelector("#onehome-separate-terms");
+  if (terms) terms.hidden = true;
+  accountRoot.querySelector("#ohqa-signup-error")?.remove();
+  createButton.hidden = true;
+  createButton.insertAdjacentElement("beforebegin", notice);
+}
+
+async function checkClaimAvailability() {
+  if (!CLAIM_TOKEN || claimAvailabilityState.checked) return;
+  claimAvailabilityState.checked = true;
+  try {
+    const response = await fetch(`${REVIEW_API}?t=${encodeURIComponent(CLAIM_TOKEN)}`, {
+      headers: { apikey: ONEHOME_ANON_KEY, Authorization: `Bearer ${ONEHOME_ANON_KEY}` },
+      cache: "no-store",
+    });
+    const packet = await response.json().catch(() => ({}));
+    claimAvailabilityState.alreadyClaimed = response.ok && packet?.already_claimed === true;
+    if (claimAvailabilityState.alreadyClaimed) window.setTimeout(mountClaimedLinkGuard, 800);
+  } catch { /* The primary review request still owns availability errors. */ }
 }
 
 // This review bundle intentionally mounts only review and inspection routes.
@@ -248,7 +296,15 @@ async function acknowledgeExistingApproval(name) {
       }),
     });
     const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.message || tr("The acknowledgments could not be saved.", "No se pudieron guardar los reconocimientos."));
+    if (!response.ok) {
+      const message = result.code === "already_claimed"
+        ? tr(
+          "This invitation has already been used. Ask the sender for a new invitation.",
+          "Esta invitación ya se utilizó. Pida al remitente una invitación nueva."
+        )
+        : result.message || tr("The acknowledgments could not be saved.", "No se pudieron guardar los reconocimientos.");
+      throw new Error(message);
+    }
     termsState.existingSaved = true;
     return true;
   } catch (error) {
@@ -859,6 +915,7 @@ const observer = new MutationObserver(() => {
     }
   }
   if (!FIXTURE_MODE) mountTerms();
+  mountClaimedLinkGuard();
   mountCountryPhone();
   mountVerificationPage();
   syncCreateTermsGate();
@@ -867,6 +924,8 @@ const observer = new MutationObserver(() => {
 });
 observer.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ["lang"] });
 mountTerms();
+void checkClaimAvailability();
+mountClaimedLinkGuard();
 mountCountryPhone();
 mountVerificationPage();
 syncCreateTermsGate();
