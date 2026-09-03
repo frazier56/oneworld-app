@@ -1,5 +1,6 @@
-// rental-inspection — secure public photo packet plus authenticated owner delivery.
-// A 48-hex contract token is the tenant capability. Raw storage paths never leave this function.
+// rental-inspection — private walkthrough media, gated tenant review and
+// authenticated owner/listing-agent operations. A 48-hex contract token is the
+// tenant capability. Raw storage paths never leave a read response.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
@@ -26,9 +27,17 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 });
 const validToken = (value: string) => /^[0-9a-f]{48}$/i.test(value);
 const validEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+const IMAGE_MIMES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+const VIDEO_MIMES = ["video/mp4", "video/webm", "video/quicktime"];
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (c) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
 }[c]!));
+
+async function sha256(value: string) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
 
 async function publicPacket(token: string) {
   const { data: contract, error: contractError } = await service
@@ -38,13 +47,9 @@ async function publicPacket(token: string) {
     .maybeSingle();
   if (contractError || !contract) return { error: "That walkthrough link is not valid.", status: 404 };
 
-  const inspectionOpen = contract.inspection_order === "inspect_first"
-    || (contract.inspection_order === "pay_first" && ["active", "ended"].includes(contract.status));
-  if (!inspectionOpen) return { error: "The move-in photos are not open yet.", status: 403 };
-
   const [{ data: inspection }, { data: property }, { data: owner }] = await Promise.all([
     service.from("rental_inspections")
-      .select("id, state, kind, round, sent_at, settled_at, evidence_version, evidence_manifest_sha256, evidence_frozen_at")
+      .select("id, state, kind, round, sent_at, settled_at, evidence_version, evidence_manifest_sha256, evidence_frozen_at, released_at, release_reason")
       .eq("contract_id", contract.id).eq("kind", "move_in")
       .order("round", { ascending: false }).limit(1).maybeSingle(),
     service.from("rental_properties")
@@ -52,18 +57,18 @@ async function publicPacket(token: string) {
       .eq("id", contract.property_id).maybeSingle(),
     service.from("profiles").select("full_name").eq("id", contract.agent_id).maybeSingle(),
   ]);
-  if (!inspection || inspection.state === "draft") {
-    return { error: "The owner has not sent these photos yet.", status: 403 };
+  if (!inspection || inspection.state === "draft" || !inspection.released_at) {
+    return { error: "The walkthrough media have not been released yet.", status: 403 };
   }
 
   const { data: rows, error: itemError } = await service
     .from("rental_inspection_items")
-    .select("id, ordinal, photo_url, host_note, verdict, tenant_note, responded_at, media_kind, mime_type, byte_size, original_name, room, width, height")
+    .select("id, ordinal, photo_url, host_note, verdict, tenant_note, tenant_photo_url, responded_at, media_kind, mime_type, byte_size, original_name, room, duration_ms, width, height, captured_at, uploaded_at, source_version, tenant_photo_mime_type, tenant_photo_byte_size, tenant_photo_original_name, tenant_photo_captured_at, tenant_photo_uploaded_at, tenant_evidence_status, tenant_evidence_locked_at")
     .eq("inspection_id", inspection.id)
     .order("ordinal", { ascending: true });
   if (itemError) return { error: "The walkthrough could not be opened.", status: 500 };
 
-  const paths = (rows ?? []).map((row) => row.photo_url).filter((path) => !/^https?:/i.test(path));
+  const paths = (rows ?? []).flatMap((row) => [row.photo_url, row.tenant_photo_url]).filter((path): path is string => Boolean(path) && !/^https?:/i.test(path!));
   const signedByPath: Record<string, string> = {};
   if (paths.length) {
     const { data: signed, error: signError } = await service.storage
@@ -82,6 +87,8 @@ async function publicPacket(token: string) {
       evidence_version: inspection.evidence_version,
       evidence_manifest_sha256: inspection.evidence_manifest_sha256,
       evidence_frozen_at: inspection.evidence_frozen_at,
+      released_at: inspection.released_at,
+      release_reason: inspection.release_reason,
       property: property ?? { title: "OneHome walkthrough" },
       owner_name: owner?.full_name ?? "The owner",
       contract: {
@@ -104,10 +111,24 @@ async function publicPacket(token: string) {
         original_name: row.original_name,
         width: row.width,
         height: row.height,
+        duration_ms: row.duration_ms,
+        captured_at: row.captured_at,
+        uploaded_at: row.uploaded_at,
+        source_version: row.source_version,
         verdict: row.verdict,
         tenant_note: row.tenant_note,
         responded_at: row.responded_at,
-        photo_url: /^https?:/i.test(row.photo_url) ? row.photo_url : signedByPath[row.photo_url] ?? null,
+        tenant_evidence_status: row.tenant_evidence_status,
+        tenant_evidence_locked_at: row.tenant_evidence_locked_at,
+        tenant_photo: row.tenant_photo_url ? {
+          url: signedByPath[row.tenant_photo_url] ?? null,
+          mime_type: row.tenant_photo_mime_type,
+          byte_size: row.tenant_photo_byte_size,
+          original_name: row.tenant_photo_original_name,
+          captured_at: row.tenant_photo_captured_at,
+          uploaded_at: row.tenant_photo_uploaded_at,
+        } : null,
+        photo_url: signedByPath[row.photo_url] ?? null,
       })),
     },
   };
@@ -131,19 +152,23 @@ async function ownerPacket(userClient: ReturnType<typeof createClient>, userId: 
   if (handoffError || !handoff?.inspection_id) {
     return { error: handoffError?.message || "This owner handoff is not connected to your account.", status: 403 } as const;
   }
-  const [{ data: inspection }, { data: items }, { data: claim }] = await Promise.all([
+  const [{ data: inspection }, { data: items }, { data: claim }, { data: contract }, { data: auditEvents }] = await Promise.all([
     service.from("rental_inspections")
-      .select("id, state, round, evidence_version, evidence_manifest_sha256, evidence_frozen_at")
+      .select("id, state, round, evidence_version, evidence_manifest_sha256, evidence_frozen_at, released_at, release_reason, released_by")
       .eq("id", handoff.inspection_id).single(),
     service.from("rental_inspection_items")
-      .select("id, ordinal, photo_url, host_note, verdict, tenant_note, media_kind, mime_type, byte_size, original_name, room, width, height, upload_state")
+      .select("id, ordinal, photo_url, host_note, verdict, tenant_note, tenant_photo_url, responded_at, media_kind, mime_type, byte_size, original_name, room, duration_ms, width, height, upload_state, captured_at, uploaded_at, source_version, tenant_photo_mime_type, tenant_photo_byte_size, tenant_photo_original_name, tenant_photo_captured_at, tenant_photo_uploaded_at, tenant_evidence_status, tenant_evidence_locked_at")
       .eq("inspection_id", handoff.inspection_id).order("ordinal", { ascending: true }),
     service.from("rental_property_claims")
       .select("id, claimed_by, note, rental_properties!inner(listing_no)")
       .eq("claim_token", token.toLowerCase()).single(),
+    service.from("rental_contracts").select("id, conversation_id, tenant_id, status, first_payment_claimed_at").eq("id", handoff.contract_id).single(),
+    service.from("rental_inspection_audit_events")
+      .select("id, item_id, event_type, actor_role, event_payload, created_at, audit_version")
+      .eq("inspection_id", handoff.inspection_id).order("id", { ascending: true }).limit(250),
   ]);
   if (!inspection) return { error: "That walkthrough was not found.", status: 404 } as const;
-  const paths = (items ?? []).map((item) => item.photo_url).filter((path) => path && !/^https?:/i.test(path));
+  const paths = (items ?? []).flatMap((item) => [item.photo_url, item.tenant_photo_url]).filter((path): path is string => Boolean(path) && !/^https?:/i.test(path!));
   const signedByPath: Record<string, string> = {};
   if (paths.length) {
     const { data: signed } = await service.storage.from("rental-evidence").createSignedUrls(paths, 3600);
@@ -158,17 +183,31 @@ async function ownerPacket(userClient: ReturnType<typeof createClient>, userId: 
       inspection,
       items: (items ?? []).map((item) => ({
         ...item,
-        preview_url: /^https?:/i.test(item.photo_url) ? item.photo_url : signedByPath[item.photo_url] ?? null,
+        preview_url: signedByPath[item.photo_url] ?? null,
+        tenant_preview_url: item.tenant_photo_url
+          ? (signedByPath[item.tenant_photo_url] ?? null)
+          : null,
       })),
+      audit_events: auditEvents ?? [],
+      message_context: {
+        contract_id: handoff.contract_id,
+        inspection_id: handoff.inspection_id,
+        conversation_id: contract?.conversation_id ?? null,
+        url: `/messages?contract=${encodeURIComponent(handoff.contract_id)}&inspection=${encodeURIComponent(handoff.inspection_id)}`,
+      },
+      contract: contract ?? null,
       upload: {
         bucket: "rental-evidence",
         path_prefix: `${handoff.contract_id}/${userId}/${handoff.inspection_id}/`,
-        max_file_bytes: 26214400,
-        max_items: 100,
-        max_queue_bytes: 524288000,
+        max_image_file_bytes: 26214400,
+        max_video_file_bytes: 314572800,
+        max_images: 100,
+        max_videos: 10,
+        max_queue_bytes: 1073741824,
         concurrency: 3,
-        allowed_mime_types: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"],
-        video_supported: false,
+        max_video_duration_ms: 300000,
+        allowed_mime_types: [...IMAGE_MIMES, ...VIDEO_MIMES],
+        video_supported: true,
       },
       qa_reset_allowed: listingNo === 10518 && claim?.claimed_by === userId && /(safe|qa|test)/i.test(String(claim?.note ?? "")),
     },
@@ -201,7 +240,7 @@ Deno.serve(async (req) => {
     const payload = await req.json().catch(() => ({}));
     const action = String(payload?.action ?? "");
 
-    if (["owner_packet", "add_item", "update_item", "reorder_items", "delete_item", "cleanup_upload", "start_correction", "qa_reset"].includes(action)) {
+    if (["owner_packet", "add_item", "update_item", "reorder_items", "delete_item", "cleanup_upload", "confirm_tenant_evidence", "qa_reset"].includes(action)) {
       const auth = await authenticated(req);
       if ("error" in auth) return json({ message: auth.error }, auth.status);
       const ownerToken = String(payload?.owner_token ?? "").trim().toLowerCase();
@@ -212,12 +251,15 @@ Deno.serve(async (req) => {
       if (action === "owner_packet") return json(handoff);
 
       if (action === "add_item") {
-        const { data, error } = await auth.userClient.rpc("rental_inspection_item_add", {
+        const { data, error } = await auth.userClient.rpc("rental_inspection_item_add_v2", {
           p_inspection_id: handoff.inspection_id,
           p_storage_path: String(payload?.storage_path ?? ""),
           p_original_name: String(payload?.original_name ?? ""),
           p_mime_type: String(payload?.mime_type ?? ""),
           p_byte_size: Number(payload?.byte_size ?? 0),
+          p_media_kind: String(payload?.media_kind ?? "image"),
+          p_duration_ms: Number(payload?.duration_ms ?? 0) || null,
+          p_captured_at: String(payload?.captured_at ?? "") || null,
           p_room: String(payload?.room ?? "") || null,
           p_caption: String(payload?.caption ?? "") || null,
           p_width: Number(payload?.width ?? 0) || null,
@@ -247,7 +289,7 @@ Deno.serve(async (req) => {
       }
 
       if (action === "delete_item") {
-        const { data: path, error } = await auth.userClient.rpc("rental_inspection_item_delete", {
+        const { data: path, error } = await auth.userClient.rpc("rental_inspection_item_delete_v2", {
           p_item_id: String(payload?.item_id ?? ""),
         });
         if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
@@ -262,12 +304,12 @@ Deno.serve(async (req) => {
         return json({ removed: !error, message: error?.message ?? null }, error ? 400 : 200);
       }
 
-      if (action === "start_correction") {
-        const { data, error } = await auth.userClient.rpc("rental_inspection_start_correction", {
-          p_inspection_id: handoff.inspection_id,
+      if (action === "confirm_tenant_evidence") {
+        const { data, error } = await auth.userClient.rpc("rental_inspection_confirm_tenant_evidence", {
+          p_item_id: String(payload?.item_id ?? ""),
         });
         if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
-        return json({ inspection_id: data });
+        return json(Array.isArray(data) ? data[0] : data);
       }
 
       if (action === "qa_reset") {
@@ -304,22 +346,71 @@ Deno.serve(async (req) => {
       return json(Array.isArray(data) ? data[0] : data);
     }
 
+    if (action === "tenant_upload_ticket") {
+      const token = String(payload?.t ?? "").trim().toLowerCase();
+      const itemId = String(payload?.item_id ?? "").trim();
+      const mimeType = String(payload?.mime_type ?? "").trim().toLowerCase();
+      const byteSize = Number(payload?.byte_size ?? 0);
+      const safeExtensionByMime: Record<string, string> = {
+        "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp",
+        "image/heic": "heic", "image/heif": "heif",
+      };
+      if (!validToken(token) || !/^[0-9a-f-]{36}$/i.test(itemId)) return json({ message: "That walkthrough item is not valid." }, 400);
+      if (!IMAGE_MIMES.includes(mimeType) || byteSize < 1 || byteSize > 26214400) return json({ message: "Condition evidence must be a supported photo no larger than 25 MiB." }, 400);
+      const extension = safeExtensionByMime[mimeType] ?? "jpg";
+      const packet = await publicPacket(token);
+      if (!("data" in packet)) return json({ message: packet.error }, packet.status);
+      const item = packet.data.items.find((candidate) => candidate.id === itemId);
+      if (!item || item.verdict !== "pending" || item.tenant_photo) return json({ message: "Condition-photo upload is closed for this item." }, 403);
+      const { data: contract } = await service.from("rental_contracts").select("id").eq("share_token", token).single();
+      if (!contract) return json({ message: "That walkthrough link is not valid." }, 404);
+      const path = `${contract.id}/tenant-evidence/${itemId}/${crypto.randomUUID()}.${extension}`;
+      const { data: signed, error } = await service.storage.from("rental-evidence").createSignedUploadUrl(path, { upsert: false });
+      if (error || !signed?.token) return json({ message: "The secure condition-photo upload could not be opened." }, 500);
+      return json({ path, token: signed.token, signed_url: signed.signedUrl, expires_in: 7200 });
+    }
+
+    if (action === "tenant_cleanup_upload") {
+      const token = String(payload?.t ?? "").trim().toLowerCase();
+      const itemId = String(payload?.item_id ?? "").trim();
+      const path = String(payload?.storage_path ?? "").trim();
+      if (!validToken(token) || !/^[0-9a-f-]{36}$/i.test(itemId)) return json({ message: "That walkthrough item is not valid." }, 400);
+      const { data: contract } = await service.from("rental_contracts").select("id").eq("share_token", token).single();
+      if (!contract || !path.startsWith(`${contract.id}/tenant-evidence/${itemId}/`)) return json({ message: "That condition upload does not belong to this item." }, 403);
+      const { data: item } = await service.from("rental_inspection_items")
+        .select("verdict, tenant_photo_url, rental_inspections!inner(contract_id, released_at)")
+        .eq("id", itemId)
+        .eq("rental_inspections.contract_id", contract.id)
+        .maybeSingle();
+      if (!item || item.verdict !== "pending" || item.tenant_photo_url === path) {
+        return json({ message: "Condition-photo cleanup is closed for this item." }, 403);
+      }
+      await service.storage.from("rental-evidence").remove([path]);
+      return json({ removed: true });
+    }
+
     if (action === "respond_item") {
       const token = String(payload?.t ?? "").trim().toLowerCase();
       const itemId = String(payload?.item_id ?? "").trim();
       const verdict = String(payload?.verdict ?? "").trim();
       const note = String(payload?.note ?? "").trim();
+      const tenantPhotoPath = String(payload?.tenant_photo_path ?? "").trim();
       if (!validToken(token)) return json({ message: "That walkthrough link is not valid." }, 400);
       if (!/^[0-9a-f-]{36}$/i.test(itemId)) return json({ message: "That walkthrough photo is not valid." }, 400);
       if (!["agreed", "disputed"].includes(verdict)) return json({ message: "Choose Looks right or Request a change." }, 400);
       if (verdict === "disputed" && !note) return json({ message: "Tell the owner what needs to change." }, 400);
 
-      const { data, error } = await service.rpc("rental_inspection_respond", {
+      const forwardedFor = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("cf-connecting-ip")?.trim() || "";
+      const requestFingerprint = await sha256(`${token}:${forwardedFor}:${req.headers.get("user-agent") || ""}`);
+      const { data, error } = await service.rpc("rental_inspection_respond_v2", {
         p_token: token,
         p_item_id: itemId,
         p_verdict: verdict,
         p_note: note || null,
-        p_tenant_photo_url: null,
+        p_tenant_photo_path: tenantPhotoPath || null,
+        p_tenant_photo_original_name: String(payload?.tenant_photo_original_name ?? "") || null,
+        p_tenant_photo_captured_at: String(payload?.tenant_photo_captured_at ?? "") || null,
+        p_request_fingerprint: requestFingerprint,
       });
       if (error) return json({ message: error.message }, error.code === "42501" ? 403 : 400);
 
@@ -377,7 +468,7 @@ Deno.serve(async (req) => {
       const recipientEmail = String(payload?.recipient_email ?? "").trim().toLowerCase();
       if (recipientEmail && !validEmail(recipientEmail)) return json({ message: "Enter a valid email address." }, 400);
 
-      const { data: rows, error: sendError } = await userClient.rpc("rental_inspection_send", {
+      const { data: rows, error: sendError } = await userClient.rpc("rental_inspection_send_v2", {
         p_inspection_id: inspectionId,
       });
       if (sendError) return json({ message: sendError.message }, sendError.code === "42501" ? 403 : 400);
@@ -458,7 +549,9 @@ Deno.serve(async (req) => {
       return json({
         inspection_id: handoff.inspection_id,
         state: handoff.inspection_state,
-        photo_count: handoff.photo_count,
+        media_count: handoff.media_count,
+        release_reason: handoff.release_reason,
+        released_at: handoff.released_at,
         share_url: shareUrl,
         message_sent: messageSent,
         conversation_id: conversationId,

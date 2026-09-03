@@ -6,6 +6,7 @@ const PLATFORM_TERMS_VERSION = "oneworld-platform-owner-review-2026-09-01";
 const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-03-v4";
 const CLAIM_TOKEN = location.pathname.match(/^\/rentals\/review\/([0-9a-f]{48})\/?$/i)?.[1]?.toLowerCase() || "";
 const FIXTURE_MODE = new URLSearchParams(location.search).get("onehomeQaFixture") === "owner-media";
+const OWNER_MEDIA_MODE = new URLSearchParams(location.search).get("ownerMedia") === "1";
 
 const termsState = window.__onehomeOwnerTerms || {
   platform: false,
@@ -728,8 +729,9 @@ function fixturePacket() {
     listing_no: 10518,
     qa_reset_allowed: true,
     inspection: { id: "33333333-3333-4333-8333-333333333333", state: "draft", round: 1 },
-    upload: { max_file_bytes: 26214400, max_items: 100, max_queue_bytes: 524288000, concurrency: 3, video_supported: false,
-      allowed_mime_types: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"], path_prefix: "fixture/" },
+    upload: { max_image_file_bytes: 26214400, max_video_file_bytes: 314572800, max_images: 100, max_videos: 10,
+      max_video_duration_ms: 300000, max_queue_bytes: 1073741824, concurrency: 3, video_supported: true,
+      allowed_mime_types: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif", "video/mp4", "video/webm", "video/quicktime"], path_prefix: "fixture/" },
     items: Array.from({ length: fixtureCount }, (_, index) => {
       const ordinal = index + 1;
       const room = rooms[index % rooms.length];
@@ -764,6 +766,8 @@ class OwnerInspectionUploader {
   render() {
     const items = this.packet.items || [];
     const ready = items.length;
+    const imageCount = items.filter((item) => (item.media_kind || "image") === "image").length;
+    const videoCount = items.filter((item) => item.media_kind === "video").length;
     const totalBytes = items.reduce((sum, item) => sum + Number(item.byte_size || 0), 0);
     const queueMarkup = this.queue.map((entry) => `
       <article class="ohqa-queue-item" data-client-id="${entry.clientId}">
@@ -775,30 +779,39 @@ class OwnerInspectionUploader {
       </article>`).join("");
     const itemMarkup = items.map((item, index) => `
       <article class="ohqa-media-card" draggable="${this.editable}" data-item-id="${item.id}">
-        <div class="ohqa-thumb">${item.preview_url ? `<img src="${escapeAttr(item.preview_url)}" alt="${escapeAttr(item.host_note || `Walkthrough photo ${index + 1}`)}">` : '<span>Preview unavailable</span>'}</div>
+        <div class="ohqa-thumb">${item.preview_url
+          ? (item.media_kind === "video"
+            ? `<video src="${escapeAttr(item.preview_url)}" controls preload="metadata" aria-label="${escapeAttr(item.host_note || `Walkthrough video ${index + 1}`)}"></video>`
+            : `<img src="${escapeAttr(item.preview_url)}" alt="${escapeAttr(item.host_note || `Walkthrough photo ${index + 1}`)}">`)
+          : '<span>Preview unavailable</span>'}</div>
         <div class="ohqa-media-body">
-          <div class="ohqa-order"><strong>${index + 1} / ${items.length}</strong><span>${formatBytes(item.byte_size)}</span></div>
+          <div class="ohqa-order"><strong>${index + 1} / ${items.length} · ${item.media_kind === "video" ? "Video" : "Photo"}</strong><span>${formatBytes(item.byte_size)}${item.duration_ms ? ` · ${formatDuration(item.duration_ms)}` : ""}</span></div>
+          <dl class="ohqa-timestamps"><div><dt>Captured</dt><dd>${formatTimestamp(item.captured_at)}</dd></div><div><dt>Uploaded</dt><dd>${formatTimestamp(item.uploaded_at || item.created_at)}</dd></div></dl>
           <div class="ohqa-fields"><input data-field="saved-room" value="${escapeAttr(item.room || "")}" placeholder="Room" ${this.editable ? "" : "disabled"}><input data-field="saved-caption" value="${escapeAttr(item.host_note || "")}" placeholder="Caption (optional)" ${this.editable ? "" : "disabled"}></div>
-          ${this.editable ? `<div class="ohqa-item-actions"><button data-act="up" ${index === 0 ? "disabled" : ""}>↑ Earlier</button><button data-act="down" ${index === items.length - 1 ? "disabled" : ""}>↓ Later</button><button data-act="save">Save</button><button class="ohqa-danger-link" data-act="delete">Remove</button></div>` : '<p class="ohqa-frozen">Frozen in the tenant evidence packet</p>'}
+          ${item.verdict === "disputed" ? `<div class="ohqa-tenant-evidence"><strong>Tenant reported a different condition</strong><p>${escapeHtml(item.tenant_note || "")}</p>${item.tenant_preview_url ? `<img src="${escapeAttr(item.tenant_preview_url)}" alt="Tenant condition evidence">` : ""}<p>Responded ${formatTimestamp(item.responded_at)}</p>${item.tenant_evidence_status === "pending_agent_review" ? '<button data-act="confirm-tenant-evidence">Accept and lock tenant evidence</button>' : item.tenant_evidence_status === "accepted" ? `<span class="ohqa-locked">✓ Locked ${formatTimestamp(item.tenant_evidence_locked_at)}</span>` : ""}</div>` : ""}
+          ${this.editable ? `<div class="ohqa-item-actions"><button data-act="up" ${index === 0 ? "disabled" : ""}>↑ Earlier</button><button data-act="down" ${index === items.length - 1 ? "disabled" : ""}>↓ Later</button><button data-act="save">Save</button><button class="ohqa-danger-link" data-act="delete">Remove</button></div>` : `<p class="ohqa-frozen">Frozen in the tenant evidence packet. Additional media must be sent in <a href="${escapeAttr(this.packet.message_context?.url || "/messages")}">property messages</a>.</p>`}
         </div>
       </article>`).join("");
     this.host.innerHTML = `
       <section class="ohqa-uploader" aria-labelledby="ohqa-uploader-title">
-        <div class="ohqa-uploader-head"><div><div class="ohqa-eyebrow">Move-in inspection · Round ${this.packet.inspection?.round || 1}</div><h2 id="ohqa-uploader-title">Organize the walkthrough photos</h2></div><span class="ohqa-count">${ready} ready</span></div>
-        <p class="ohqa-muted">Built for 50+ ordered photos. Add room names and captions, check the complete packet, then send it to the tenant.</p>
-        <div class="ohqa-video-warning"><strong>Photos only.</strong> Video is not supported or promised in this release. Accepted: JPEG, PNG, WebP, HEIC and HEIF; 25 MiB per photo.</div>
-        ${this.editable ? `<label class="ohqa-drop"><input type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif"><strong>Choose photos</strong><span>or drop up to ${Math.max(0, 100 - ready)} here · three upload at once</span></label>` : ''}
-        <div class="ohqa-summary"><span>${ready} stored</span><span>${this.queue.length} in queue</span><span>${formatBytes(totalBytes)} stored</span></div>
+        <div class="ohqa-uploader-head"><div><div class="ohqa-eyebrow">Move-in inspection · Round ${this.packet.inspection?.round || 1}</div><h2 id="ohqa-uploader-title">Walkthrough photos and videos</h2></div><span class="ohqa-count">${ready} ready</span></div>
+        <p class="ohqa-muted">Private evidence for this property. Add room names and captions, verify the immutable timestamps, then release the frozen packet to the tenant.</p>
+        <div class="ohqa-video-warning"><strong>Up to 100 photos and 10 videos.</strong> Photos: JPEG, PNG, WebP, HEIC or HEIF, 25 MiB each. Videos: MP4, WebM or QuickTime, 300 MiB and five minutes each.</div>
+        ${this.editable ? `<label class="ohqa-drop"><input type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/webm,video/quicktime"><strong>Choose photos or videos</strong><span>or drop files here · three upload at once</span></label>` : ''}
+        <div class="ohqa-summary"><span>${imageCount} / 100 photos</span><span>${videoCount} / 10 videos</span><span>${this.queue.length} in queue</span><span>${formatBytes(totalBytes)} stored</span></div>
         ${this.error ? `<p class="ohqa-alert ohqa-alert-error" role="alert">${escapeHtml(this.error)}</p>` : ''}
         ${this.message ? `<p class="ohqa-alert ohqa-alert-ok">${escapeHtml(this.message)}</p>` : ''}
         ${queueMarkup ? `<div class="ohqa-queue"><h3>Upload progress</h3>${queueMarkup}</div>` : ''}
         <div class="ohqa-review-head"><h3>Tenant packet preview</h3><span>Drag cards or use Earlier / Later</span></div>
-        <div class="ohqa-media-grid">${itemMarkup || '<div class="ohqa-empty">No photos yet. Add the move-in condition photos above.</div>'}</div>
-        ${this.packet.inspection?.state === "tenant_responded" ? '<button class="ohqa-primary" data-act="correction">Start a correction round</button>' : ''}
+        <div class="ohqa-media-grid">${itemMarkup || '<div class="ohqa-empty"><strong>No walkthrough media yet.</strong><span>Upload the first photo or video above. Nothing is visible to a tenant or public listing.</span></div>'}</div>
+        ${this.editable && ready ? '<button class="ohqa-primary" data-act="release">Send walkthrough photos and videos</button>' : ''}
+        ${!this.editable && this.packet.inspection?.released_at ? `<p class="ohqa-alert ohqa-alert-ok">Released ${formatTimestamp(this.packet.inspection.released_at)} · ${this.packet.inspection.release_reason === "payment" ? "after payment/lease initiation" : "early by listing agent"}</p>` : ''}
+        ${!this.editable && this.packet.message_context?.url ? `<a class="ohqa-primary ohqa-message-link" href="${escapeAttr(this.packet.message_context.url)}">Send additional media in property messages</a>` : ''}
         ${this.packet.qa_reset_allowed ? `<details class="ohqa-reset"><summary>Reset this QA rehearsal</summary><p>Listing 10518 only. This removes this rehearsal’s contract, inspection media and QA account, then restores the same link to approved and unclaimed.</p><input data-field="reset-confirm" placeholder="Type RESET 10518"><button class="ohqa-danger" data-act="reset">Reset listing 10518</button></details>` : ''}
       </section>`;
     this.bind();
     window.__onehomeUploaderHasUnsettled = () => this.unsettled;
+    syncOwnerMediaCta(ready);
   }
 
   bind() {
@@ -821,18 +834,33 @@ class OwnerInspectionUploader {
     });
   }
 
-  addFiles(files) {
+  async addFiles(files) {
     this.error = "";
     const allowed = new Set(this.packet.upload.allowed_mime_types);
     const currentBytes = this.queue.filter((entry) => entry.status !== "cancelled").reduce((sum, entry) => sum + entry.file.size, 0);
+    let imageCount = this.packet.items.filter((item) => (item.media_kind || "image") === "image").length
+      + this.queue.filter((entry) => entry.mediaKind === "image" && entry.status !== "cancelled").length;
+    let videoCount = this.packet.items.filter((item) => item.media_kind === "video").length
+      + this.queue.filter((entry) => entry.mediaKind === "video" && entry.status !== "cancelled").length;
     let addedBytes = 0;
     for (const file of files) {
-      if (!allowed.has(file.type)) { this.error = `${file.name}: unsupported type. Video is not supported.`; continue; }
-      if (file.size > this.packet.upload.max_file_bytes) { this.error = `${file.name}: larger than 25 MiB.`; continue; }
-      if (this.packet.items.length + this.queue.length >= this.packet.upload.max_items) { this.error = "This walkthrough is limited to 100 photos."; break; }
-      if (currentBytes + addedBytes + file.size > this.packet.upload.max_queue_bytes) { this.error = "This upload queue is limited to 500 MiB at a time."; break; }
+      if (!allowed.has(file.type)) { this.error = `${file.name}: unsupported file type.`; continue; }
+      const mediaKind = file.type.startsWith("video/") ? "video" : "image";
+      const maxBytes = mediaKind === "video" ? this.packet.upload.max_video_file_bytes : this.packet.upload.max_image_file_bytes;
+      if (file.size > maxBytes) { this.error = `${file.name}: larger than ${mediaKind === "video" ? "300" : "25"} MiB.`; continue; }
+      if (mediaKind === "image" && imageCount >= this.packet.upload.max_images) { this.error = "This walkthrough already has 100 photos."; continue; }
+      if (mediaKind === "video" && videoCount >= this.packet.upload.max_videos) { this.error = "This walkthrough already has 10 videos."; continue; }
+      if (currentBytes + addedBytes + file.size > this.packet.upload.max_queue_bytes) { this.error = "This upload queue is limited to 1 GiB at a time."; break; }
+      let metadata;
+      try { metadata = await readMediaMetadata(file, mediaKind); }
+      catch (error) { this.error = `${file.name}: ${error?.message || String(error)}`; continue; }
+      if (mediaKind === "video" && metadata.durationMs > this.packet.upload.max_video_duration_ms) {
+        this.error = `${file.name}: longer than five minutes.`;
+        continue;
+      }
       addedBytes += file.size;
-      this.queue.push({ clientId: crypto.randomUUID(), file, status: "pending", progress: 0, room: "", caption: "", error: "", xhr: null, storagePath: "" });
+      if (mediaKind === "video") videoCount += 1; else imageCount += 1;
+      this.queue.push({ clientId: crypto.randomUUID(), file, mediaKind, metadata, status: "pending", progress: 0, room: "", caption: "", error: "", xhr: null, storagePath: "" });
     }
     this.render();
     if (!FIXTURE_MODE) this.pump();
@@ -857,11 +885,13 @@ class OwnerInspectionUploader {
       await uploadWithProgress(entry, (progress) => { entry.progress = progress; this.updateProgress(entry); });
       await ownerApi("add_item", { inspection_id: this.packet.inspection_id, storage_path: entry.storagePath,
         original_name: entry.file.name, mime_type: entry.file.type, byte_size: entry.file.size,
-        room: entry.room, caption: entry.caption });
+        media_kind: entry.mediaKind, duration_ms: entry.metadata?.durationMs || null,
+        captured_at: entry.metadata?.capturedAt || null, width: entry.metadata?.width || null,
+        height: entry.metadata?.height || null, room: entry.room, caption: entry.caption });
       entry.status = "complete";
       entry.progress = 100;
       this.queue = this.queue.filter((candidate) => candidate !== entry);
-      await this.refresh("Photo uploaded and added to the packet.");
+      await this.refresh(`${entry.mediaKind === "video" ? "Video" : "Photo"} uploaded and added to the private packet.`);
     } catch (error) {
       if (entry.status !== "cancelled") {
         entry.status = "failed";
@@ -923,14 +953,19 @@ class OwnerInspectionUploader {
       item.room = room; item.host_note = caption; this.message = "Room and caption saved."; this.render(); return;
     }
     if (action === "delete" && mediaCard) {
-      if (!confirm("Remove this photo from the draft walkthrough?")) return;
+      if (!confirm("Remove this media item from the draft walkthrough?")) return;
       if (!FIXTURE_MODE) await ownerApi("delete_item", { item_id: mediaCard.dataset.itemId });
       this.packet.items = this.packet.items.filter((item) => item.id !== mediaCard.dataset.itemId);
-      this.message = "Photo removed from the draft."; this.render(); return;
+      this.message = "Media removed from the draft."; this.render(); return;
     }
-    if (action === "correction") {
-      if (!FIXTURE_MODE) await ownerApi("start_correction", { inspection_id: this.packet.inspection_id });
-      await this.refresh("A new draft correction round is ready."); return;
+    if (action === "confirm-tenant-evidence" && mediaCard) {
+      if (!FIXTURE_MODE) await ownerApi("confirm_tenant_evidence", { item_id: mediaCard.dataset.itemId });
+      await this.refresh("Tenant condition evidence accepted and locked."); return;
+    }
+    if (action === "release") {
+      if (!confirm("Freeze this packet and release it to the tenant now? Source media and timestamps can no longer be changed.")) return;
+      if (!FIXTURE_MODE) await ownerApi("send", { inspection_id: this.packet.inspection_id });
+      await this.refresh("Walkthrough media released to the tenant."); return;
     }
     if (action === "reset") {
       const confirmText = this.host.querySelector('[data-field="reset-confirm"]').value;
@@ -957,7 +992,7 @@ class OwnerInspectionUploader {
     this.packet.items.forEach((item, index) => { item.ordinal = index + 1; });
     this.render();
     if (!FIXTURE_MODE) await ownerApi("reorder_items", { inspection_id: this.packet.inspection_id, item_ids: this.packet.items.map((item) => item.id) });
-    this.message = "Photo order saved.";
+    this.message = "Media order saved.";
     this.render();
   }
 }
@@ -980,11 +1015,65 @@ function uploadWithProgress(entry, onProgress) {
   });
 }
 
+function readMediaMetadata(file, mediaKind) {
+  const capturedAt = file.lastModified ? new Date(file.lastModified).toISOString() : null;
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const timer = window.setTimeout(() => {
+      URL.revokeObjectURL(url);
+      reject(new Error("media metadata could not be read"));
+    }, 15000);
+    const done = (value) => {
+      window.clearTimeout(timer);
+      URL.revokeObjectURL(url);
+      resolve({ ...value, capturedAt });
+    };
+    if (mediaKind === "video") {
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.onloadedmetadata = () => done({
+        durationMs: Math.round(Number(video.duration || 0) * 1000),
+        width: video.videoWidth || null,
+        height: video.videoHeight || null,
+      });
+      video.onerror = () => {
+        window.clearTimeout(timer);
+        URL.revokeObjectURL(url);
+        reject(new Error("video metadata could not be read"));
+      };
+      video.src = url;
+      return;
+    }
+    const image = new Image();
+    image.onload = () => done({ durationMs: null, width: image.naturalWidth || null, height: image.naturalHeight || null });
+    image.onerror = () => {
+      window.clearTimeout(timer);
+      URL.revokeObjectURL(url);
+      reject(new Error("photo metadata could not be read"));
+    };
+    image.src = url;
+  });
+}
+
 function formatBytes(value) {
   const bytes = Number(value || 0);
   if (!bytes) return "0 B";
   if (bytes < 1048576) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / 1048576).toFixed(1)} MB`;
+}
+
+function formatDuration(value) {
+  const seconds = Math.max(0, Math.round(Number(value || 0) / 1000));
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
+function formatTimestamp(value) {
+  if (!value) return "Not supplied";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "Not supplied";
+  return new Intl.DateTimeFormat(undefined, {
+    year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).format(parsed);
 }
 
 function statusText(entry) {
@@ -1000,6 +1089,25 @@ function escapeHtml(value) {
 function escapeAttr(value) { return escapeHtml(value); }
 
 let uploaderAttemptAt = 0;
+function syncOwnerMediaCta(itemCount = 0) {
+  window.__onehomeOwnerMediaCount = itemCount;
+  const button = [...document.querySelectorAll("button")].find((node) => /Check for photos|Buscar fotos|View Walkthrough Photos|Ver fotos del acta|No walkthrough media yet/i.test(node.textContent || ""));
+  if (!button) return;
+  button.disabled = false;
+  button.textContent = itemCount ? "View Walkthrough Photos" : "No walkthrough media yet — upload below";
+  button.dataset.ohqaOwnerMediaCta = "true";
+  let note = button.parentElement?.querySelector("[data-ohqa-media-status]");
+  if (!note && button.parentElement) {
+    note = document.createElement("p");
+    note.dataset.ohqaMediaStatus = "true";
+    note.className = "mt-2 text-[12px] opacity-70";
+    button.insertAdjacentElement("afterend", note);
+  }
+  if (note) note.textContent = itemCount
+    ? `${itemCount} private walkthrough item${itemCount === 1 ? "" : "s"} ready to view.`
+    : "No photos or videos have been uploaded. Nothing is visible to the tenant or public listing.";
+}
+
 async function maybeMountUploader() {
   if ((!CLAIM_TOKEN && !FIXTURE_MODE) || document.querySelector("#onehome-owner-media")) return;
   if (!FIXTURE_MODE && Date.now() - uploaderAttemptAt < 3000) return;
@@ -1024,11 +1132,23 @@ async function maybeMountUploader() {
     section.parentElement.insertBefore(host, section.nextSibling);
   }
   new OwnerInspectionUploader(host, packet);
+  syncOwnerMediaCta(packet.items?.length || 0);
+  if (OWNER_MEDIA_MODE) window.setTimeout(() => host.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
 }
 
 document.addEventListener("click", (event) => {
   const button = event.target.closest?.("button");
-  if (!button || !window.__onehomeUploaderHasUnsettled?.()) return;
+  if (!button) return;
+  if (button.dataset.ohqaOwnerMediaCta === "true" || /Check for photos|Buscar fotos|View Walkthrough Photos|Ver fotos del acta|No walkthrough media yet/i.test(button.textContent || "")) {
+    const uploader = document.querySelector("#onehome-owner-media");
+    if (uploader) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      uploader.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+  }
+  if (!window.__onehomeUploaderHasUnsettled?.()) return;
   if (/Send to Tenant|Enviar al inquilino|Send in OneHome Messages|Enviar en Mensajes/i.test(button.textContent || "")) {
     event.preventDefault();
     event.stopImmediatePropagation();
