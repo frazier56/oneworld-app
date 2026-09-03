@@ -1,5 +1,11 @@
 // Runtime translations for the OneHome review, owner handoff and walkthrough flow.
 (() => {
+  const latinAmericanSpanish = {
+    "Contree Las Palmas — furnished apartment, El Poblado": "Contree Las Palmas — apartamento amoblado, El Poblado",
+    "Three bedrooms, four bathrooms and 137 square metres in Contree Las Palmas, one of the quieter corners of El Poblado.\n\nThe apartment is fully furnished and ready to move into. An open kitchen with an island and a walk-in pantry runs into the dining table and the living room, so the whole floor reads as one bright space rather than a series of rooms. Every bedroom has its own bathroom. There is a walk-in closet off the main room, and a laundry room with the washer and dryer already installed.\n\nThe balcony faces green hillside and the lights of the valley below — in practice it is the part of the apartment you end up using every evening.\n\nWater, electricity, gas, internet, television and building administration are all included, so the monthly figure is the whole monthly figure.\n\nLas Palmas puts you a few minutes from Provenza and the restaurants around Parque Lleras, close to the Oviedo and Santafé shopping centres, and on the road that runs straight up to the airport.": "Tres habitaciones, cuatro baños y 137 metros cuadrados en Contree Las Palmas, uno de los sectores más tranquilos de El Poblado.\n\nEl apartamento está completamente amoblado y listo para habitar. La cocina abierta, con isla y despensa, se integra con el comedor y la sala, de modo que todo el espacio se siente amplio y luminoso, en lugar de estar dividido en varias habitaciones. Cada habitación tiene su propio baño. La habitación principal cuenta con vestier, y la zona de ropas ya tiene lavadora y secadora instaladas.\n\nEl balcón tiene vista hacia la ladera verde y las luces del valle; en la práctica, es el lugar del apartamento que querrá disfrutar todas las noches.\n\nEl agua, la electricidad, el gas, internet, la televisión y la administración del edificio están incluidos, así que el valor mensual indicado es el valor mensual total.\n\nDesde Las Palmas estará a pocos minutos de Provenza y de los restaurantes de Parque Lleras, cerca de los centros comerciales Oviedo y Santafé, y sobre la vía directa al aeropuerto.",
+    "Cleaning": "Limpieza",
+    "QA listing #10518 — resettable. Safe to approve, claim and reset.": "Anuncio de control de calidad #10518 — se puede restablecer. Es seguro aprobarlo, reclamarlo y restablecerlo."
+  };
   const dictionaries = {
     de: {
       "Sent to you by": "Gesendet von", "Review this home": "Dieses Zuhause prüfen",
@@ -179,7 +185,9 @@
     }
   };
   window.__onehomeFlowTranslate = (locale, english, spanish) => {
-    if (locale === "co" || locale === "es") return spanish;
+    if (locale === "co" || locale === "es") {
+      return english === spanish ? latinAmericanSpanish[english] || spanish : spanish;
+    }
     return dictionaries[locale]?.[english] || english;
   };
 })();

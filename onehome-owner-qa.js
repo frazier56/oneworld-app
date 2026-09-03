@@ -33,44 +33,14 @@ window.__onehomeOwnerSignup = signupState;
 // are intentionally obfuscated and may not dispatch any email.
 const ONEHOME_TURNSTILE_SITE_KEY = "0x4AAAAAAEAsMHkBsF_CmIVg";
 
-// The shared profiles table intentionally restricts signup_intent to the
-// OneJob values (`hiring` and `working`). OneRental ownership is represented
-// by signup_app and entry_product, so remove the legacy rental_owner intent
-// before the compiled handoff screen updates the profile.
-const oneHomeOriginalFetch = window.fetch.bind(window);
-window.fetch = async (input, init = {}) => {
-  const url = typeof input === "string" ? input : input?.url || "";
-  const method = String(init?.method || (typeof input !== "string" ? input?.method : "GET") || "GET").toUpperCase();
-  if (method === "PATCH" && url.includes("/rest/v1/profiles") && typeof init?.body === "string") {
-    try {
-      const body = JSON.parse(init.body);
-      if (body?.signup_intent === "rental_owner") {
-        delete body.signup_intent;
-        init = { ...init, body: JSON.stringify(body) };
-      }
-
-      // Authenticated users may update their own profile but are not granted
-      // table SELECT. Supabase `.update(...).select("id")` therefore fails at
-      // RETURNING even though the update policy is correct. Perform the same
-      // update with a minimal response and provide the requested id locally so
-      // the compiled handoff can keep its non-empty-result guard.
-      const requestUrl = new URL(url, location.origin);
-      const requestedId = requestUrl.searchParams.get("id")?.replace(/^eq\./, "") || "";
-      requestUrl.searchParams.delete("select");
-      const headers = new Headers(init.headers || {});
-      headers.set("Prefer", "return=minimal");
-      const response = await oneHomeOriginalFetch(requestUrl.toString(), { ...init, headers });
-      if (!response.ok) return response;
-      return new Response(JSON.stringify(requestedId ? [{ id: requestedId }] : [{}]), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch {
-      // Leave non-JSON requests untouched.
-    }
-  }
-  return oneHomeOriginalFetch(input, init);
-};
+// The profile write needs no client-side compatibility layer. `signup_intent`
+// now accepts 'rental_owner' at the database (migration
+// onehome_allow_rental_owner_signup_intent), and `authenticated` holds a
+// column-level SELECT on profiles.id, so `.update(...).select("id")` returns
+// normally. The previous window.fetch wrapper is deleted rather than repaired:
+// it only fired when the body arrived as a string on `init`, which the bundled
+// supabase-js does not guarantee, and it synthesised a success response the
+// server never sent — which would report a real failure to the user as success.
 
 function currentLocale() {
   const stored = localStorage.getItem("oneworld-lang");
@@ -106,7 +76,7 @@ function termDocument(kind) {
     <h2 id="ohqa-document-title">${tr("Property Owner Terms", "Términos del propietario")}</h2>
     <h3>${tr("Current listing terms", "Términos actuales del inmueble")}</h3>
     <ul>
-      <li><strong>9,000,000 COP</strong> ${tr("for each monthly rental period.", "por cada período mensual de arriendo.")}</li>
+      <li><strong>8,600,000 COP</strong> ${tr("for each monthly rental period.", "por cada período mensual de arriendo.")}</li>
       <li>${tr("A separate, one-time 300,000 COP cleaning charge is due when the lease starts.", "Se debe pagar un cargo único y separado de limpieza de 300.000 COP cuando comience el contrato.")}</li>
       <li>${tr("No security deposit. The start date and tenant identity are added when the tenant packet is prepared.", "No hay depósito de garantía. La fecha de inicio y la identidad del inquilino se agregan cuando se prepare el paquete del inquilino.")}</li>
     </ul>
@@ -193,13 +163,11 @@ function termsPanel() {
   panel.dataset.locale = currentLocale();
   panel.innerHTML = `
     <div class="ohqa-term-row">
-      <strong>${tr("OneHome Terms", "Términos de OneHome")}</strong>
-      <button type="button" class="ohqa-document-open" data-document="platform">${tr("View", "Ver")}</button>
+      <span class="ohqa-term-title"><strong>${tr("OneHome Terms", "Términos de OneHome")}</strong><button type="button" class="ohqa-document-open" data-document="platform">${tr("View", "Ver")}</button></span>
       <span class="ohqa-term-status ${termsState.platform ? "is-complete" : "is-empty"}" role="status" aria-label="${termsState.platform ? tr("OneHome Terms completed", "Términos de OneHome completados") : tr("OneHome Terms not completed", "Términos de OneHome no completados")}">${termsState.platform ? "✓" : ""}</span>
     </div>
     <div class="ohqa-term-row">
-      <strong>${tr("Property Owner Terms", "Términos del propietario")}</strong>
-      <button type="button" class="ohqa-document-open" data-document="property">${tr("View", "Ver")}</button>
+      <span class="ohqa-term-title"><strong>${tr("Property Owner Terms", "Términos del propietario")}</strong><button type="button" class="ohqa-document-open" data-document="property">${tr("View", "Ver")}</button></span>
       <span class="ohqa-term-status ${termsState.property ? "is-complete" : "is-empty"}" role="status" aria-label="${termsState.property ? tr("Property Owner Terms completed", "Términos del propietario completados") : tr("Property Owner Terms not completed", "Términos del propietario no completados")}">${termsState.property ? "✓" : ""}</span>
     </div>
     <p class="ohqa-terms-error" role="alert" hidden>${tr("Open and agree to both documents before continuing.", "Abra y acepte ambos documentos antes de continuar.")}</p>`;
