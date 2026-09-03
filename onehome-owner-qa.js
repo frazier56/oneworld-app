@@ -85,11 +85,18 @@ function mountClaimedLinkGuard() {
   }
 
   const fields = email.closest("div.mt-4");
-  if (fields) fields.hidden = true;
+  if (fields) {
+    fields.hidden = true;
+    fields.style.display = "none";
+  }
   const terms = accountRoot.querySelector("#onehome-separate-terms");
-  if (terms) terms.hidden = true;
+  if (terms) {
+    terms.hidden = true;
+    terms.style.display = "none";
+  }
   accountRoot.querySelector("#ohqa-signup-error")?.remove();
   createButton.hidden = true;
+  createButton.style.display = "none";
 }
 
 async function checkClaimAvailability() {
