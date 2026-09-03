@@ -8,7 +8,17 @@
     "Show password": "Mostrar contraseña",
     "Hide password": "Ocultar contraseña",
     "Country: Colombia +57": "País: Colombia +57",
-    "Tap VAIA for insights": "Toca VAIA para obtener información"
+    "Country and currency: USA, US dollar": "País y moneda: Colombia, peso colombiano",
+    "Tap VAIA for insights": "Toca VAIA para obtener información",
+    "Tap for insights": "Toca para obtener información",
+    "Home": "Inicio",
+    "Agents": "Agentes",
+    "List a place": "Publicar",
+    "Messages": "Mensajes",
+    "Profile": "Perfil",
+    "Like": "Me gusta",
+    "Share": "Compartir",
+    "Menu": "Menú"
   };
   const dictionaries = {
     de: {

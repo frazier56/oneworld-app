@@ -838,6 +838,11 @@ const observer = new MutationObserver(() => {
   if (locale !== observedLocale) {
     observedLocale = locale;
     document.querySelector("#ohqa-document-modal")?.remove();
+    const phoneSource = document.querySelector('input[type="tel"][autocomplete="tel"]');
+    if (phoneSource && !phoneSource.value) {
+      phoneSource.nextElementSibling?.classList.contains("ohqa-phone-canonical") && phoneSource.nextElementSibling.remove();
+      delete phoneSource.dataset.ohqaPhone;
+    }
   }
   if (!FIXTURE_MODE) mountTerms();
   mountCountryPhone();
