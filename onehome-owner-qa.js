@@ -3,7 +3,7 @@ const ONEHOME_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 const REVIEW_API = `${ONEHOME_SUPABASE_URL}/functions/v1/listing-review`;
 const INSPECTION_API = `${ONEHOME_SUPABASE_URL}/functions/v1/rental-inspection`;
 const PLATFORM_TERMS_VERSION = "oneworld-platform-owner-review-2026-09-01";
-const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-01-v3";
+const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-03-v4";
 const CLAIM_TOKEN = location.pathname.match(/^\/rentals\/review\/([0-9a-f]{48})\/?$/i)?.[1]?.toLowerCase() || "";
 const FIXTURE_MODE = new URLSearchParams(location.search).get("onehomeQaFixture") === "owner-media";
 
