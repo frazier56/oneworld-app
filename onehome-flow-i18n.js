@@ -10,6 +10,7 @@
     "Country: Colombia +57": "País: Colombia +57",
     "Country and currency: USA, US dollar": "País y moneda: Colombia, peso colombiano",
     "Country and currency: Colombia, Colombian peso": "País y moneda: Colombia, peso colombiano",
+    "País y moneda: Colombia, Colombian peso": "País y moneda: Colombia, peso colombiano",
     "Tap VAIA for insights": "Toca VAIA para obtener información",
     "Tap for insights": "Toca para obtener información",
     "Toca para insights": "Toca para obtener información",
