@@ -55,6 +55,20 @@ function tr(english, spanish) {
     ((currentLocale() === "co" || currentLocale() === "es") ? spanish : english);
 }
 
+// This review bundle intentionally mounts only review and inspection routes.
+// Force shell links into the full application so React Router does not keep a
+// user on an empty route when they open Home, Messages, or Profile.
+document.addEventListener("click", (event) => {
+  const anchor = event.target.closest?.("a[href]");
+  if (!anchor || !CLAIM_TOKEN) return;
+  const destination = new URL(anchor.href, location.href);
+  if (destination.origin !== location.origin || !destination.pathname.startsWith("/rentals")) return;
+  if (/^\/rentals\/(?:review|inspection)\//i.test(destination.pathname)) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  location.assign(destination.href);
+}, true);
+
 function textMatches(element, pattern) {
   return pattern.test((element?.textContent || "").trim());
 }
