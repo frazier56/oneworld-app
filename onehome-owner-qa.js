@@ -19,6 +19,12 @@ window.__onehomeOwnerTerms = termsState;
 
 const signupState = window.__onehomeOwnerSignup || {
   email: "",
+  fullName: "",
+  phone: "",
+  password: "",
+  startedAt: 0,
+  pendingSession: null,
+  mfaFactorId: "",
   resendBusy: false,
   resendAvailableAt: 0,
   resendCaptchaToken: "",
@@ -31,12 +37,13 @@ const claimAvailabilityState = {
   alreadyClaimed: false,
 };
 
-// Keep OneHome on the same proven email-code contract as the shared OneWorld
-// signup: POST /auth/v1/otp without a PKCE challenge, verify type=email, then
-// set the password on the authenticated session. Do not replace that flow with
-// /signup or rewrite verification to type=signup; repeated /signup responses
-// are intentionally obfuscated and may not dispatch any email.
+// The email-code endpoint serves both first-time signups and existing One ID
+// accounts. After verification we distinguish those identities by creation time:
+// only a user created by this attempt receives the submitted password. Existing
+// users keep their credentials, and an enrolled MFA factor must be completed at
+// AAL2 before the property handoff continues.
 const ONEHOME_TURNSTILE_SITE_KEY = "0x4AAAAAAEAsMHkBsF_CmIVg";
+const ONEHOME_AUTH_STORAGE_KEY = "sb-wseblryyqxawvbjmylbo-auth-token";
 
 // The profile write needs no client-side compatibility layer. `signup_intent`
 // now accepts 'rental_owner' at the database (migration
@@ -350,10 +357,242 @@ function showSignupError(message) {
   if (error) error.textContent = message;
 }
 
+function authErrorMessage(packet, fallback) {
+  return packet?.msg || packet?.message || packet?.error_description || packet?.error || fallback;
+}
+
+async function onehomeJson(url, { method = "GET", token = "", body, prefer = "" } = {}) {
+  const headers = { apikey: ONEHOME_ANON_KEY, Authorization: `Bearer ${token || ONEHOME_ANON_KEY}` };
+  if (body !== undefined) headers["content-type"] = "application/json";
+  if (prefer) headers.Prefer = prefer;
+  const response = await fetch(url, {
+    method,
+    headers,
+    body: body === undefined ? undefined : JSON.stringify(body),
+    cache: "no-store",
+  });
+  const packet = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(authErrorMessage(packet, tr("The account could not be verified.", "No se pudo verificar la cuenta.")));
+    error.code = packet?.error_code || packet?.code || "";
+    error.status = response.status;
+    throw error;
+  }
+  return packet;
+}
+
+function jwtPayload(token) {
+  try {
+    const encoded = String(token || "").split(".")[1] || "";
+    const padded = encoded.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(encoded.length / 4) * 4, "=");
+    return JSON.parse(atob(padded));
+  } catch { return {}; }
+}
+
+function persistOwnerSession(session) {
+  const complete = {
+    ...session,
+    expires_at: session?.expires_at || Math.round(Date.now() / 1000) + Number(session?.expires_in || 3600),
+  };
+  localStorage.setItem(ONEHOME_AUTH_STORAGE_KEY, JSON.stringify(complete));
+  signupState.pendingSession = complete;
+  return complete;
+}
+
+function verificationStatus(section, message = "", isError = true) {
+  let status = section?.querySelector("#ohqa-verification-status");
+  if (!status && section) {
+    status = document.createElement("p");
+    status.id = "ohqa-verification-status";
+    status.className = "mt-3 text-[12px] font-semibold";
+    status.setAttribute("role", "alert");
+    section.append(status);
+  }
+  if (!status) return;
+  status.textContent = message;
+  status.classList.toggle("text-red-600", isError);
+  status.classList.toggle("text-brand", !isError);
+}
+
+async function finishOwnerHandoff(session, { setNewPassword = false } = {}) {
+  const active = persistOwnerSession(session);
+  const access = active.access_token;
+  const userId = active.user?.id || jwtPayload(access).sub;
+  if (!access || !userId) throw new Error(tr("Your session expired. Please request a new code.", "Su sesión venció. Solicite un código nuevo."));
+
+  if (setNewPassword) {
+    await onehomeJson(`${ONEHOME_SUPABASE_URL}/auth/v1/user`, {
+      method: "PUT",
+      token: access,
+      body: {
+        password: signupState.password,
+        data: { full_name: signupState.fullName, phone: signupState.phone, signup_app: "onerental" },
+      },
+    });
+  }
+
+  const profile = await onehomeJson(`${ONEHOME_SUPABASE_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&select=id`, {
+    method: "PATCH",
+    token: access,
+    prefer: "return=representation",
+    body: {
+      full_name: signupState.fullName,
+      phone: signupState.phone,
+      signup_intent: "rental_owner",
+      signup_app: "onerental",
+      entry_product: "onerental",
+    },
+  });
+  if (!Array.isArray(profile) || !profile.length) {
+    throw new Error(tr("Your profile could not be completed. Nothing was transferred.", "No se pudo completar su perfil. No se transfirió nada."));
+  }
+
+  const claim = await onehomeJson(`${ONEHOME_SUPABASE_URL}/rest/v1/rpc/rental_claim_property`, {
+    method: "POST",
+    token: access,
+    body: { p_token: CLAIM_TOKEN },
+  });
+  const handoff = Array.isArray(claim) ? claim[0] : claim;
+  if (!handoff?.contract_id || !handoff?.inspection_id) {
+    throw new Error(tr("The home handoff was incomplete. Nothing was lost; please try again.", "La entrega del inmueble quedó incompleta. No se perdió nada; intente de nuevo."));
+  }
+  signupState.password = "";
+  return handoff;
+}
+
+function mountOwnerMfa(section) {
+  section.querySelectorAll(":scope > *:not(#ohqa-owner-mfa)").forEach((node) => { node.hidden = true; });
+  let host = section.querySelector("#ohqa-owner-mfa");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "ohqa-owner-mfa";
+    host.innerHTML = `
+      <h2 class="text-[18px] font-black">${tr("Complete your security check", "Complete su verificación de seguridad")}</h2>
+      <p class="mt-2 text-[13px] leading-relaxed opacity-70">${tr(
+        "This email already belongs to a One ID account with MFA. Enter the six-digit code from your authenticator app. Your existing password will not be changed.",
+        "Este correo ya pertenece a una cuenta One ID con MFA. Ingrese el código de seis dígitos de su aplicación de autenticación. Su contraseña actual no cambiará."
+      )}</p>
+      <input id="ohqa-owner-mfa-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="mt-4 w-full rounded-xl border border-ink/15 bg-transparent px-3 py-3 text-center text-[24px] font-black tracking-[0.35em] outline-none focus:border-brand dark:border-white/20" placeholder="000000">
+      <p id="ohqa-owner-mfa-error" class="mt-3 text-[12px] font-semibold text-red-600" role="alert"></p>
+      <button type="button" data-ohqa-mfa-verify="true" class="btn-primary mt-4 w-full">${tr("Verify MFA and continue", "Verificar MFA y continuar")}</button>
+      <button type="button" data-ohqa-auth-cancel="true" class="btn-ghost mt-2 w-full">${tr("Use a different email", "Usar otro correo")}</button>`;
+    section.append(host);
+  }
+  host.hidden = false;
+  host.querySelector("#ohqa-owner-mfa-code")?.focus();
+}
+
+async function verifyOwnerEmailCode(button, codeInput) {
+  const section = codeInput.closest("section");
+  const code = codeInput.value.replace(/\D/g, "").slice(0, 6);
+  if (code.length !== 6 || button.disabled) return;
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = "…";
+  verificationStatus(section, "");
+  try {
+    const verified = await onehomeJson(`${ONEHOME_SUPABASE_URL}/auth/v1/verify`, {
+      method: "POST",
+      body: { email: signupState.email, token: code, type: "email" },
+    });
+    const session = persistOwnerSession(verified);
+    const verifiedFactors = (verified.user?.factors || []).filter((factor) => factor.status === "verified");
+    const aal = jwtPayload(session.access_token).aal || "aal1";
+    const createdAt = Date.parse(verified.user?.created_at || "");
+    if (!Number.isFinite(createdAt)) throw new Error(tr("The account identity could not be confirmed.", "No se pudo confirmar la identidad de la cuenta."));
+    const createdByThisAttempt = !!signupState.startedAt && createdAt >= signupState.startedAt - 5000;
+
+    if (verifiedFactors.length && aal !== "aal2") {
+      const factor = verifiedFactors.find((candidate) => candidate.factor_type === "totp");
+      if (!factor) throw new Error(tr("Complete MFA from the One ID sign-in screen, then reopen this invitation.", "Complete MFA desde la pantalla de inicio de One ID y luego vuelva a abrir esta invitación."));
+      signupState.mfaFactorId = factor.id;
+      mountOwnerMfa(section);
+      return;
+    }
+
+    await finishOwnerHandoff(session, { setNewPassword: createdByThisAttempt });
+    verificationStatus(section, tr("Your home is connected. Opening it now…", "Su inmueble está conectado. Abriéndolo ahora…"), false);
+    window.setTimeout(() => location.reload(), 350);
+  } catch (error) {
+    verificationStatus(section, error?.message || String(error));
+  } finally {
+    button.disabled = false;
+    button.textContent = original;
+  }
+}
+
+async function verifyOwnerMfa(button) {
+  const host = button.closest("#ohqa-owner-mfa");
+  const input = host?.querySelector("#ohqa-owner-mfa-code");
+  const errorNode = host?.querySelector("#ohqa-owner-mfa-error");
+  const code = input?.value?.replace(/\D/g, "").slice(0, 6) || "";
+  const session = signupState.pendingSession;
+  if (code.length !== 6 || !session?.access_token || !signupState.mfaFactorId || button.disabled) return;
+  const original = button.textContent;
+  button.disabled = true;
+  button.textContent = "…";
+  if (errorNode) errorNode.textContent = "";
+  try {
+    const challenge = await onehomeJson(`${ONEHOME_SUPABASE_URL}/auth/v1/factors/${encodeURIComponent(signupState.mfaFactorId)}/challenge`, {
+      method: "POST",
+      token: session.access_token,
+      body: { factorId: signupState.mfaFactorId },
+    });
+    const upgradedRaw = await onehomeJson(`${ONEHOME_SUPABASE_URL}/auth/v1/factors/${encodeURIComponent(signupState.mfaFactorId)}/verify`, {
+      method: "POST",
+      token: session.access_token,
+      body: { challenge_id: challenge.id, code },
+    });
+    const upgraded = persistOwnerSession({ ...upgradedRaw, user: upgradedRaw.user || session.user });
+    if (jwtPayload(upgraded.access_token).aal !== "aal2") {
+      throw new Error(tr("MFA verification did not reach the required assurance level.", "La verificación MFA no alcanzó el nivel de seguridad requerido."));
+    }
+    await finishOwnerHandoff(upgraded, { setNewPassword: false });
+    if (errorNode) {
+      errorNode.classList.remove("text-red-600");
+      errorNode.classList.add("text-brand");
+      errorNode.textContent = tr("Your home is connected. Opening it now…", "Su inmueble está conectado. Abriéndolo ahora…");
+    }
+    window.setTimeout(() => location.reload(), 350);
+  } catch (error) {
+    if (errorNode) errorNode.textContent = error?.message || String(error);
+  } finally {
+    button.disabled = false;
+    button.textContent = original;
+  }
+}
+
+function cancelOwnerAuth() {
+  localStorage.removeItem(ONEHOME_AUTH_STORAGE_KEY);
+  signupState.password = "";
+  signupState.pendingSession = null;
+  signupState.mfaFactorId = "";
+  location.reload();
+}
+
 document.addEventListener("click", async (event) => {
   const button = event.target.closest?.("button");
   if (!button || !CLAIM_TOKEN) return;
   const label = (button.textContent || "").trim();
+  if (button.dataset.ohqaMfaVerify === "true") {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    void verifyOwnerMfa(button);
+    return;
+  }
+  if (button.dataset.ohqaAuthCancel === "true") {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    cancelOwnerAuth();
+    return;
+  }
+  const codeInput = button.closest("section")?.querySelector?.('input[autocomplete="one-time-code"]');
+  if (codeInput && /Verify and continue|Verificar y continuar/i.test(label)) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    void verifyOwnerEmailCode(button, codeInput);
+    return;
+  }
   const accountArea = button.parentElement?.querySelector?.('input[type="email"][autocomplete="email"]');
   const reviewArea = button.closest("section")?.querySelector?.('input[autocomplete="name"]');
   const isCreate = !!accountArea && button.classList.contains("btn-primary");
@@ -361,6 +600,10 @@ document.addEventListener("click", async (event) => {
   if (!isCreate && !isReviewDecision) return;
   if (isCreate) {
     signupState.email = accountArea.value?.trim().toLowerCase() || "";
+    signupState.fullName = document.querySelector('input[autocomplete="name"]')?.value?.trim() || "";
+    signupState.phone = document.querySelector('input[type="tel"][autocomplete="tel"]')?.value?.trim() || "";
+    signupState.password = document.querySelector('input[autocomplete="new-password"]')?.value || "";
+    signupState.startedAt = Date.now();
     signupState.resendAvailableAt = Date.now() + 60000;
     const phone = document.querySelector(".ohqa-phone-canonical");
     if (phone && phone.dataset.valid !== "true") {
