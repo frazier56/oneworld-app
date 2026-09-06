@@ -1,0 +1,15 @@
+/* OneHome mobile date picker
+   Keep the seven-day grid inside the booking sheet on narrow phones. Desktop retains the
+   current calendar rhythm; phone date cells remain comfortable 36px targets. */
+@media (max-width: 639px) {
+  .ow-cal {
+    width: 100%;
+    max-width: 320px;
+    margin-inline: auto;
+  }
+
+  .ow-cal .grid.grid-cols-7 > button {
+    width: 36px;
+    height: 36px;
+  }
+}
