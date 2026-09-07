@@ -23142,6 +23142,23 @@ function ew({ growthOnly: B = !1 } = {}) {
     ] })
   ] });
 }
+function OwFinanceAmounts(t, e) {
+  return Array.isArray(t) && t.length ? t.map((r) => `${r.currency || "UNKNOWN"} ${new Intl.NumberFormat().format(Number(r[e] || 0))}`).join(" · ") : "No recorded amounts";
+}
+function OwFinanceLine({ label: t, value: e }) {
+  return /* @__PURE__ */ _.jsxs("div", { children: [
+    /* @__PURE__ */ _.jsx("dt", { children: t }),
+    /* @__PURE__ */ _.jsx("dd", { children: e })
+  ] });
+}
+function OwFinancePanel({ title: t, intro: e, children: r, note: n }) {
+  return /* @__PURE__ */ _.jsxs("article", { className: "owal-card owal-finance-card", children: [
+    /* @__PURE__ */ _.jsx("h3", { children: t }),
+    /* @__PURE__ */ _.jsx("p", { className: "owal-finance-intro", children: e }),
+    r,
+    n && /* @__PURE__ */ _.jsx("p", { className: "owal-finance-note", children: n })
+  ] });
+}
 function ow({ mode: t }) {
   const [e, r] = Z.useState(null), [n, s] = Z.useState("");
   Z.useEffect(() => {
@@ -23160,24 +23177,45 @@ function ow({ mode: t }) {
   if (!e)
     return /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-loading", children: `Loading ${t === "money" ? "money" : "operations"} data…` });
   if (t === "money") {
-    const i = e.money;
+    const i = e.money, o = i.finance || {}, a = o.refunds || {}, l = o.recurring || {};
     return /* @__PURE__ */ _.jsxs("section", { className: "owal-stack", children: [
       /* @__PURE__ */ _.jsxs("div", { className: "owal-section-heading", children: [
         /* @__PURE__ */ _.jsx("h2", { children: "Money" }),
-        /* @__PURE__ */ _.jsx("p", { children: "Stripe activity, paid work and promotional access." })
+        /* @__PURE__ */ _.jsx("p", { children: "Recorded payments, refund evidence and recurring-source coverage." })
       ] }),
       /* @__PURE__ */ _.jsx("div", { className: "owal-section-kpis", children: [
         ["Paid agreements", i.paid_agreements, "Completed agreement payments"],
         ["Paid bookings", i.paid_bookings, "Completed booking payments"],
         ["Active promos", i.active_promos, "Promotional access passes"],
-        ["Refunds", i.refunds, "Stripe refund totals are not connected to this secure overview yet"],
-        ["MRR", i.mrr, "Recurring revenue is not connected to this secure overview yet"]
-      ].map(([o, a, l]) => /* @__PURE__ */ _.jsxs("article", { className: "owal-card", children: [
-        /* @__PURE__ */ _.jsx("small", { children: o }),
-        /* @__PURE__ */ _.jsx("strong", { children: a == null ? "—" : Xn(a) }),
-        /* @__PURE__ */ _.jsx("p", { children: l })
-      ] }, o)) }),
-      /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-disclosure", children: "Established parity preserved: Refunds and MRR remain explicitly unwired rather than showing invented values." })
+        ["Confirmed refund records", a.confirmed_records ?? i.refunds, "Lifecycle-confirmed records across connected sources"],
+        ["MRR", l.mrr == null ? "Not defined" : l.mrr, "Awaiting an approved definition and priced subscription source"]
+      ].map(([c, h, d]) => /* @__PURE__ */ _.jsxs("article", { className: "owal-card", children: [
+        /* @__PURE__ */ _.jsx("small", { children: c }),
+        /* @__PURE__ */ _.jsx("strong", { children: h == null ? "—" : typeof h === "number" ? Xn(h) : h }),
+        /* @__PURE__ */ _.jsx("p", { children: d })
+      ] }, c)) }),
+      o.generated_at ? /* @__PURE__ */ _.jsxs("div", { className: "owal-finance-grid", children: [
+        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: "Refund evidence", intro: "Only explicit completed-refund lifecycle fields count. Amounts appear only where the source stores a refund amount and currency.", note: a.amount_scope, children: /* @__PURE__ */ _.jsxs("dl", { className: "owal-finance-list", children: [
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Confirmed records", value: Xn(a.confirmed_records) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Pending records", value: Xn(a.pending_records) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Explicit refund amounts", value: OwFinanceAmounts(a.amounts_by_currency, "amount") }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Connected sources", value: (a.sources || []).map((c) => `${c.label}: ${Xn(c.confirmed_records)}`).join(" · ") || "No sources returned" })
+        ] }) }),
+        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: "Recurring source coverage", intro: "These are source facts and commitments, not an MRR calculation.", note: l.commitment_scope, children: /* @__PURE__ */ _.jsxs("dl", { className: "owal-finance-list", children: [
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Current subscription rows", value: Xn(l.current_subscription_rows) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Provider-linked rows", value: Xn(l.provider_linked_subscription_rows) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Priced rows", value: Xn(l.priced_subscription_rows) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Founder-free rows", value: Xn(l.founder_free_rows) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Scheduled recurring work", value: OwFinanceAmounts(l.scheduled_recurring_work, "amount") }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Accepted monthly rent", value: OwFinanceAmounts(l.accepted_monthly_rent, "monthly_rent") })
+        ] }) }),
+        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: "Recognized platform fees", intro: "Recorded platform fees on captured, non-refunded agreements. This is earned-fee evidence, not recurring revenue.", note: "Grouped by currency; currencies are never converted or combined.", children: /* @__PURE__ */ _.jsx("strong", { className: "owal-finance-total", children: OwFinanceAmounts(o.recognized_platform_fees, "platform_fee") }) })
+      ] }) : /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-disclosure", children: "Finance evidence is waiting for the server-side Admin summary. Existing payment counts remain available." }),
+      /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-disclosure", children: [
+        /* @__PURE__ */ _.jsx("b", { children: "MRR remains intentionally blank." }),
+        " ",
+        l.decision_question || "An approved definition and a priced recurring source are required before this dashboard can calculate it."
+      ] })
     ] });
   }
   const i = e.ops, o = i.last_aws_sync || {};
