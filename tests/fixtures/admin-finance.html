@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin finance local review fixture</title>
+    <link rel="stylesheet" href="/admin-dashboard.css?v=20260907-finance2" />
+    <link rel="stylesheet" href="/admin-parity.css?v=20260907-finance1" />
+    <style>
+      :root {
+        color-scheme: light;
+        --brand: #0b7f74;
+        --card: #ffffff;
+      }
+
+      * { box-sizing: border-box; }
+      html { background: #f2f5f4; color: #16211f; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+      body { margin: 0; min-width: 0; background: radial-gradient(circle at top right, #dff3ef 0, transparent 34rem); }
+      h1, h2, h3, p, dl, dd { margin: 0; }
+      .fixture-banner {
+        margin-bottom: .75rem;
+        padding: .75rem 1rem;
+        border: 1px solid #0d94884d;
+        border-radius: 1rem;
+        background: #effcf9;
+        color: #0f6159;
+        font-size: .72rem;
+        font-weight: 800;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="owal-host">
+      <div class="ow-admin-live">
+        <div class="fixture-banner" role="note">Local synthetic layout fixture · no authentication, database write, refund, charge, or account action</div>
+        <header>
+          <h1>Admin Dashboard</h1>
+          <p>Growth · People · Money · Ops</p>
+        </header>
+        <nav aria-label="Admin sections">
+          <button type="button">Overview</button>
+          <button type="button">Growth</button>
+          <button type="button">People</button>
+          <button type="button" aria-current="page">Money</button>
+          <button type="button">Ops</button>
+        </nav>
+
+        <section class="owal-stack" aria-labelledby="money-heading">
+          <div class="owal-section-heading">
+            <h2 id="money-heading">Money</h2>
+            <p>Recorded payments, refund evidence and recurring-source coverage.</p>
+          </div>
+
+          <div class="owal-section-kpis">
+            <article class="owal-card"><small>Paid agreements</small><strong>12</strong><p>Completed agreement payments</p></article>
+            <article class="owal-card"><small>Paid bookings</small><strong>8</strong><p>Completed booking payments</p></article>
+            <article class="owal-card"><small>Active promos</small><strong>2</strong><p>Promotional access passes</p></article>
+            <article class="owal-card"><small>Confirmed refund records</small><strong>0</strong><p>Lifecycle-confirmed records across connected sources</p></article>
+            <article class="owal-card"><small>MRR</small><strong>Not defined</strong><p>Awaiting an approved definition and priced subscription source</p></article>
+          </div>
+
+          <div class="owal-finance-grid">
+            <article class="owal-card owal-finance-card">
+              <h3>Refund evidence</h3>
+              <p class="owal-finance-intro">Only explicit completed-refund lifecycle fields count. Amounts appear only where the source stores a refund amount and currency.</p>
+              <dl class="owal-finance-list">
+                <div><dt>Confirmed records</dt><dd>0</dd></div>
+                <div><dt>Pending records</dt><dd>0</dd></div>
+                <div><dt>Explicit refund amounts</dt><dd>No recorded amounts</dd></div>
+                <div><dt>Connected sources</dt><dd>Agreements: 0 · Bookings: 0 · Event registrations: 0</dd></div>
+              </dl>
+              <p class="owal-finance-note">Agreement and event refunds are count-only; their sources do not store an authoritative refunded amount.</p>
+            </article>
+
+            <article class="owal-card owal-finance-card">
+              <h3>Recurring source coverage</h3>
+              <p class="owal-finance-intro">These are source facts and commitments, not an MRR calculation.</p>
+              <dl class="owal-finance-list">
+                <div><dt>Current subscription rows</dt><dd>1</dd></div>
+                <div><dt>Provider-linked rows</dt><dd>0</dd></div>
+                <div><dt>Priced rows</dt><dd>0</dd></div>
+                <div><dt>Founder-free rows</dt><dd>1</dd></div>
+                <div><dt>Scheduled recurring work</dt><dd>USD 5,100.00</dd></div>
+                <div><dt>Accepted monthly rent</dt><dd>No recorded amounts</dd></div>
+              </dl>
+              <p class="owal-finance-note">Scheduled work and accepted monthly rent are commitments, not earned One World recurring revenue.</p>
+            </article>
+
+            <article class="owal-card owal-finance-card">
+              <h3>Recognized platform fees</h3>
+              <p class="owal-finance-intro">Recorded platform fees on captured, non-refunded agreements. This is earned-fee evidence, not recurring revenue.</p>
+              <strong class="owal-finance-total">COP 23,960.00</strong>
+              <p class="owal-finance-note">Grouped by currency; currencies are never converted or combined.</p>
+            </article>
+          </div>
+
+          <div class="owal-card owal-disclosure"><b>MRR remains intentionally blank.</b> Should MRR include only earned One World subscription fees, or also recurring marketplace and rental platform fees? Name the products in scope.</div>
+        </section>
+        <footer>Synthetic values exercise long labels, currency strings, null states, and breakpoint behavior.</footer>
+      </div>
+    </main>
+  </body>
+</html>

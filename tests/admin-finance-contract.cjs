@@ -10,8 +10,10 @@ assert.ok(migrationName, 'Admin finance migration must exist');
 
 const sql = fs.readFileSync(path.join(root, 'supabase', 'migrations', migrationName), 'utf8');
 const js = fs.readFileSync(path.join(root, 'admin-dashboard.js'), 'utf8');
+const dashboardCss = fs.readFileSync(path.join(root, 'admin-dashboard.css'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'admin-parity.css'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'admin', 'index.html'), 'utf8');
+const fixture = fs.readFileSync(path.join(root, 'tests', 'fixtures', 'admin-finance.html'), 'utf8');
 
 assert.match(sql, /if not public\.is_platform_admin\(\)/i, 'Finance data must retain the platform-admin guard');
 assert.match(sql, /security definer[\s\S]*set search_path = ''/i, 'Privileged function must use an empty search path');
@@ -34,6 +36,11 @@ assert.match(js, /finance \|\| \{\}/, 'UI must remain compatible while the serve
 assert.match(css, /\.owal-finance-grid/);
 assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.owal-finance-grid \{ grid-template-columns: 1fr; \}/);
 assert.match(html, /admin-dashboard\.js\?v=20260907-finance1/);
+assert.match(html, /admin-dashboard\.css\?v=20260907-finance2/);
 assert.match(html, /admin-parity\.css\?v=20260907-finance1/);
+assert.match(dashboardCss, /\.ow-admin-live nav button\{min-width:0;flex:1 1 0;padding:\.68rem \.32rem\}/);
+assert.match(fixture, /Local synthetic layout fixture/);
+assert.match(fixture, /MRR remains intentionally blank/);
+assert.match(fixture, /no authentication, database write, refund, charge, or account action/i);
 
 console.log('Admin finance contract checks passed.');
