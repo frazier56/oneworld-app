@@ -30,7 +30,24 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="One World" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <script type="module" crossorigin src="/index-B7htfE8L.js"></script>
+    <script type="module">
+      const oneHomeHandoff = /^\/rentals\/(?:review|inspection)\/[a-f0-9]{48}\/?$/i.test(location.pathname);
+      if (oneHomeHandoff) {
+        for (const href of [
+          '/onehome-review-app.css?v=20260906-owner-auth1',
+          '/onehome-owner-qa.css?v=20260906-owner-auth1',
+        ]) {
+          const stylesheet = document.createElement('link');
+          stylesheet.rel = 'stylesheet';
+          stylesheet.href = href;
+          document.head.append(stylesheet);
+        }
+        import('/onehome-review-app.js?v=20260906-owner-auth1')
+          .then(() => import('/onehome-owner-qa.js?v=20260906-owner-auth1'));
+      } else {
+        import('/index-B7htfE8L.js');
+      }
+    </script>
     <link rel="stylesheet" crossorigin href="/index-B_q7Yo7U.css">
   </head>
   <body class="ow-no-sideways">
