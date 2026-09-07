@@ -23,7 +23,10 @@ const signupState = window.__onehomeOwnerSignup || {
   fullName: "",
   phone: "",
   password: "",
-  startedAt: 0,
+  busy: false,
+  allowOriginal: false,
+  suppressNextOtp: false,
+  verifyType: "signup",
   pendingSession: null,
   mfaFactorId: "",
   resendBusy: false,
@@ -38,13 +41,38 @@ const claimAvailabilityState = {
   alreadyClaimed: false,
 };
 
-// The email-code endpoint serves both first-time signups and existing One ID
-// accounts. After verification we distinguish those identities by creation time:
-// only a user created by this attempt receives the submitted password. Existing
-// users keep their credentials, and an enrolled MFA factor must be completed at
-// AAL2 before the property handoff continues.
+// A new owner starts with email + password and verifies a signup code. An
+// existing One ID keeps its password and receives an email sign-in code instead.
+// The recovered React screen still asks for its own OTP after the new-user
+// signup; suppress that duplicate request while preserving its screen change.
 const ONEHOME_TURNSTILE_SITE_KEY = "0x4AAAAAAEAsMHkBsF_CmIVg";
 const ONEHOME_AUTH_STORAGE_KEY = "sb-wseblryyqxawvbjmylbo-auth-token";
+
+if (!window.__onehomeOwnerAuthFlowPatched) {
+  window.__onehomeOwnerAuthFlowPatched = true;
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = async (input, init = {}) => {
+    const url = typeof input === "string" ? input : input?.url || "";
+    const method = String(init.method || input?.method || "GET").toUpperCase();
+    let body = init.body;
+    if (body == null && input instanceof Request && method !== "GET" && method !== "HEAD") {
+      body = await input.clone().text().catch(() => "");
+    }
+    let parsed = null;
+    if (typeof body === "string") {
+      try { parsed = JSON.parse(body); } catch { /* Not an Auth JSON request. */ }
+    }
+    if (
+      url.includes("/auth/v1/otp") && method === "POST" &&
+      signupState.suppressNextOtp &&
+      parsed?.email?.toLowerCase() === signupState.email
+    ) {
+      signupState.suppressNextOtp = false;
+      return new Response("{}", { status: 200, headers: { "content-type": "application/json" } });
+    }
+    return nativeFetch(input, init);
+  };
+}
 
 // The profile write needs no client-side compatibility layer. `signup_intent`
 // now accepts 'rental_owner' at the database (migration
@@ -415,22 +443,11 @@ function verificationStatus(section, message = "", isError = true) {
   status.classList.toggle("text-brand", !isError);
 }
 
-async function finishOwnerHandoff(session, { setNewPassword = false } = {}) {
+async function finishOwnerHandoff(session) {
   const active = persistOwnerSession(session);
   const access = active.access_token;
   const userId = active.user?.id || jwtPayload(access).sub;
   if (!access || !userId) throw new Error(tr("Your session expired. Please request a new code.", "Su sesión venció. Solicite un código nuevo."));
-
-  if (setNewPassword) {
-    await onehomeJson(`${ONEHOME_SUPABASE_URL}/auth/v1/user`, {
-      method: "PUT",
-      token: access,
-      body: {
-        password: signupState.password,
-        data: { full_name: signupState.fullName, phone: signupState.phone, signup_app: "onerental" },
-      },
-    });
-  }
 
   const profile = await onehomeJson(`${ONEHOME_SUPABASE_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}&select=id`, {
     method: "PATCH",
@@ -459,6 +476,64 @@ async function finishOwnerHandoff(session, { setNewPassword = false } = {}) {
   }
   signupState.password = "";
   return handoff;
+}
+
+async function startOwnerSignup(button) {
+  if (signupState.busy) return;
+  const captchaToken = [...document.querySelectorAll('[name="cf-turnstile-response"]')]
+    .map((input) => input.value?.trim() || "")
+    .find(Boolean) || "";
+  if (!signupState.email || !signupState.password || !signupState.fullName || !signupState.phone || !captchaToken) {
+    showSignupError(tr(
+      "Complete the form and human check before creating the account.",
+      "Complete el formulario y la verificación humana antes de crear la cuenta."
+    ));
+    return;
+  }
+  signupState.busy = true;
+  button.disabled = true;
+  showSignupError("");
+  try {
+    const response = await fetch(`${ONEHOME_SUPABASE_URL}/auth/v1/signup`, {
+      method: "POST",
+      headers: {
+        apikey: ONEHOME_ANON_KEY,
+        Authorization: `Bearer ${ONEHOME_ANON_KEY}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        email: signupState.email,
+        password: signupState.password,
+        data: {
+          full_name: signupState.fullName,
+          phone: signupState.phone,
+          signup_app: "onerental",
+          signup_intent: "rental_owner",
+          entry_product: "onerental",
+        },
+        gotrue_meta_security: { captcha_token: captchaToken },
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const alreadyRegistered = response.status === 422 || /already registered|already exists/i.test(authErrorMessage(result, ""));
+      if (!alreadyRegistered) {
+        throw new Error(authErrorMessage(result, tr("The account could not be created.", "No se pudo crear la cuenta.")));
+      }
+    }
+    const repeatedSignup = !response.ok || (Array.isArray(result?.user?.identities) && result.user.identities.length === 0);
+    signupState.verifyType = repeatedSignup ? "email" : "signup";
+    signupState.suppressNextOtp = !repeatedSignup;
+    signupState.allowOriginal = true;
+    button.disabled = false;
+    button.click();
+  } catch (error) {
+    button.disabled = false;
+    showSignupError(error?.message || String(error));
+  } finally {
+    signupState.allowOriginal = false;
+    signupState.busy = false;
+  }
 }
 
 function mountOwnerMfa(section) {
@@ -494,15 +569,11 @@ async function verifyOwnerEmailCode(button, codeInput) {
   try {
     const verified = await onehomeJson(`${ONEHOME_SUPABASE_URL}/auth/v1/verify`, {
       method: "POST",
-      body: { email: signupState.email, token: code, type: "email" },
+      body: { email: signupState.email, token: code, type: signupState.verifyType || "email" },
     });
     const session = persistOwnerSession(verified);
     const verifiedFactors = (verified.user?.factors || []).filter((factor) => factor.status === "verified");
     const aal = jwtPayload(session.access_token).aal || "aal1";
-    const createdAt = Date.parse(verified.user?.created_at || "");
-    if (!Number.isFinite(createdAt)) throw new Error(tr("The account identity could not be confirmed.", "No se pudo confirmar la identidad de la cuenta."));
-    const createdByThisAttempt = !!signupState.startedAt && createdAt >= signupState.startedAt - 5000;
-
     if (verifiedFactors.length && aal !== "aal2") {
       const factor = verifiedFactors.find((candidate) => candidate.factor_type === "totp");
       if (!factor) throw new Error(tr("Complete MFA from the One ID sign-in screen, then reopen this invitation.", "Complete MFA desde la pantalla de inicio de One ID y luego vuelva a abrir esta invitación."));
@@ -511,7 +582,7 @@ async function verifyOwnerEmailCode(button, codeInput) {
       return;
     }
 
-    await finishOwnerHandoff(session, { setNewPassword: createdByThisAttempt });
+    await finishOwnerHandoff(session);
     verificationStatus(section, tr("Your home is connected. Opening it now…", "Su inmueble está conectado. Abriéndolo ahora…"), false);
     window.setTimeout(() => location.reload(), 350);
   } catch (error) {
@@ -548,7 +619,7 @@ async function verifyOwnerMfa(button) {
     if (jwtPayload(upgraded.access_token).aal !== "aal2") {
       throw new Error(tr("MFA verification did not reach the required assurance level.", "La verificación MFA no alcanzó el nivel de seguridad requerido."));
     }
-    await finishOwnerHandoff(upgraded, { setNewPassword: false });
+    await finishOwnerHandoff(upgraded);
     if (errorNode) {
       errorNode.classList.remove("text-red-600");
       errorNode.classList.add("text-brand");
@@ -566,6 +637,8 @@ async function verifyOwnerMfa(button) {
 function cancelOwnerAuth() {
   localStorage.removeItem(ONEHOME_AUTH_STORAGE_KEY);
   signupState.password = "";
+  signupState.verifyType = "signup";
+  signupState.suppressNextOtp = false;
   signupState.pendingSession = null;
   signupState.mfaFactorId = "";
   location.reload();
@@ -604,7 +677,6 @@ document.addEventListener("click", async (event) => {
     signupState.fullName = document.querySelector('input[autocomplete="name"]')?.value?.trim() || "";
     signupState.phone = document.querySelector('input[type="tel"][autocomplete="tel"]')?.value?.trim() || "";
     signupState.password = document.querySelector('input[autocomplete="new-password"]')?.value || "";
-    signupState.startedAt = Date.now();
     signupState.resendAvailableAt = Date.now() + 60000;
     const phone = document.querySelector(".ohqa-phone-canonical");
     if (phone && phone.dataset.valid !== "true") {
@@ -636,6 +708,12 @@ document.addEventListener("click", async (event) => {
     }
     const saved = await acknowledgeExistingApproval(name);
     if (saved) button.click();
+    return;
+  }
+  if (isCreate && termsState.existingSaved && !signupState.allowOriginal) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    await startOwnerSignup(button);
     return;
   }
 }, true);
@@ -1214,12 +1292,17 @@ async function resendOwnerSignupCode(button, status) {
   status.textContent = "";
   updateResendControl(button, status);
   try {
-    const response = await fetch(`${ONEHOME_SUPABASE_URL}/auth/v1/otp`, {
+    const signupResend = signupState.verifyType === "signup";
+    const response = await fetch(`${ONEHOME_SUPABASE_URL}/auth/v1/${signupResend ? "resend" : "otp"}`, {
       method: "POST",
       headers: { apikey: ONEHOME_ANON_KEY, Authorization: `Bearer ${ONEHOME_ANON_KEY}`, "content-type": "application/json" },
-      body: JSON.stringify({
+      body: JSON.stringify(signupResend ? {
+        type: "signup",
         email,
-        create_user: true,
+        gotrue_meta_security: { captcha_token: captchaToken },
+      } : {
+        email,
+        create_user: false,
         gotrue_meta_security: { captcha_token: captchaToken },
       }),
     });
