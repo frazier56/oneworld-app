@@ -168,6 +168,31 @@
 .owal-section-kpis p { margin-top: .45rem; font-size: .65rem; line-height: 1.35; opacity: .52; }
 .owal-disclosure { font-size: .7rem; color: #b45309; border-color: #d9770640; }
 
+.owal-finance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .75rem;
+}
+
+.owal-finance-card { min-width: 0; }
+.owal-finance-card h3 { font-size: .88rem; font-weight: 900; }
+.owal-finance-intro,
+.owal-finance-note { margin-top: .35rem; font-size: .66rem; line-height: 1.45; opacity: .56; }
+.owal-finance-note { padding-top: .55rem; border-top: 1px solid color-mix(in srgb, currentColor 7%, transparent); }
+.owal-finance-list { display: grid; gap: 0; margin-top: .65rem; }
+.owal-finance-list > div {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .48rem 0;
+  border-top: 1px solid color-mix(in srgb, currentColor 7%, transparent);
+}
+.owal-finance-list dt { font-size: .64rem; opacity: .55; }
+.owal-finance-list dd { max-width: 62%; text-align: right; font-size: .66rem; font-weight: 850; overflow-wrap: anywhere; }
+.owal-finance-total { display: block; margin-top: 1rem; font-size: 1.25rem; line-height: 1.25; overflow-wrap: anywhere; }
+
 @media (max-width: 900px) {
   .owal-section-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .owal-finance-grid { grid-template-columns: 1fr; }
 }
