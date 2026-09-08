@@ -7,6 +7,10 @@ const migrationName = fs.readdirSync(path.join(root, 'supabase', 'migrations'))
   .find((name) => name.endsWith('_admin_finance_evidence_summary.sql'));
 
 assert.ok(migrationName, 'Admin finance migration must exist');
+assert.ok(
+  migrationName.startsWith('20260908091500_'),
+  'Admin finance migration must sort after the latest applied 8 September migrations'
+);
 
 const sql = fs.readFileSync(path.join(root, 'supabase', 'migrations', migrationName), 'utf8');
 const js = fs.readFileSync(path.join(root, 'admin-dashboard.js'), 'utf8');
