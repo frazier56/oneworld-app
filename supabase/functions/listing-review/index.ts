@@ -1,5 +1,5 @@
 // listing-review — capability-token resolver for the public owner-review screen.
-// v4 enriches the safe packet with the fields rendered by PropertyDetailComposition.
+// v5 keeps the safe packet and owner-terms evidence on the current listing price.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
@@ -7,7 +7,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const PLATFORM_TERMS_VERSION = "oneworld-platform-owner-review-2026-09-01";
-const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-03-v4";
+const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-07-v5";
 
 const CORS = {
   "access-control-allow-origin": "*",

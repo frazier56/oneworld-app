@@ -3,7 +3,7 @@ const ONEHOME_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 const REVIEW_API = `${ONEHOME_SUPABASE_URL}/functions/v1/listing-review`;
 const INSPECTION_API = `${ONEHOME_SUPABASE_URL}/functions/v1/rental-inspection`;
 const PLATFORM_TERMS_VERSION = "oneworld-platform-owner-review-2026-09-01";
-const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-03-v4";
+const PROPERTY_TERMS_VERSION = "onehome-property-owner-review-draft-2026-09-07-v5";
 const CLAIM_TOKEN = location.pathname.match(/^\/rentals\/review\/([0-9a-f]{48})\/?$/i)?.[1]?.toLowerCase() || "";
 const FIXTURE_MODE = new URLSearchParams(location.search).get("onehomeQaFixture") === "owner-media";
 const OWNER_MEDIA_MODE = new URLSearchParams(location.search).get("ownerMedia") === "1";
@@ -184,7 +184,7 @@ function termDocument(kind) {
     <h2 id="ohqa-document-title">${tr("Property Owner Terms", "Términos del propietario")}</h2>
     <h3>${tr("Current listing terms", "Términos actuales del inmueble")}</h3>
     <ul>
-      <li><strong>8,600,000 COP</strong> ${tr("for each monthly rental period.", "por cada período mensual de arriendo.")}</li>
+      <li><strong>9,000,000 COP</strong> ${tr("for each monthly rental period.", "por cada período mensual de arriendo.")}</li>
       <li>${tr("A separate, one-time 300,000 COP cleaning charge is due when the lease starts.", "Se debe pagar un cargo único y separado de limpieza de 300.000 COP cuando comience el contrato.")}</li>
       <li>${tr("No security deposit. The start date and tenant identity are added when the tenant packet is prepared.", "No hay depósito de garantía. La fecha de inicio y la identidad del inquilino se agregan cuando se prepare el paquete del inquilino.")}</li>
     </ul>
