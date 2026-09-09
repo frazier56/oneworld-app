@@ -23735,19 +23735,87 @@ function tw() {
     /* @__PURE__ */ _.jsx("footer", { children: text("Read-only · Server-authorized · Sensitive views are audited") })
   ] }) });
 }
+class OwAdminAccessBoundary extends Z.Component {
+  constructor(props) { super(props); this.state = { failed: false }; }
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() { return this.state.failed ? this.props.fallback : this.props.children; }
+}
 async function rw() {
   if (window.location.pathname.replace(/\/$/, "") !== "/admin") return;
-  const { data: { session: t } } = await Ti.auth.getSession();
-  if (!t) return;
-  const { data: e, error: r } = await Ti.rpc("is_platform_admin");
-  if (r || e !== !0) return;
-  try {
-    localStorage.setItem("ow_platform_admin_v1", "true");
-  } catch {
+  const host = document.querySelector("#root main");
+  if (!host) return;
+  host.classList.add("owal-host");
+  host.style.boxSizing = "border-box";
+  const root = Ld(host);
+  let generation = 0, disposed = false, state = "loading";
+  const copy = {
+    loading: ["Checking administrator access…", "Verificando el acceso de administración…"],
+    signedout: ["Sign in to open Admin", "Inicia sesión para abrir Administración"],
+    denied: ["Administrator access required", "Se requiere acceso de administración"],
+    error: ["We couldn’t check administrator access", "No pudimos verificar el acceso de administración"],
+    runtime: ["The Admin dashboard couldn’t load", "No se pudo cargar el panel de administración"]
+  };
+  function gate(kind) {
+    const language = OwAdminStoredLanguage(), es = language === "co";
+    const text = (en, co) => es ? co : en;
+    document.documentElement.lang = es ? "es-CO" : "en";
+    const message = kind === "loading" ? text("Please wait while we check your session and permissions.", "Espera mientras verificamos tu sesión y tus permisos.")
+      : kind === "signedout" ? text("Use your existing One ID account. Signing in does not grant administrator access.", "Usa tu cuenta de One ID. Iniciar sesión no otorga acceso de administración.")
+      : kind === "denied" ? text("This signed-in account does not have administrator access. If access was recently changed, try again.", "Esta cuenta no tiene acceso de administración. Si tus permisos cambiaron recientemente, intenta de nuevo.")
+      : text("Your access has not been changed. Try again, or return to your account.", "Tus permisos no han cambiado. Intenta de nuevo o vuelve a tu cuenta.");
+    return _.jsxs("div", { className: "ow-admin-live", children: [
+      _.jsxs("header", { style: { flexWrap: "wrap" }, children: [_.jsx("h1", { children: text("Admin", "Administración") }),
+        _.jsx(OwAdminLanguagePicker, { language, text: (s) => OwAdminTranslate(language, s), onChange: (next) => {
+          try { localStorage.setItem(OwAdminLocaleKey, OwAdminNormalizeLanguage(next.target.value)); } catch {}
+          show(state);
+        } })] }),
+      _.jsxs("section", { className: "owal-card", role: kind === "error" || kind === "runtime" ? "alert" : "status", children: [
+        _.jsx("h2", { children: copy[kind][es ? 1 : 0] }), _.jsx("p", { children: message }),
+        _.jsxs("div", { style: { display: "flex", flexWrap: "wrap", gap: "12px", marginTop: "20px" }, children: [
+          kind === "signedout" && _.jsx("a", { href: "/signin", className: "owal-support-action", style: { display: "inline-flex", alignItems: "center" }, children: text("Sign in", "Iniciar sesión") }),
+          kind !== "loading" && _.jsx("button", { type: "button", className: "owal-support-action", onClick: check, children: text("Try again", "Intentar de nuevo") }),
+          _.jsx("a", { href: "/yourworld", className: "owal-support-action", style: { display: "inline-flex", alignItems: "center" }, children: text("Open my account", "Abrir mi cuenta") })
+        ] })
+      ] })
+    ] });
   }
-  let n = null;
-  for (let s = 0; s < 80 && !n; s++)
-    n = document.querySelector("#root main"), n || await new Promise((i) => setTimeout(i, 50));
-  n && (n.replaceChildren(), n.classList.add("owal-host"), Ld(n).render(/* @__PURE__ */ _.jsx(tw, {})));
+  function show(next) {
+    if (disposed) return;
+    state = next;
+    root.render(next === "authorized"
+      ? _.jsx(OwAdminAccessBoundary, { children: _.jsx(tw, {}), fallback: gate("runtime") }, generation)
+      : gate(next));
+  }
+  async function check() {
+    const attempt = ++generation;
+    show("loading");
+    let timer;
+    try {
+      const result = await Promise.race([
+        (async () => {
+          const sessionResult = await Ti.auth.getSession();
+          if (sessionResult.error) throw sessionResult.error;
+          if (!sessionResult.data?.session) return "signedout";
+          const roleResult = await Ti.rpc("is_platform_admin");
+          if (roleResult.error) throw roleResult.error;
+          if (roleResult.data === true) return "authorized";
+          if (roleResult.data === false) return "denied";
+          throw new Error("Unexpected access response");
+        })(),
+        new Promise((_, reject) => { timer = setTimeout(() => reject(new Error("Access check timed out")), 15000); })
+      ]);
+      if (!disposed && attempt === generation) show(result);
+    } catch {
+      if (!disposed && attempt === generation) show("error");
+    } finally { clearTimeout(timer); }
+  }
+  const { data: { subscription } } = Ti.auth.onAuthStateChange((event) => {
+    if (["SIGNED_IN", "SIGNED_OUT", "TOKEN_REFRESHED", "USER_UPDATED"].includes(event)) {
+      // Remove protected UI immediately; defer SDK calls outside its auth lock.
+      ++generation; show("loading"); setTimeout(() => { if (!disposed) check(); }, 0);
+    }
+  });
+  window.addEventListener("pagehide", () => { ++generation; show("loading"); }, { once: true });
+  check();
 }
 rw();
