@@ -23031,12 +23031,205 @@ function qy() {
   return r ? parseInt(r[1], 10) <= 20 : !1;
 }
 qy() && console.warn("⚠️  Node.js 20 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 22 or later. For more information, visit: https://github.com/orgs/supabase/discussions/45715");
-const Gy = "https://wseblryyqxawvbjmylbo.supabase.co", Jy = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZWJscnl5cXhhd3Ziam15bGJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NDU4NjksImV4cCI6MjA5MzUyMTg2OX0.y2yfMwSC_eh_jzI5eXsp6qD5zkl0OICtESV070EhRQM", Ti = Ky(Gy, Jy, { auth: { storageKey: "sb-wseblryyqxawvbjmylbo-auth-token", persistSession: !0, autoRefreshToken: !0 } }), Xn = (t) => new Intl.NumberFormat().format(Number(t || 0)), Qy = (t) => t != null && t.previous ? `${Math.round((t.current - t.previous) / t.previous * 100) > 0 ? "+" : ""}${Math.round((t.current - t.previous) / t.previous * 100)}%` : t != null && t.current ? "+100%" : "—", kc = (t) => t ? new Date(t).toLocaleDateString(void 0, { month: "short", day: "numeric", year: "2-digit" }) : "—";
+const Gy = "https://wseblryyqxawvbjmylbo.supabase.co", Jy = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZWJscnl5cXhhd3Ziam15bGJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NDU4NjksImV4cCI6MjA5MzUyMTg2OX0.y2yfMwSC_eh_jzI5eXsp6qD5zkl0OICtESV070EhRQM", Ti = Ky(Gy, Jy, { auth: { storageKey: "sb-wseblryyqxawvbjmylbo-auth-token", persistSession: !0, autoRefreshToken: !0 } }), OwAdminLocaleKey = "oneworld-lang", OwAdminLocaleEvent = "oneworld-language-change", OwAdminFlags = {
+  en: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAVBAMAAADGNLEtAAAALVBMVEX////GU3LZjKGzGUINM2PsxtAYPWotT3hed5enma46WoBPa46zGkMkR3Jrgp+6ntXWAAAAiklEQVQY02Nwc0lJcQMSxghgw+CRVdaWkVXWooQEGFxaPLxKWjxcGJCBn1fJExAWRAJglUuAKlEEPdyXgA1A0e62LTu9bFt2CopF3iCh9LItKE5yX5tVe31tVgmq9pL0NLcy95RQJMAAdiUQo2ifCQUoKrECY0xgw6CEBWDXLogFYBfECrBahM1JAItMTcEiMDpsAAAAAElFTkSuQmCC",
+  co: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAbBAMAAAD8PtBdAAAAD1BMVEUAMIfIEC7/zQCWGER/fkQonp92AAAAHklEQVQoz2NQwgIYRrKgCxbAMLDAGAtgEMQC6CYIAA/lM811RVp8AAAAAElFTkSuQmCC"
+}, OwAdminCoCopy = Object.freeze({
+  "Language": "Idioma",
+  "Admin Dashboard": "Panel de administración",
+  "Admin sections": "Secciones de administración",
+  "Overview": "Resumen",
+  "Growth": "Crecimiento",
+  "People": "Personas",
+  "Money": "Finanzas",
+  "Ops": "Operaciones",
+  "Growth · People · Money · Ops": "Crecimiento · Personas · Finanzas · Operaciones",
+  "Visitors, sources, devices and product demand": "Visitantes, fuentes, dispositivos y demanda por producto",
+  "Real accounts, signup details and connected products": "Cuentas reales, datos de registro y productos conectados",
+  "Payments, paid work and promotional access": "Pagos, trabajos pagados y accesos promocionales",
+  "Incidents, security and infrastructure health": "Incidentes, seguridad y estado de la infraestructura",
+  "Read-only · Server-authorized · Sensitive views are audited": "Solo lectura · Autorizado por el servidor · Las vistas sensibles se auditan",
+  "No data yet": "Aún no hay datos",
+  "Visitors": "Visitantes",
+  "Visits": "Visitas",
+  "Signups": "Registros",
+  "Onboarded": "Incorporaciones completadas",
+  "Product actions": "Acciones en productos",
+  "Previous: ": "Anterior: ",
+  "Audience trend": "Tendencia de audiencia",
+  "Unique visitors per day": "Visitantes únicos por día",
+  "Daily visitors trend": "Tendencia diaria de visitantes",
+  "No visitor history yet. Privacy-safe collection is active and this trend will populate with new visits.": "Aún no hay historial de visitantes. La recopilación respetuosa de la privacidad está activa y esta tendencia se completará con nuevas visitas.",
+  "Events": "Eventos",
+  "Applications": "Solicitudes",
+  "Registrations": "Registros",
+  "Pending approvals": "Aprobaciones pendientes",
+  "Payment attention": "Pagos que requieren atención",
+  "Rental listings": "Anuncios de arriendo",
+  "Rental requests": "Solicitudes de arriendo",
+  "Active contracts": "Contratos activos",
+  "Sale listings": "Anuncios de venta",
+  "Sale deals": "Negocios de venta",
+  "Operations health": "Estado de operaciones",
+  "Open alerts": "Alertas abiertas",
+  "Onboarding incomplete": "Incorporación incompleta",
+  "Email failures": "Fallos de correo",
+  "Last 7 days": "Últimos 7 días",
+  "Last 30 days": "Últimos 30 días",
+  "Last 90 days": "Últimos 90 días",
+  "All products": "Todos los productos",
+  "Human traffic": "Tráfico humano",
+  "Bot traffic": "Tráfico de bots",
+  "All traffic": "Todo el tráfico",
+  "Live visitor collection is active": "La recopilación de visitantes está activa",
+  "Visitor collection is live — history starts now": "La recopilación de visitantes está activa; el historial empieza ahora",
+  "No historical visitor events were available before this release. New visits will appear here automatically.": "No había eventos históricos de visitantes antes de esta versión. Las nuevas visitas aparecerán aquí automáticamente.",
+  "Dashboard data is unavailable.": "Los datos del panel no están disponibles.",
+  "Loading live dashboard…": "Cargando el panel en vivo…",
+  "Traffic sources": "Fuentes de tráfico",
+  "Devices": "Dispositivos",
+  "Products connected": "Productos conectados",
+  "Countries": "Países",
+  "Cities": "Ciudades",
+  "Landing pages": "Páginas de destino",
+  "Search & discovery crawlers": "Rastreadores de búsqueda y descubrimiento",
+  "No recorded amounts": "No hay montos registrados",
+  "External payment help request failed.": "No se pudo procesar la solicitud de ayuda con el pago externo.",
+  "External payment help requests": "Solicitudes de ayuda con pagos externos",
+  "Review status only. This does not confirm payment, accept a reservation, release dates, issue a refund or send a message.": "Solo cambia el estado de revisión. Esto no confirma el pago, no acepta una reserva, no libera fechas, no emite un reembolso ni envía mensajes.",
+  "Filter external payment help requests": "Filtrar solicitudes de ayuda con pagos externos",
+  "Open": "Abierta",
+  "In review": "En revisión",
+  "All": "Todas",
+  "Open filter": "Abiertas",
+  "All filter": "Todas",
+  "Open count": "Abiertas ",
+  "In review count": "En revisión ",
+  "Queue totals": "Totales de la cola",
+  "Try again": "Intentar de nuevo",
+  "Loading external payment help requests…": "Cargando solicitudes de ayuda con pagos externos…",
+  "No external payment help requests match this filter.": "No hay solicitudes de ayuda con pagos externos que coincidan con este filtro.",
+  "Request": "Solicitud",
+  "Payment rail": "Medio de pago",
+  "Payment reported": "Pago reportado",
+  "Help requested": "Ayuda solicitada",
+  "Receipt": "Recepción del pago",
+  "Host receipt recorded": "El anfitrión confirmó la recepción del pago",
+  "Receipt not confirmed": "Recepción del pago no confirmada",
+  "Cancelled by guest": "Cancelada por el huésped",
+  "Cancelled by host": "Cancelada por el anfitrión",
+  "Requested": "Solicitada",
+  "Dates": "Fechas",
+  "Protected by the booking request": "Protegidas por la solicitud de reserva",
+  "Not protected": "No protegidas",
+  "Not protected; request was cancelled by guest": "No protegidas; la solicitud fue cancelada por el huésped",
+  "Not protected; request was cancelled by host": "No protegidas; la solicitud fue cancelada por el anfitrión",
+  "Evidence": "Evidencia",
+  "Evidence recorded": "Evidencia registrada",
+  "No evidence uploaded": "No se cargó evidencia",
+  "Marking…": "Marcando…",
+  "Mark in review": "Marcar en revisión",
+  "Loading…": "Cargando…",
+  "Load more": "Cargar más",
+  "This case changed in another review. The queue has been refreshed.": "Este caso cambió durante otra revisión. La cola se actualizó.",
+  "Already in review. No duplicate transition was created.": "Ya está en revisión. No se creó una transición duplicada.",
+  "Marked in review. This did not change payment, receipt, reservation or date protection.": "Se marcó en revisión. Esto no cambió el pago, la confirmación de recepción, la reserva ni la protección de las fechas.",
+  "Money data is unavailable.": "Los datos financieros no están disponibles.",
+  "Operations data is unavailable.": "Los datos de operaciones no están disponibles.",
+  "Loading money data…": "Cargando los datos financieros…",
+  "Loading operations data…": "Cargando los datos de operaciones…",
+  "Recorded payments, refund evidence and recurring-source coverage.": "Pagos registrados, evidencia de reembolsos y cobertura de fuentes recurrentes.",
+  "Paid agreements": "Acuerdos pagados",
+  "Completed agreement payments": "Pagos de acuerdos completados",
+  "Paid bookings": "Reservas pagadas",
+  "Completed booking payments": "Pagos de reservas completados",
+  "Active promos": "Promociones activas",
+  "Promotional access passes": "Pases de acceso promocional",
+  "Confirmed refund records": "Registros de reembolso confirmados",
+  "Lifecycle-confirmed records across connected sources": "Registros confirmados por el ciclo de vida en las fuentes conectadas",
+  "Not defined": "Sin definir",
+  "Awaiting an approved definition and priced subscription source": "Pendiente de una definición aprobada y una fuente de suscripción con precio",
+  "Refund evidence": "Evidencia de reembolsos",
+  "Only explicit completed-refund lifecycle fields count. Amounts appear only where the source stores a refund amount and currency.": "Solo cuentan los campos explícitos del ciclo de vida de reembolsos completados. Los montos aparecen únicamente cuando la fuente registra el monto y la moneda del reembolso.",
+  "Confirmed records": "Registros confirmados",
+  "Pending records": "Registros pendientes",
+  "Explicit refund amounts": "Montos explícitos de reembolso",
+  "Connected sources": "Fuentes conectadas",
+  "No sources returned": "No se devolvieron fuentes",
+  "Recurring source coverage": "Cobertura de fuentes recurrentes",
+  "These are source facts and commitments, not an MRR calculation.": "Estos son datos y compromisos de las fuentes, no un cálculo del MRR.",
+  "Current subscription rows": "Registros de suscripción actuales",
+  "Provider-linked rows": "Registros vinculados al proveedor",
+  "Priced rows": "Registros con precio",
+  "Founder-free rows": "Registros gratuitos del fundador",
+  "Scheduled recurring work": "Trabajo recurrente programado",
+  "Accepted monthly rent": "Arriendo mensual aceptado",
+  "Recognized platform fees": "Comisiones de plataforma reconocidas",
+  "Recorded platform fees on captured, non-refunded agreements. This is earned-fee evidence, not recurring revenue.": "Comisiones de plataforma registradas en acuerdos cobrados y no reembolsados. Esto demuestra comisiones ganadas, no ingresos recurrentes.",
+  "Grouped by currency; currencies are never converted or combined.": "Agrupadas por moneda; las monedas nunca se convierten ni se combinan.",
+  "Finance evidence is waiting for the server-side Admin summary. Existing payment counts remain available.": "La evidencia financiera está esperando el resumen del servidor para administración. Los conteos de pagos existentes siguen disponibles.",
+  "MRR remains intentionally blank.": "El MRR se mantiene intencionalmente sin valor.",
+  "An approved definition and a priced recurring source are required before this dashboard can calculate it.": "Se requiere una definición aprobada y una fuente recurrente con precio antes de que este panel pueda calcularlo.",
+  "Operations": "Operaciones",
+  "Incidents, security controls and infrastructure synchronization.": "Incidentes, controles de seguridad y sincronización de infraestructura.",
+  "Open incidents": "Incidentes abiertos",
+  "Needs attention": "Requiere atención",
+  "Total incidents": "Incidentes totales",
+  "Accountability log": "Registro de auditoría",
+  "Blocked IPs": "IP bloqueadas",
+  "Security block list": "Lista de bloqueos de seguridad",
+  "Last AWS sync": "Última sincronización con AWS",
+  "No synchronization run recorded": "No hay una sincronización registrada",
+  "People directory": "Directorio de personas",
+  "real accounts · sensitive access audited": "cuentas reales · acceso sensible auditado",
+  "Open directory": "Abrir directorio",
+  "Name, email or phone": "Nombre, correo o teléfono",
+  "Search people": "Buscar personas",
+  "Filter people by product": "Filtrar personas por producto",
+  "Filter people by account state": "Filtrar personas por estado de la cuenta",
+  "All account states": "Todos los estados de cuenta",
+  "Claimed": "Reclamada",
+  "Invited": "Invitada",
+  "Migrated": "Migrada",
+  "Loading people…": "Cargando personas…",
+  "PII access audited": "Acceso a datos personales auditado",
+  "People directory is unavailable.": "El directorio de personas no está disponible.",
+  "Loading the administrator directory…": "Cargando el directorio de administración…",
+  "No people match these filters.": "Ninguna persona coincide con estos filtros.",
+  "Person": "Persona",
+  "Signup date": "Fecha de registro",
+  "Email address": "Correo electrónico",
+  "Phone number": "Número de teléfono",
+  "App / product context": "Contexto de aplicación / producto",
+  "Account state": "Estado de la cuenta",
+  "Score": "Puntaje",
+  "Last sign-in": "Último inicio de sesión",
+  "Profile": "Perfil",
+  "No name": "Sin nombre",
+  "Public": "Público",
+  "Private": "Privado",
+  "Profession": "Profesión",
+  "Location": "Ubicación",
+  "Connected apps": "Aplicaciones conectadas",
+  "Onboarding": "Incorporación",
+  "Incomplete": "Incompleta",
+  "Complete": "Completa",
+  "Previous": "Anterior",
+  "Page": "Página",
+  "of": "de",
+  "Next": "Siguiente"
+}), OwAdminNormalizeLanguage = (t) => t === "co" || t === "es" ? "co" : "en", OwAdminStoredLanguage = () => {
+  try {
+    return OwAdminNormalizeLanguage(localStorage.getItem(OwAdminLocaleKey));
+  } catch {
+    return "en";
+  }
+}, OwAdminIntlLocale = () => OwAdminStoredLanguage() === "co" ? "es-CO" : "en-US", OwAdminTranslate = (t, e) => t === "co" ? OwAdminCoCopy[e] || e : e, OwAdminLocaleContext = Z.createContext({ language: "en", locale: "en-US", text: (t) => t }), OwAdminUseLocale = () => Z.useContext(OwAdminLocaleContext), Xn = (t) => new Intl.NumberFormat(OwAdminIntlLocale()).format(Number(t || 0)), Qy = (t) => t != null && t.previous ? `${Math.round((t.current - t.previous) / t.previous * 100) > 0 ? "+" : ""}${Math.round((t.current - t.previous) / t.previous * 100)}%` : t != null && t.current ? "+100%" : "—", kc = (t) => t ? new Date(t).toLocaleDateString(OwAdminIntlLocale(), { month: "short", day: "numeric", year: "2-digit" }) : "—";
 function Kt({ title: t, rows: e = [] }) {
-  const r = Math.max(1, ...e.map((n) => Number(n.value || 0)));
+  const { text: C } = OwAdminUseLocale(), r = Math.max(1, ...e.map((n) => Number(n.value || 0)));
   return /* @__PURE__ */ _.jsxs("section", { className: "owal-card owal-break", children: [
-    /* @__PURE__ */ _.jsx("h3", { children: t }),
-    !e.length && /* @__PURE__ */ _.jsx("p", { className: "owal-empty", children: "No data yet" }),
+    /* @__PURE__ */ _.jsx("h3", { children: C(t) }),
+    !e.length && /* @__PURE__ */ _.jsx("p", { className: "owal-empty", children: C("No data yet") }),
     e.slice(0, 8).map((n) => /* @__PURE__ */ _.jsxs("div", { className: "owal-bar", children: [
       /* @__PURE__ */ _.jsxs("div", { children: [
         /* @__PURE__ */ _.jsx("span", { children: n.label }),
@@ -23047,48 +23240,49 @@ function Kt({ title: t, rows: e = [] }) {
   ] });
 }
 function Yy({ overview: t }) {
-  const e = [["visitors", "Visitors"], ["visits", "Visits"], ["signups", "Signups"], ["onboarded", "Onboarded"], ["product_actions", "Product actions"]];
+  const { text: C } = OwAdminUseLocale(), e = [["visitors", "Visitors"], ["visits", "Visits"], ["signups", "Signups"], ["onboarded", "Onboarded"], ["product_actions", "Product actions"]];
   return /* @__PURE__ */ _.jsx("div", { className: "owal-metrics", children: e.map(([r, n]) => {
     const s = t.kpis[r], i = Qy(s);
     return /* @__PURE__ */ _.jsxs("article", { className: "owal-card", children: [
-      /* @__PURE__ */ _.jsx("small", { children: n }),
+      /* @__PURE__ */ _.jsx("small", { children: C(n) }),
       /* @__PURE__ */ _.jsxs("div", { children: [
         /* @__PURE__ */ _.jsx("strong", { children: Xn(s.current) }),
         /* @__PURE__ */ _.jsx("mark", { className: i.startsWith("+") ? "up" : "", children: i })
       ] }),
       /* @__PURE__ */ _.jsxs("p", { children: [
-        "Previous: ",
+        C("Previous: "),
         Xn(s.previous)
       ] })
     ] }, r);
   }) });
 }
 function Xy({ rows: t = [] }) {
-  const e = t.map((s) => Number(s.visitors || 0)), r = Math.max(1, ...e), n = e.map((s, i) => `${i / Math.max(1, e.length - 1) * 100},${38 - s / r * 32}`).join(" "), o = e.some((s) => s > 0);
+  const { text: C } = OwAdminUseLocale(), e = t.map((s) => Number(s.visitors || 0)), r = Math.max(1, ...e), n = e.map((s, i) => `${i / Math.max(1, e.length - 1) * 100},${38 - s / r * 32}`).join(" "), o = e.some((s) => s > 0);
   return /* @__PURE__ */ _.jsxs("section", { className: "owal-card owal-trend", children: [
     /* @__PURE__ */ _.jsxs("div", { children: [
-      /* @__PURE__ */ _.jsx("h3", { children: "Audience trend" }),
-      /* @__PURE__ */ _.jsx("p", { children: "Unique visitors per day" })
+      /* @__PURE__ */ _.jsx("h3", { children: C("Audience trend") }),
+      /* @__PURE__ */ _.jsx("p", { children: C("Unique visitors per day") })
     ] }),
-    o ? /* @__PURE__ */ _.jsx("svg", { viewBox: "0 0 100 42", preserveAspectRatio: "none", "aria-label": "Daily visitors trend", children: /* @__PURE__ */ _.jsx("polyline", { points: n }) }) : /* @__PURE__ */ _.jsx("p", { className: "owal-empty", children: "No visitor history yet. Privacy-safe collection is active and this trend will populate with new visits." })
+    o ? /* @__PURE__ */ _.jsx("svg", { viewBox: "0 0 100 42", preserveAspectRatio: "none", "aria-label": C("Daily visitors trend"), children: /* @__PURE__ */ _.jsx("polyline", { points: n }) }) : /* @__PURE__ */ _.jsx("p", { className: "owal-empty", children: C("No visitor history yet. Privacy-safe collection is active and this trend will populate with new visits.") })
   ] });
 }
 function Zy({ data: t }) {
+  const { text: C } = OwAdminUseLocale();
   const e = [
     ["OneEvent", [["Events", t.oneevent.events], ["Applications", t.oneevent.applications], ["Registrations", t.oneevent.registrations], ["Pending approvals", t.oneevent.pending_approvals, !0], ["Payment attention", t.oneevent.payment_attention, !0]]],
     ["OneHome", [["Rental listings", t.onehome.rental_listings], ["Rental requests", t.onehome.rental_requests], ["Active contracts", t.onehome.active_contracts], ["Sale listings", t.onehome.sale_listings], ["Sale deals", t.onehome.sale_deals]]],
     ["Operations health", [["Open alerts", t.health.open_alerts, !0], ["Onboarding incomplete", t.health.onboarding_incomplete, !0], ["Email failures", t.health.email_failures, !0]]]
   ];
   return /* @__PURE__ */ _.jsx("div", { className: "owal-ops", children: e.map(([r, n]) => /* @__PURE__ */ _.jsxs("section", { className: "owal-card", children: [
-    /* @__PURE__ */ _.jsx("h3", { children: r }),
+    /* @__PURE__ */ _.jsx("h3", { children: C(r) }),
     /* @__PURE__ */ _.jsx("dl", { children: n.map(([s, i, o]) => /* @__PURE__ */ _.jsxs("div", { children: [
-      /* @__PURE__ */ _.jsx("dt", { children: s }),
+      /* @__PURE__ */ _.jsx("dt", { children: C(s) }),
       /* @__PURE__ */ _.jsx("dd", { className: o && i ? "attention" : "", children: Xn(i) })
     ] }, s)) })
   ] }, r)) });
 }
 function ew({ growthOnly: B = !1 } = {}) {
-  const [t, e] = Z.useState(30), [r, n] = Z.useState(""), [s, i] = Z.useState("human"), [o, a] = Z.useState(null), [l, u] = Z.useState("");
+  const { language: D, text: C } = OwAdminUseLocale(), [t, e] = Z.useState(30), [r, n] = Z.useState(""), [s, i] = Z.useState("human"), [o, a] = Z.useState(null), [l, u] = Z.useState("");
   return Z.useEffect(() => {
     let c = !0;
     return a(null), Ti.rpc("admin_analytics_overview", { p_days: t, p_product: r || null, p_traffic: s }).then(({ data: h, error: d }) => {
@@ -23099,12 +23293,12 @@ function ew({ growthOnly: B = !1 } = {}) {
   }, [t, r, s]), /* @__PURE__ */ _.jsxs("div", { className: "owal-stack", children: [
     /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-filters", children: [
       /* @__PURE__ */ _.jsxs("select", { value: t, onChange: (c) => e(Number(c.target.value)), children: [
-        /* @__PURE__ */ _.jsx("option", { value: "7", children: "Last 7 days" }),
-        /* @__PURE__ */ _.jsx("option", { value: "30", children: "Last 30 days" }),
-        /* @__PURE__ */ _.jsx("option", { value: "90", children: "Last 90 days" })
+        /* @__PURE__ */ _.jsx("option", { value: "7", children: C("Last 7 days") }),
+        /* @__PURE__ */ _.jsx("option", { value: "30", children: C("Last 30 days") }),
+        /* @__PURE__ */ _.jsx("option", { value: "90", children: C("Last 90 days") })
       ] }),
       /* @__PURE__ */ _.jsxs("select", { value: r, onChange: (c) => n(c.target.value), children: [
-        /* @__PURE__ */ _.jsx("option", { value: "", children: "All products" }),
+        /* @__PURE__ */ _.jsx("option", { value: "", children: C("All products") }),
         /* @__PURE__ */ _.jsx("option", { value: "onejob", children: "OneJob" }),
         /* @__PURE__ */ _.jsx("option", { value: "oneevent", children: "OneEvent" }),
         /* @__PURE__ */ _.jsx("option", { value: "onehome", children: "OneHome" }),
@@ -23112,20 +23306,20 @@ function ew({ growthOnly: B = !1 } = {}) {
         /* @__PURE__ */ _.jsx("option", { value: "onescore", children: "OneScore" })
       ] }),
       /* @__PURE__ */ _.jsxs("select", { value: s, onChange: (c) => i(c.target.value), children: [
-        /* @__PURE__ */ _.jsx("option", { value: "human", children: "Human traffic" }),
-        /* @__PURE__ */ _.jsx("option", { value: "bot", children: "Bot traffic" }),
-        /* @__PURE__ */ _.jsx("option", { value: "all", children: "All traffic" })
+        /* @__PURE__ */ _.jsx("option", { value: "human", children: C("Human traffic") }),
+        /* @__PURE__ */ _.jsx("option", { value: "bot", children: C("Bot traffic") }),
+        /* @__PURE__ */ _.jsx("option", { value: "all", children: C("All traffic") })
       ] })
     ] }),
     o && /* @__PURE__ */ _.jsxs("div", { className: `owal-card owal-collection ${Number(o.collection && o.collection.event_count || 0) > 0 ? "is-live" : "is-new"}`, children: [
-      /* @__PURE__ */ _.jsx("b", { children: Number(o.collection && o.collection.event_count || 0) > 0 ? "Live visitor collection is active" : "Visitor collection is live — history starts now" }),
-      /* @__PURE__ */ _.jsx("span", { children: Number(o.collection && o.collection.event_count || 0) > 0 ? `${Xn(o.collection.event_count)} privacy-safe events collected since ${kc(o.collection.first_event_at)}` : "No historical visitor events were available before this release. New visits will appear here automatically." })
+      /* @__PURE__ */ _.jsx("b", { children: C(Number(o.collection && o.collection.event_count || 0) > 0 ? "Live visitor collection is active" : "Visitor collection is live — history starts now") }),
+      /* @__PURE__ */ _.jsx("span", { children: Number(o.collection && o.collection.event_count || 0) > 0 ? D === "co" ? `${Xn(o.collection.event_count)} eventos respetuosos de la privacidad recopilados desde ${kc(o.collection.first_event_at)}` : `${Xn(o.collection.event_count)} privacy-safe events collected since ${kc(o.collection.first_event_at)}` : C("No historical visitor events were available before this release. New visits will appear here automatically.") })
     ] }),
     l && /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-warn", children: [
-      /* @__PURE__ */ _.jsx("b", { children: "Dashboard data is unavailable." }),
+      /* @__PURE__ */ _.jsx("b", { children: C("Dashboard data is unavailable.") }),
       /* @__PURE__ */ _.jsx("p", { children: l })
     ] }),
-    !o && !l && /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-loading", children: "Loading live dashboard…" }),
+    !o && !l && /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-loading", children: C("Loading live dashboard…") }),
     o && /* @__PURE__ */ _.jsxs(_.Fragment, { children: [
       /* @__PURE__ */ _.jsx(Yy, { overview: o }),
       /* @__PURE__ */ _.jsx(Xy, { rows: o.daily }),
@@ -23142,8 +23336,8 @@ function ew({ growthOnly: B = !1 } = {}) {
     ] })
   ] });
 }
-function OwFinanceAmounts(t, e) {
-  return Array.isArray(t) && t.length ? t.map((r) => `${r.currency || "UNKNOWN"} ${new Intl.NumberFormat().format(Number(r[e] || 0))}`).join(" · ") : "No recorded amounts";
+function OwFinanceAmounts(t, e, r) {
+  return Array.isArray(t) && t.length ? t.map((n) => `${n.currency || "UNKNOWN"} ${new Intl.NumberFormat(OwAdminIntlLocale()).format(Number(n[e] || 0))}`).join(" · ") : r("No recorded amounts");
 }
 function OwFinanceLine({ label: t, value: e }) {
   return /* @__PURE__ */ _.jsxs("div", { children: [
@@ -23159,17 +23353,17 @@ function OwFinancePanel({ title: t, intro: e, children: r, note: n }) {
     n && /* @__PURE__ */ _.jsx("p", { className: "owal-finance-note", children: n })
   ] });
 }
-function OwPaymentHelpDate(t) {
+function OwPaymentHelpDate(t, locale) {
   if (!t)
     return "—";
   const e = new Date(t);
-  return Number.isNaN(e.getTime()) ? "—" : e.toLocaleString(void 0, { dateStyle: "medium", timeStyle: "short" });
+  return Number.isNaN(e.getTime()) ? "—" : e.toLocaleString(locale || "en-US", { dateStyle: "medium", timeStyle: "short" });
 }
-function OwPaymentHelpStatus(t) {
-  return t === "in_review" ? "In review" : "Open";
+function OwPaymentHelpStatus(t, e) {
+  return e(t === "in_review" ? "In review" : "Open");
 }
-function OwPaymentHelpError(t) {
-  return t && typeof t.message === "string" && t.message ? t.message : "External payment help request failed.";
+function OwPaymentHelpError(t, e) {
+  return t && typeof t.message === "string" && t.message ? t.message : e("External payment help request failed.");
 }
 function OwPaymentHelpRequestGate() {
   return {
@@ -23213,12 +23407,14 @@ function OwPaymentHelpRequestGate() {
   };
 }
 function OwExternalPaymentHelpQueue() {
-  const [data, setData] = Z.useState(null), [filter, setFilter] = Z.useState("open"), [error, setError] = Z.useState(""), [refresh, setRefresh] = Z.useState(0), [busyCaseId, setBusyCaseId] = Z.useState(null), [loadingMore, setLoadingMore] = Z.useState(!1), [notice, setNotice] = Z.useState(""), gateRef = Z.useRef(null), filterRef = Z.useRef(filter);
+  const { locale: D, text: C } = OwAdminUseLocale(), [data, setData] = Z.useState(null), [filter, setFilter] = Z.useState("open"), [error, setError] = Z.useState(""), [refresh, setRefresh] = Z.useState(0), [busyCaseId, setBusyCaseId] = Z.useState(null), [loadingMore, setLoadingMore] = Z.useState(!1), [notice, setNotice] = Z.useState(""), gateRef = Z.useRef(null), filterRef = Z.useRef(filter);
   gateRef.current || (gateRef.current = OwPaymentHelpRequestGate());
   const gate = gateRef.current;
   Z.useEffect(() => (gate.mount(), () => gate.unmount()), [gate]), Z.useEffect(() => {
     filterRef.current = filter;
   }, [filter]), Z.useEffect(() => {
+    setNotice("");
+  }, [D]), Z.useEffect(() => {
     const generation = gate.beginRead();
     setData(null), setError(""), setLoadingMore(!1);
     (async () => {
@@ -23226,7 +23422,7 @@ function OwExternalPaymentHelpQueue() {
         const { data: result, error: rpcError } = await Ti.rpc("admin_external_payment_help_queue", { p_status: filter, p_limit: 50, p_before_created_at: null, p_before_id: null });
         gate.currentRead(generation) && (rpcError ? setError(rpcError.message) : setData(result));
       } catch (readError) {
-        gate.currentRead(generation) && setError(OwPaymentHelpError(readError));
+        gate.currentRead(generation) && setError(OwPaymentHelpError(readError, C));
       }
     })();
   }, [filter, refresh, gate]);
@@ -23245,9 +23441,9 @@ function OwExternalPaymentHelpQueue() {
         setNotice(rpcError.message);
         return;
       }
-      result != null && result.conflict ? setNotice("This case changed in another review. The queue has been refreshed.") : result != null && result.changed === !1 ? setNotice("Already in review. No duplicate transition was created.") : setNotice("Marked in review. This did not change payment, receipt, reservation or date protection."), shouldRefresh = !0;
+      result != null && result.conflict ? setNotice(C("This case changed in another review. The queue has been refreshed.")) : result != null && result.changed === !1 ? setNotice(C("Already in review. No duplicate transition was created.")) : setNotice(C("Marked in review. This did not change payment, receipt, reservation or date protection.")), shouldRefresh = !0;
     } catch (mutationError) {
-      gate.mounted && setNotice(OwPaymentHelpError(mutationError));
+      gate.mounted && setNotice(OwPaymentHelpError(mutationError, C));
     } finally {
       gate.endMutation() && (setBusyCaseId(null), shouldRefresh && invalidateAndRefresh());
     }
@@ -23272,7 +23468,7 @@ function OwExternalPaymentHelpQueue() {
         return gate.currentPagination(token, filterSnapshot, filterRef.current) && cursor && cursor.created_at === cursorSnapshot.created_at && cursor.id === cursorSnapshot.id ? q(q({}, result), {}, { rows: [...current.rows || [], ...result.rows || []] }) : current;
       });
     } catch (paginationError) {
-      gate.currentPagination(token, filterSnapshot, filterRef.current) && setNotice(OwPaymentHelpError(paginationError));
+      gate.currentPagination(token, filterSnapshot, filterRef.current) && setNotice(OwPaymentHelpError(paginationError, C));
     } finally {
       gate.endPagination(token.paginationToken) && setLoadingMore(!1);
     }
@@ -23280,59 +23476,59 @@ function OwExternalPaymentHelpQueue() {
   return /* @__PURE__ */ _.jsxs("section", { className: "owal-card owal-support-queue", "aria-labelledby": "external-payment-help-heading", children: [
     /* @__PURE__ */ _.jsxs("div", { className: "owal-support-heading", children: [
       /* @__PURE__ */ _.jsxs("div", { children: [
-        /* @__PURE__ */ _.jsx("h3", { id: "external-payment-help-heading", children: "External payment help requests" }),
-        /* @__PURE__ */ _.jsx("p", { children: "Review status only. This does not confirm payment, accept a reservation, release dates, issue a refund or send a message." })
+        /* @__PURE__ */ _.jsx("h3", { id: "external-payment-help-heading", children: C("External payment help requests") }),
+        /* @__PURE__ */ _.jsx("p", { children: C("Review status only. This does not confirm payment, accept a reservation, release dates, issue a refund or send a message.") })
       ] }),
-      /* @__PURE__ */ _.jsxs("select", { "aria-label": "Filter external payment help requests", value: filter, onChange: (event) => {
+      /* @__PURE__ */ _.jsxs("select", { "aria-label": C("Filter external payment help requests"), value: filter, onChange: (event) => {
         const nextFilter = event.target.value;
         filterRef.current = nextFilter, gate.invalidate(), setLoadingMore(!1), setNotice(""), setFilter(nextFilter);
       }, children: [
-        /* @__PURE__ */ _.jsx("option", { value: "open", children: "Open" }),
-        /* @__PURE__ */ _.jsx("option", { value: "in_review", children: "In review" }),
-        /* @__PURE__ */ _.jsx("option", { value: "all", children: "All" })
+        /* @__PURE__ */ _.jsx("option", { value: "open", children: C("Open filter") }),
+        /* @__PURE__ */ _.jsx("option", { value: "in_review", children: C("In review") }),
+        /* @__PURE__ */ _.jsx("option", { value: "all", children: C("All filter") })
       ] })
     ] }),
-    /* @__PURE__ */ _.jsxs("div", { className: "owal-support-counts", "aria-label": "Queue totals", children: [
-      /* @__PURE__ */ _.jsxs("span", { children: ["Open ", /* @__PURE__ */ _.jsx("b", { children: Xn(counts.open) })] }),
-      /* @__PURE__ */ _.jsxs("span", { children: ["In review ", /* @__PURE__ */ _.jsx("b", { children: Xn(counts.in_review) })] })
+    /* @__PURE__ */ _.jsxs("div", { className: "owal-support-counts", "aria-label": C("Queue totals"), children: [
+      /* @__PURE__ */ _.jsxs("span", { children: [C("Open count"), /* @__PURE__ */ _.jsx("b", { children: Xn(counts.open) })] }),
+      /* @__PURE__ */ _.jsxs("span", { children: [C("In review count"), /* @__PURE__ */ _.jsx("b", { children: Xn(counts.in_review) })] })
     ] }),
     error && /* @__PURE__ */ _.jsxs("div", { className: "owal-support-error", role: "alert", children: [
       /* @__PURE__ */ _.jsx("span", { children: error }),
-      /* @__PURE__ */ _.jsx("button", { type: "button", onClick: () => (setNotice(""), invalidateAndRefresh()), children: "Try again" })
+      /* @__PURE__ */ _.jsx("button", { type: "button", onClick: () => (setNotice(""), invalidateAndRefresh()), children: C("Try again") })
     ] }),
-    !data && !error && /* @__PURE__ */ _.jsx("div", { className: "owal-loading", children: "Loading external payment help requests…" }),
-    data && !error && !rows.length && /* @__PURE__ */ _.jsx("div", { className: "owal-empty", children: "No external payment help requests match this filter." }),
+    !data && !error && /* @__PURE__ */ _.jsx("div", { className: "owal-loading", children: C("Loading external payment help requests…") }),
+    data && !error && !rows.length && /* @__PURE__ */ _.jsx("div", { className: "owal-empty", children: C("No external payment help requests match this filter.") }),
     notice && /* @__PURE__ */ _.jsx("div", { className: "owal-support-notice", role: "status", children: notice }),
     !!rows.length && /* @__PURE__ */ _.jsx("div", { className: "owal-support-list", children: rows.map((f) => {
-      const p = !!f.host_receipt_confirmed_at || f.payment_status === "received", m = String(f.request_id || "").slice(0, 8) || "unknown", w = String(f.payment_rail || "external transfer").replaceAll("_", " "), b = f.request_state === "cancelled_by_guest" ? "Cancelled by guest" : f.request_state === "cancelled_by_host" ? "Cancelled by host" : String(f.request_state || "—").replaceAll("_", " "), x = f.request_state === "cancelled_by_guest" ? "Not protected; request was cancelled by guest" : f.request_state === "cancelled_by_host" ? "Not protected; request was cancelled by host" : "Not protected";
+      const p = !!f.host_receipt_confirmed_at || f.payment_status === "received", m = String(f.request_id || "").slice(0, 8) || "unknown", w = String(f.payment_rail || "external transfer").replaceAll("_", " "), b = f.request_state === "cancelled_by_guest" ? C("Cancelled by guest") : f.request_state === "cancelled_by_host" ? C("Cancelled by host") : f.request_state === "requested" ? C("Requested") : String(f.request_state || "—").replaceAll("_", " "), x = f.request_state === "cancelled_by_guest" ? C("Not protected; request was cancelled by guest") : f.request_state === "cancelled_by_host" ? C("Not protected; request was cancelled by host") : C("Not protected");
       return /* @__PURE__ */ _.jsxs("article", { className: "owal-support-row", children: [
         /* @__PURE__ */ _.jsxs("div", { className: "owal-support-row-top", children: [
           /* @__PURE__ */ _.jsxs("div", { children: [
-            /* @__PURE__ */ _.jsx("small", { children: "Request" }),
+            /* @__PURE__ */ _.jsx("small", { children: C("Request") }),
             /* @__PURE__ */ _.jsxs("strong", { children: ["#", m] })
           ] }),
-          /* @__PURE__ */ _.jsx("span", { className: `owal-support-status ${f.status === "in_review" ? "is-reviewing" : ""}`, children: OwPaymentHelpStatus(f.status) })
+          /* @__PURE__ */ _.jsx("span", { className: `owal-support-status ${f.status === "in_review" ? "is-reviewing" : ""}`, children: OwPaymentHelpStatus(f.status, C) })
         ] }),
         /* @__PURE__ */ _.jsx("dl", { className: "owal-support-facts", children: [
-          ["Payment rail", w],
-          ["Payment reported", OwPaymentHelpDate(f.payment_reported_at)],
-          ["Help requested", OwPaymentHelpDate(f.help_requested_at)],
-          ["Receipt", p ? "Host receipt recorded" : "Receipt not confirmed"],
-          ["Request", b],
-          ["Dates", f.dates_protected ? "Protected by the booking request" : x],
-          ["Evidence", f.evidence_present ? "Evidence recorded" : "No evidence uploaded"]
+          [C("Payment rail"), w],
+          [C("Payment reported"), OwPaymentHelpDate(f.payment_reported_at, D)],
+          [C("Help requested"), OwPaymentHelpDate(f.help_requested_at, D)],
+          [C("Receipt"), p ? C("Host receipt recorded") : C("Receipt not confirmed")],
+          [C("Request"), b],
+          [C("Dates"), f.dates_protected ? C("Protected by the booking request") : x],
+          [C("Evidence"), f.evidence_present ? C("Evidence recorded") : C("No evidence uploaded")]
         ].map(([M, C]) => /* @__PURE__ */ _.jsxs("div", { children: [
           /* @__PURE__ */ _.jsx("dt", { children: M }),
           /* @__PURE__ */ _.jsx("dd", { children: C })
         ] }, M)) }),
-        f.status === "open" && /* @__PURE__ */ _.jsx("button", { className: "owal-support-action", type: "button", disabled: busyCaseId !== null, onClick: () => markInReview(f), children: busyCaseId === f.case_id ? "Marking…" : "Mark in review" })
+        f.status === "open" && /* @__PURE__ */ _.jsx("button", { className: "owal-support-action", type: "button", disabled: busyCaseId !== null, onClick: () => markInReview(f), children: C(busyCaseId === f.case_id ? "Marking…" : "Mark in review") })
       ] }, f.case_id);
     }) }),
-    (data == null ? void 0 : data.next_cursor) && /* @__PURE__ */ _.jsx("button", { className: "owal-support-more", type: "button", disabled: loadingMore || busyCaseId !== null, onClick: loadMore, children: loadingMore ? "Loading…" : "Load more" })
+    (data == null ? void 0 : data.next_cursor) && /* @__PURE__ */ _.jsx("button", { className: "owal-support-more", type: "button", disabled: loadingMore || busyCaseId !== null, onClick: loadMore, children: C(loadingMore ? "Loading…" : "Load more") })
   ] });
 }
 function ow({ mode: t }) {
-  const [e, r] = Z.useState(null), [n, s] = Z.useState("");
+  const { language: D, text: C } = OwAdminUseLocale(), [e, r] = Z.useState(null), [n, s] = Z.useState("");
   Z.useEffect(() => {
     let i = !0;
     return Ti.rpc("admin_dashboard_sections").then(({ data: o, error: a }) => {
@@ -23343,17 +23539,17 @@ function ow({ mode: t }) {
   }, []);
   if (n)
     return /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-warn", children: [
-      /* @__PURE__ */ _.jsx("b", { children: `${t === "money" ? "Money" : "Operations"} data is unavailable.` }),
+      /* @__PURE__ */ _.jsx("b", { children: C(t === "money" ? "Money data is unavailable." : "Operations data is unavailable.") }),
       /* @__PURE__ */ _.jsx("p", { children: n })
     ] });
   if (!e)
-    return /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-loading", children: `Loading ${t === "money" ? "money" : "operations"} data…` });
+    return /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-loading", children: C(t === "money" ? "Loading money data…" : "Loading operations data…") });
   if (t === "money") {
     const i = e.money, o = i.finance || {}, a = o.refunds || {}, l = o.recurring || {};
     return /* @__PURE__ */ _.jsxs("section", { className: "owal-stack", children: [
       /* @__PURE__ */ _.jsxs("div", { className: "owal-section-heading", children: [
-        /* @__PURE__ */ _.jsx("h2", { children: "Money" }),
-        /* @__PURE__ */ _.jsx("p", { children: "Recorded payments, refund evidence and recurring-source coverage." })
+        /* @__PURE__ */ _.jsx("h2", { children: C("Money") }),
+        /* @__PURE__ */ _.jsx("p", { children: C("Recorded payments, refund evidence and recurring-source coverage.") })
       ] }),
       /* @__PURE__ */ _.jsx("div", { className: "owal-section-kpis", children: [
         ["Paid agreements", i.paid_agreements, "Completed agreement payments"],
@@ -23362,55 +23558,55 @@ function ow({ mode: t }) {
         ["Confirmed refund records", a.confirmed_records ?? i.refunds, "Lifecycle-confirmed records across connected sources"],
         ["MRR", l.mrr == null ? "Not defined" : l.mrr, "Awaiting an approved definition and priced subscription source"]
       ].map(([c, h, d]) => /* @__PURE__ */ _.jsxs("article", { className: "owal-card", children: [
-        /* @__PURE__ */ _.jsx("small", { children: c }),
-        /* @__PURE__ */ _.jsx("strong", { children: h == null ? "—" : typeof h === "number" ? Xn(h) : h }),
-        /* @__PURE__ */ _.jsx("p", { children: d })
+        /* @__PURE__ */ _.jsx("small", { children: C(c) }),
+        /* @__PURE__ */ _.jsx("strong", { children: h == null ? "—" : typeof h === "number" ? Xn(h) : C(h) }),
+        /* @__PURE__ */ _.jsx("p", { children: C(d) })
       ] }, c)) }),
       o.generated_at ? /* @__PURE__ */ _.jsxs("div", { className: "owal-finance-grid", children: [
-        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: "Refund evidence", intro: "Only explicit completed-refund lifecycle fields count. Amounts appear only where the source stores a refund amount and currency.", note: a.amount_scope, children: /* @__PURE__ */ _.jsxs("dl", { className: "owal-finance-list", children: [
-          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Confirmed records", value: Xn(a.confirmed_records) }),
-          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Pending records", value: Xn(a.pending_records) }),
-          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Explicit refund amounts", value: OwFinanceAmounts(a.amounts_by_currency, "amount") }),
-          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Connected sources", value: (a.sources || []).map((c) => `${c.label}: ${Xn(c.confirmed_records)}`).join(" · ") || "No sources returned" })
+        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: C("Refund evidence"), intro: C("Only explicit completed-refund lifecycle fields count. Amounts appear only where the source stores a refund amount and currency."), note: a.amount_scope, children: /* @__PURE__ */ _.jsxs("dl", { className: "owal-finance-list", children: [
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Confirmed records"), value: Xn(a.confirmed_records) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Pending records"), value: Xn(a.pending_records) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Explicit refund amounts"), value: OwFinanceAmounts(a.amounts_by_currency, "amount", C) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Connected sources"), value: (a.sources || []).map((c) => `${c.label}: ${Xn(c.confirmed_records)}`).join(" · ") || C("No sources returned") })
         ] }) }),
-        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: "Recurring source coverage", intro: "These are source facts and commitments, not an MRR calculation.", note: l.commitment_scope, children: /* @__PURE__ */ _.jsxs("dl", { className: "owal-finance-list", children: [
-          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Current subscription rows", value: Xn(l.current_subscription_rows) }),
-          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Provider-linked rows", value: Xn(l.provider_linked_subscription_rows) }),
-          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Priced rows", value: Xn(l.priced_subscription_rows) }),
-          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Founder-free rows", value: Xn(l.founder_free_rows) }),
-          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Scheduled recurring work", value: OwFinanceAmounts(l.scheduled_recurring_work, "amount") }),
-          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: "Accepted monthly rent", value: OwFinanceAmounts(l.accepted_monthly_rent, "monthly_rent") })
+        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: C("Recurring source coverage"), intro: C("These are source facts and commitments, not an MRR calculation."), note: l.commitment_scope, children: /* @__PURE__ */ _.jsxs("dl", { className: "owal-finance-list", children: [
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Current subscription rows"), value: Xn(l.current_subscription_rows) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Provider-linked rows"), value: Xn(l.provider_linked_subscription_rows) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Priced rows"), value: Xn(l.priced_subscription_rows) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Founder-free rows"), value: Xn(l.founder_free_rows) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Scheduled recurring work"), value: OwFinanceAmounts(l.scheduled_recurring_work, "amount", C) }),
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Accepted monthly rent"), value: OwFinanceAmounts(l.accepted_monthly_rent, "monthly_rent", C) })
         ] }) }),
-        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: "Recognized platform fees", intro: "Recorded platform fees on captured, non-refunded agreements. This is earned-fee evidence, not recurring revenue.", note: "Grouped by currency; currencies are never converted or combined.", children: /* @__PURE__ */ _.jsx("strong", { className: "owal-finance-total", children: OwFinanceAmounts(o.recognized_platform_fees, "platform_fee") }) })
-      ] }) : /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-disclosure", children: "Finance evidence is waiting for the server-side Admin summary. Existing payment counts remain available." }),
+        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: C("Recognized platform fees"), intro: C("Recorded platform fees on captured, non-refunded agreements. This is earned-fee evidence, not recurring revenue."), note: C("Grouped by currency; currencies are never converted or combined."), children: /* @__PURE__ */ _.jsx("strong", { className: "owal-finance-total", children: OwFinanceAmounts(o.recognized_platform_fees, "platform_fee", C) }) })
+      ] }) : /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-disclosure", children: C("Finance evidence is waiting for the server-side Admin summary. Existing payment counts remain available.") }),
       /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-disclosure", children: [
-        /* @__PURE__ */ _.jsx("b", { children: "MRR remains intentionally blank." }),
+        /* @__PURE__ */ _.jsx("b", { children: C("MRR remains intentionally blank.") }),
         " ",
-        l.decision_question || "An approved definition and a priced recurring source are required before this dashboard can calculate it."
+        l.decision_question || C("An approved definition and a priced recurring source are required before this dashboard can calculate it.")
       ] })
     ] });
   }
   const i = e.ops, o = i.last_aws_sync || {};
   return /* @__PURE__ */ _.jsxs("section", { className: "owal-stack", children: [
     /* @__PURE__ */ _.jsxs("div", { className: "owal-section-heading", children: [
-      /* @__PURE__ */ _.jsx("h2", { children: "Operations" }),
-      /* @__PURE__ */ _.jsx("p", { children: "Incidents, security controls and infrastructure synchronization." })
+      /* @__PURE__ */ _.jsx("h2", { children: C("Operations") }),
+      /* @__PURE__ */ _.jsx("p", { children: C("Incidents, security controls and infrastructure synchronization.") })
     ] }),
     /* @__PURE__ */ _.jsx("div", { className: "owal-section-kpis", children: [
       ["Open incidents", i.open_incidents, "Needs attention"],
       ["Total incidents", i.total_incidents, "Accountability log"],
       ["Blocked IPs", i.blocked_ips, "Security block list"],
-      ["Last AWS sync", o.status || "—", o.started_at ? `${kc(o.started_at)} · ${Xn(o.records_synced)} records` : "No synchronization run recorded"]
+      ["Last AWS sync", o.status || "—", o.started_at ? `${kc(o.started_at)} · ${Xn(o.records_synced)} ${D === "co" ? "registros" : "records"}` : "No synchronization run recorded"]
     ].map(([a, l, u]) => /* @__PURE__ */ _.jsxs("article", { className: "owal-card", children: [
-      /* @__PURE__ */ _.jsx("small", { children: a }),
+      /* @__PURE__ */ _.jsx("small", { children: C(a) }),
       /* @__PURE__ */ _.jsx("strong", { children: typeof l === "number" ? Xn(l) : l }),
-      /* @__PURE__ */ _.jsx("p", { children: u })
+      /* @__PURE__ */ _.jsx("p", { children: C(u) })
     ] }, a)) }),
     /* @__PURE__ */ _.jsx(OwExternalPaymentHelpQueue, {})
   ] });
 }
 function Sc({ compact: t = !1, viewAll: e }) {
-  const [r, n] = Z.useState(""), [s, i] = Z.useState(""), [o, a] = Z.useState(""), [l, u] = Z.useState(""), [c, h] = Z.useState(null), [d, g] = Z.useState(null), [v, y] = Z.useState(""), [f, p] = Z.useState(0), m = 50;
+  const { language: D, text: C } = OwAdminUseLocale(), [r, n] = Z.useState(""), [s, i] = Z.useState(""), [o, a] = Z.useState(""), [l, u] = Z.useState(""), [c, h] = Z.useState(null), [d, g] = Z.useState(null), [v, y] = Z.useState(""), [f, p] = Z.useState(0), m = 50;
   Z.useEffect(() => {
     const w = setTimeout(() => i(r.trim()), 250);
     return () => clearTimeout(w);
@@ -23422,40 +23618,40 @@ function Sc({ compact: t = !1, viewAll: e }) {
       w = !1;
     };
   }, [s, o, l, t, f]);
-  const k = Z.useMemo(() => [["", "All products"], ["onejob", "OneJob"], ["oneevent", "OneEvent"], ["onehome", "OneHome"], ["onesocial", "OneSocial"], ["onescore", "OneScore"], ["oneagent", "OneAgent"]], []), S = c ? Math.max(1, Math.ceil(Number(c.total || 0) / m)) : 1;
+  const k = Z.useMemo(() => [["", C("All products")], ["onejob", "OneJob"], ["oneevent", "OneEvent"], ["onehome", "OneHome"], ["onesocial", "OneSocial"], ["onescore", "OneScore"], ["oneagent", "OneAgent"]], [C]), S = c ? Math.max(1, Math.ceil(Number(c.total || 0) / m)) : 1;
   if (t)
     return /* @__PURE__ */ _.jsxs("section", { className: "owal-card owal-people-summary", children: [
       /* @__PURE__ */ _.jsxs("div", { children: [
-        /* @__PURE__ */ _.jsx("small", { children: "People directory" }),
+        /* @__PURE__ */ _.jsx("small", { children: C("People directory") }),
         /* @__PURE__ */ _.jsx("strong", { children: c ? Xn(c.total) : "—" }),
-        /* @__PURE__ */ _.jsx("span", { children: "real accounts · sensitive access audited" })
+        /* @__PURE__ */ _.jsx("span", { children: C("real accounts · sensitive access audited") })
       ] }),
-      /* @__PURE__ */ _.jsx("button", { onClick: e, children: "Open directory" })
+      /* @__PURE__ */ _.jsx("button", { onClick: e, children: C("Open directory") })
     ] });
   return /* @__PURE__ */ _.jsxs("section", { className: "owal-stack", children: [
     /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-people-filters", children: [
-      /* @__PURE__ */ _.jsx("input", { value: r, onChange: (w) => n(w.target.value), placeholder: "Name, email or phone", "aria-label": "Search people" }),
-      /* @__PURE__ */ _.jsx("select", { value: o, onChange: (w) => a(w.target.value), "aria-label": "Filter people by product", children: k.map(([w, b]) => /* @__PURE__ */ _.jsx("option", { value: w, children: b }, w)) }),
-      /* @__PURE__ */ _.jsxs("select", { value: l, onChange: (w) => u(w.target.value), "aria-label": "Filter people by account state", children: [
-        /* @__PURE__ */ _.jsx("option", { value: "", children: "All account states" }),
-        /* @__PURE__ */ _.jsx("option", { value: "claimed", children: "Claimed" }),
-        /* @__PURE__ */ _.jsx("option", { value: "invited", children: "Invited" }),
-        /* @__PURE__ */ _.jsx("option", { value: "migrated", children: "Migrated" }),
-        /* @__PURE__ */ _.jsx("option", { value: "onboarding", children: "Onboarding incomplete" })
+      /* @__PURE__ */ _.jsx("input", { value: r, onChange: (w) => n(w.target.value), placeholder: C("Name, email or phone"), "aria-label": C("Search people") }),
+      /* @__PURE__ */ _.jsx("select", { value: o, onChange: (w) => a(w.target.value), "aria-label": C("Filter people by product"), children: k.map(([w, b]) => /* @__PURE__ */ _.jsx("option", { value: w, children: b }, w)) }),
+      /* @__PURE__ */ _.jsxs("select", { value: l, onChange: (w) => u(w.target.value), "aria-label": C("Filter people by account state"), children: [
+        /* @__PURE__ */ _.jsx("option", { value: "", children: C("All account states") }),
+        /* @__PURE__ */ _.jsx("option", { value: "claimed", children: C("Claimed") }),
+        /* @__PURE__ */ _.jsx("option", { value: "invited", children: C("Invited") }),
+        /* @__PURE__ */ _.jsx("option", { value: "migrated", children: C("Migrated") }),
+        /* @__PURE__ */ _.jsx("option", { value: "onboarding", children: C("Onboarding incomplete") })
       ] })
     ] }),
     /* @__PURE__ */ _.jsxs("div", { className: "owal-meta", children: [
-      /* @__PURE__ */ _.jsx("span", { children: c ? `${Xn(c.total)} people · newest first` : "Loading people…" }),
-      /* @__PURE__ */ _.jsx("span", { children: "PII access audited" })
+      /* @__PURE__ */ _.jsx("span", { children: c ? D === "co" ? `${Xn(c.total)} personas · más recientes primero` : `${Xn(c.total)} people · newest first` : C("Loading people…") }),
+      /* @__PURE__ */ _.jsx("span", { children: C("PII access audited") })
     ] }),
     v && /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-warn", children: [
-      /* @__PURE__ */ _.jsx("b", { children: "People directory is unavailable." }),
+      /* @__PURE__ */ _.jsx("b", { children: C("People directory is unavailable.") }),
       /* @__PURE__ */ _.jsx("p", { children: v })
     ] }),
-    !c && !v && /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-loading", children: "Loading the administrator directory…" }),
-    c && !c.rows.length && /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-empty", children: "No people match these filters." }),
+    !c && !v && /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-loading", children: C("Loading the administrator directory…") }),
+    c && !c.rows.length && /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-empty", children: C("No people match these filters.") }),
     c && c.rows.length > 0 && /* @__PURE__ */ _.jsx("div", { className: "owal-card owal-table-card", children: /* @__PURE__ */ _.jsx("div", { className: "owal-table-wrap", children: /* @__PURE__ */ _.jsxs("table", { className: "owal-people-table", children: [
-      /* @__PURE__ */ _.jsx("thead", { children: /* @__PURE__ */ _.jsx("tr", { children: ["Person", "Signup date", "Email address", "Phone number", "App / product context", "Account state", "Score", "Last sign-in", "Profile"].map((w) => /* @__PURE__ */ _.jsx("th", { scope: "col", children: w }, w)) }) }),
+      /* @__PURE__ */ _.jsx("thead", { children: /* @__PURE__ */ _.jsx("tr", { children: ["Person", "Signup date", "Email address", "Phone number", "App / product context", "Account state", "Score", "Last sign-in", "Profile"].map((w) => /* @__PURE__ */ _.jsx("th", { scope: "col", children: C(w) }, w)) }) }),
       /* @__PURE__ */ _.jsx("tbody", { children: c.rows.map((w) => {
         const b = d === w.user_id, x = (w.products || []).filter((M) => M.status === "active");
         return /* @__PURE__ */ _.jsxs(_.Fragment, { children: [
@@ -23463,7 +23659,7 @@ function Sc({ compact: t = !1, viewAll: e }) {
             /* @__PURE__ */ _.jsxs("td", { children: [
               /* @__PURE__ */ _.jsx("span", { className: "owal-table-avatar", children: (w.full_name || "?").slice(0, 1).toUpperCase() }),
               /* @__PURE__ */ _.jsxs("span", { children: [
-                /* @__PURE__ */ _.jsx("b", { children: w.full_name || "No name" }),
+                /* @__PURE__ */ _.jsx("b", { children: w.full_name || C("No name") }),
                 /* @__PURE__ */ _.jsx("small", { children: w.profession || w.location || "—" })
               ] })
             ] }),
@@ -23471,46 +23667,73 @@ function Sc({ compact: t = !1, viewAll: e }) {
             /* @__PURE__ */ _.jsx("td", { children: w.email || "—" }),
             /* @__PURE__ */ _.jsx("td", { children: w.phone || "—" }),
             /* @__PURE__ */ _.jsx("td", { children: x.length ? /* @__PURE__ */ _.jsx("div", { className: "owal-products", children: x.map((M) => /* @__PURE__ */ _.jsxs("span", { children: [M.product.replace(/^one/, "One"), M.plan ? ` · ${M.plan}` : ""] }, M.product)) }) : "—" }),
-            /* @__PURE__ */ _.jsx("td", { children: /* @__PURE__ */ _.jsx("mark", { children: w.onboarding_incomplete ? "onboarding" : w.membership }) }),
+            /* @__PURE__ */ _.jsx("td", { children: /* @__PURE__ */ _.jsx("mark", { children: w.onboarding_incomplete ? C("Onboarding incomplete") : w.membership }) }),
             /* @__PURE__ */ _.jsx("td", { children: w.score == null ? "—" : Math.round(w.score) }),
             /* @__PURE__ */ _.jsx("td", { children: kc(w.last_sign_in_at) }),
-            /* @__PURE__ */ _.jsx("td", { children: w.is_public ? "Public" : "Private" })
+            /* @__PURE__ */ _.jsx("td", { children: C(w.is_public ? "Public" : "Private") })
           ] }),
-          b && /* @__PURE__ */ _.jsx("tr", { className: "owal-detail-row", children: /* @__PURE__ */ _.jsx("td", { colSpan: 9, children: /* @__PURE__ */ _.jsx("dl", { children: [["Profession", w.profession || "—"], ["Location", w.location || "—"], ["Connected apps", Xn(w.apps_connected)], ["Onboarding", w.onboarding_incomplete ? "Incomplete" : "Complete"]].map(([M, C]) => /* @__PURE__ */ _.jsxs("div", { children: [/* @__PURE__ */ _.jsx("dt", { children: M }), /* @__PURE__ */ _.jsx("dd", { children: C })] }, M)) }) }) })
+          b && /* @__PURE__ */ _.jsx("tr", { className: "owal-detail-row", children: /* @__PURE__ */ _.jsx("td", { colSpan: 9, children: /* @__PURE__ */ _.jsx("dl", { children: [[C("Profession"), w.profession || "—"], [C("Location"), w.location || "—"], [C("Connected apps"), Xn(w.apps_connected)], [C("Onboarding"), C(w.onboarding_incomplete ? "Incomplete" : "Complete")]].map(([M, P]) => /* @__PURE__ */ _.jsxs("div", { children: [/* @__PURE__ */ _.jsx("dt", { children: M }), /* @__PURE__ */ _.jsx("dd", { children: P })] }, M)) }) }) })
         ] }, w.user_id);
       }) })
     ] }) }) }),
     c && c.total > m && /* @__PURE__ */ _.jsxs("div", { className: "owal-pagination", children: [
-      /* @__PURE__ */ _.jsx("button", { disabled: f === 0, onClick: () => p(Math.max(0, f - 1)), children: "Previous" }),
-      /* @__PURE__ */ _.jsxs("span", { children: ["Page ", f + 1, " of ", S] }),
-      /* @__PURE__ */ _.jsx("button", { disabled: f + 1 >= S, onClick: () => p(Math.min(S - 1, f + 1)), children: "Next" })
+      /* @__PURE__ */ _.jsx("button", { disabled: f === 0, onClick: () => p(Math.max(0, f - 1)), children: C("Previous") }),
+      /* @__PURE__ */ _.jsxs("span", { children: [C("Page"), " ", f + 1, " ", C("of"), " ", S] }),
+      /* @__PURE__ */ _.jsx("button", { disabled: f + 1 >= S, onClick: () => p(Math.min(S - 1, f + 1)), children: C("Next") })
+    ] })
+  ] });
+}
+function OwAdminLanguagePicker({ language: t, onChange: e, text: r }) {
+  return /* @__PURE__ */ _.jsxs("label", { className: "owal-language", children: [
+    /* @__PURE__ */ _.jsx("img", { src: OwAdminFlags[t], alt: "", "aria-hidden": "true" }),
+    /* @__PURE__ */ _.jsxs("select", { value: t, onChange: e, "aria-label": r("Language"), children: [
+      /* @__PURE__ */ _.jsx("option", { value: "en", children: "English" }),
+      /* @__PURE__ */ _.jsx("option", { value: "co", children: "Español (Colombia)" })
     ] })
   ] });
 }
 function tw() {
-  const [t, e] = Z.useState("overview");
-  const r = {
+  const [t, e] = Z.useState("overview"), [language, setLanguage] = Z.useState(OwAdminStoredLanguage);
+  Z.useEffect(() => {
+    const onStorage = (event) => event.key === OwAdminLocaleKey && setLanguage(OwAdminNormalizeLanguage(event.newValue)), onLanguage = (event) => setLanguage(OwAdminNormalizeLanguage(event.detail));
+    return window.addEventListener("storage", onStorage), window.addEventListener(OwAdminLocaleEvent, onLanguage), () => {
+      window.removeEventListener("storage", onStorage), window.removeEventListener(OwAdminLocaleEvent, onLanguage);
+    };
+  }, []), Z.useEffect(() => {
+    document.documentElement.lang = language === "co" ? "es-CO" : "en";
+  }, [language]);
+  const text = Z.useCallback((value) => OwAdminTranslate(language, value), [language]), locale = language === "co" ? "es-CO" : "en-US", localeValue = Z.useMemo(() => ({ language, locale, text }), [language, locale, text]), changeLanguage = (event) => {
+    const nextLanguage = OwAdminNormalizeLanguage(event.target.value);
+    try {
+      localStorage.setItem(OwAdminLocaleKey, nextLanguage);
+    } catch {
+    }
+    setLanguage(nextLanguage), window.dispatchEvent(new CustomEvent(OwAdminLocaleEvent, { detail: nextLanguage }));
+  }, r = {
     overview: "Growth · People · Money · Ops",
     growth: "Visitors, sources, devices and product demand",
     people: "Real accounts, signup details and connected products",
     money: "Payments, paid work and promotional access",
     ops: "Incidents, security and infrastructure health"
   }[t];
-  return /* @__PURE__ */ _.jsxs("div", { className: "ow-admin-live", children: [
+  return /* @__PURE__ */ _.jsx(OwAdminLocaleContext.Provider, { value: localeValue, children: /* @__PURE__ */ _.jsxs("div", { className: "ow-admin-live", children: [
     /* @__PURE__ */ _.jsxs("header", { children: [
-      /* @__PURE__ */ _.jsx("h1", { children: /* @__PURE__ */ _.jsx("span", { children: "Admin Dashboard" }) }),
-      /* @__PURE__ */ _.jsx("p", { children: r })
+      /* @__PURE__ */ _.jsxs("div", { children: [
+        /* @__PURE__ */ _.jsx("h1", { children: /* @__PURE__ */ _.jsx("span", { children: text("Admin Dashboard") }) }),
+        /* @__PURE__ */ _.jsx("p", { children: text(r) })
+      ] }),
+      /* @__PURE__ */ _.jsx(OwAdminLanguagePicker, { language, onChange: changeLanguage, text })
     ] }),
-    /* @__PURE__ */ _.jsx("nav", { "aria-label": "Admin sections", children: ["Overview", "Growth", "People", "Money", "Ops"].map((n) => {
-      const s = t === n.toLowerCase();
-      return /* @__PURE__ */ _.jsx("button", { "aria-current": s ? "page" : void 0, onClick: () => e(n.toLowerCase()), children: n }, n);
+    /* @__PURE__ */ _.jsx("nav", { "aria-label": text("Admin sections"), children: [["overview", "Overview"], ["growth", "Growth"], ["people", "People"], ["money", "Money"], ["ops", "Ops"]].map(([key, label]) => {
+      const s = t === key;
+      return /* @__PURE__ */ _.jsx("button", { "aria-current": s ? "page" : void 0, onClick: () => e(key), children: text(label) }, key);
     }) }),
     t === "overview" ? /* @__PURE__ */ _.jsxs(_.Fragment, { children: [
       /* @__PURE__ */ _.jsx(ew, {}),
       /* @__PURE__ */ _.jsx(Sc, { compact: !0, viewAll: () => e("people") })
     ] }) : t === "growth" ? /* @__PURE__ */ _.jsx(ew, { growthOnly: !0 }) : t === "people" ? /* @__PURE__ */ _.jsx(Sc, {}) : t === "money" ? /* @__PURE__ */ _.jsx(ow, { mode: "money" }) : /* @__PURE__ */ _.jsx(ow, { mode: "ops" }),
-    /* @__PURE__ */ _.jsx("footer", { children: "Read-only · Server-authorized · Sensitive views are audited" })
-  ] });
+    /* @__PURE__ */ _.jsx("footer", { children: text("Read-only · Server-authorized · Sensitive views are audited") })
+  ] }) });
 }
 async function rw() {
   if (window.location.pathname.replace(/\/$/, "") !== "/admin") return;

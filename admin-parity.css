@@ -9,6 +9,45 @@
   overflow: visible !important;
 }
 
+.ow-admin-live > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.owal-language {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 2.75rem;
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  border-radius: .85rem;
+  background: color-mix(in srgb, var(--card, #fff) 88%, transparent);
+  padding-left: .7rem;
+  overflow: hidden;
+}
+
+.owal-language img {
+  width: 1.4rem;
+  height: .95rem;
+  border-radius: .16rem;
+  object-fit: cover;
+}
+
+.owal-language select {
+  min-height: 2.75rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  padding: .5rem .7rem;
+  font: inherit;
+  font-size: .7rem;
+  font-weight: 850;
+}
+
 .owal-collection {
   display: flex;
   align-items: center;
@@ -148,6 +187,9 @@
 
 @media (max-width: 800px) {
   .owal-host { padding: .75rem !important; }
+  .ow-admin-live > header { align-items: center; }
+  .owal-language { max-width: 9.5rem; }
+  .owal-language select { min-width: 0; max-width: 7.2rem; }
   .owal-collection { align-items: flex-start; flex-direction: column; }
   .owal-collection span { text-align: left; }
   .owal-people-summary { align-items: flex-start; }
