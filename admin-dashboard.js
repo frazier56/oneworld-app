@@ -23159,6 +23159,178 @@ function OwFinancePanel({ title: t, intro: e, children: r, note: n }) {
     n && /* @__PURE__ */ _.jsx("p", { className: "owal-finance-note", children: n })
   ] });
 }
+function OwPaymentHelpDate(t) {
+  if (!t)
+    return "—";
+  const e = new Date(t);
+  return Number.isNaN(e.getTime()) ? "—" : e.toLocaleString(void 0, { dateStyle: "medium", timeStyle: "short" });
+}
+function OwPaymentHelpStatus(t) {
+  return t === "in_review" ? "In review" : "Open";
+}
+function OwPaymentHelpError(t) {
+  return t && typeof t.message === "string" && t.message ? t.message : "External payment help request failed.";
+}
+function OwPaymentHelpRequestGate() {
+  return {
+    mounted: !1,
+    generation: 0,
+    paginationToken: 0,
+    mutationBusy: !1,
+    loadMoreBusy: !1,
+    mount() {
+      this.mounted = !0;
+    },
+    invalidate() {
+      this.generation += 1, this.paginationToken += 1, this.loadMoreBusy = !1;
+    },
+    unmount() {
+      this.mounted = !1, this.invalidate(), this.mutationBusy = !1;
+    },
+    beginRead() {
+      return this.generation += 1, this.paginationToken += 1, this.loadMoreBusy = !1, this.generation;
+    },
+    currentRead(t) {
+      return this.mounted && t === this.generation;
+    },
+    beginPagination() {
+      if (!this.mounted || this.loadMoreBusy)
+        return null;
+      return this.loadMoreBusy = !0, this.paginationToken += 1, { generation: this.generation, paginationToken: this.paginationToken };
+    },
+    currentPagination(t, e, r) {
+      return this.mounted && t.generation === this.generation && t.paginationToken === this.paginationToken && e === r;
+    },
+    endPagination(t) {
+      return t !== this.paginationToken ? !1 : (this.loadMoreBusy = !1, this.mounted);
+    },
+    beginMutation() {
+      return !this.mounted || this.mutationBusy ? !1 : (this.mutationBusy = !0, !0);
+    },
+    endMutation() {
+      return this.mutationBusy = !1, this.mounted;
+    }
+  };
+}
+function OwExternalPaymentHelpQueue() {
+  const [data, setData] = Z.useState(null), [filter, setFilter] = Z.useState("open"), [error, setError] = Z.useState(""), [refresh, setRefresh] = Z.useState(0), [busyCaseId, setBusyCaseId] = Z.useState(null), [loadingMore, setLoadingMore] = Z.useState(!1), [notice, setNotice] = Z.useState(""), gateRef = Z.useRef(null), filterRef = Z.useRef(filter);
+  gateRef.current || (gateRef.current = OwPaymentHelpRequestGate());
+  const gate = gateRef.current;
+  Z.useEffect(() => (gate.mount(), () => gate.unmount()), [gate]), Z.useEffect(() => {
+    filterRef.current = filter;
+  }, [filter]), Z.useEffect(() => {
+    const generation = gate.beginRead();
+    setData(null), setError(""), setLoadingMore(!1);
+    (async () => {
+      try {
+        const { data: result, error: rpcError } = await Ti.rpc("admin_external_payment_help_queue", { p_status: filter, p_limit: 50, p_before_created_at: null, p_before_id: null });
+        gate.currentRead(generation) && (rpcError ? setError(rpcError.message) : setData(result));
+      } catch (readError) {
+        gate.currentRead(generation) && setError(OwPaymentHelpError(readError));
+      }
+    })();
+  }, [filter, refresh, gate]);
+  const invalidateAndRefresh = () => {
+    gate.invalidate(), setLoadingMore(!1), setRefresh((value) => value + 1);
+  }, markInReview = async (row) => {
+    if (!gate.beginMutation())
+      return;
+    setBusyCaseId(row.case_id), setNotice("");
+    let shouldRefresh = !1;
+    try {
+      const { data: result, error: rpcError } = await Ti.rpc("admin_mark_external_payment_help_in_review", { p_case_id: row.case_id, p_expected_status: "open" });
+      if (!gate.mounted)
+        return;
+      if (rpcError) {
+        setNotice(rpcError.message);
+        return;
+      }
+      result != null && result.conflict ? setNotice("This case changed in another review. The queue has been refreshed.") : result != null && result.changed === !1 ? setNotice("Already in review. No duplicate transition was created.") : setNotice("Marked in review. This did not change payment, receipt, reservation or date protection."), shouldRefresh = !0;
+    } catch (mutationError) {
+      gate.mounted && setNotice(OwPaymentHelpError(mutationError));
+    } finally {
+      gate.endMutation() && (setBusyCaseId(null), shouldRefresh && invalidateAndRefresh());
+    }
+  }, loadMore = async () => {
+    if (!(data != null && data.next_cursor))
+      return;
+    const token = gate.beginPagination();
+    if (!token)
+      return;
+    const filterSnapshot = filterRef.current, cursorSnapshot = { created_at: data.next_cursor.created_at, id: data.next_cursor.id };
+    setLoadingMore(!0), setNotice("");
+    try {
+      const { data: result, error: rpcError } = await Ti.rpc("admin_external_payment_help_queue", { p_status: filterSnapshot, p_limit: 50, p_before_created_at: cursorSnapshot.created_at, p_before_id: cursorSnapshot.id });
+      if (!gate.currentPagination(token, filterSnapshot, filterRef.current))
+        return;
+      if (rpcError) {
+        setNotice(rpcError.message);
+        return;
+      }
+      setData((current) => {
+        const cursor = current == null ? void 0 : current.next_cursor;
+        return gate.currentPagination(token, filterSnapshot, filterRef.current) && cursor && cursor.created_at === cursorSnapshot.created_at && cursor.id === cursorSnapshot.id ? q(q({}, result), {}, { rows: [...current.rows || [], ...result.rows || []] }) : current;
+      });
+    } catch (paginationError) {
+      gate.currentPagination(token, filterSnapshot, filterRef.current) && setNotice(OwPaymentHelpError(paginationError));
+    } finally {
+      gate.endPagination(token.paginationToken) && setLoadingMore(!1);
+    }
+  }, rows = Array.isArray(data == null ? void 0 : data.rows) ? data.rows : [], counts = (data == null ? void 0 : data.status_counts) || {};
+  return /* @__PURE__ */ _.jsxs("section", { className: "owal-card owal-support-queue", "aria-labelledby": "external-payment-help-heading", children: [
+    /* @__PURE__ */ _.jsxs("div", { className: "owal-support-heading", children: [
+      /* @__PURE__ */ _.jsxs("div", { children: [
+        /* @__PURE__ */ _.jsx("h3", { id: "external-payment-help-heading", children: "External payment help requests" }),
+        /* @__PURE__ */ _.jsx("p", { children: "Review status only. This does not confirm payment, accept a reservation, release dates, issue a refund or send a message." })
+      ] }),
+      /* @__PURE__ */ _.jsxs("select", { "aria-label": "Filter external payment help requests", value: filter, onChange: (event) => {
+        const nextFilter = event.target.value;
+        filterRef.current = nextFilter, gate.invalidate(), setLoadingMore(!1), setNotice(""), setFilter(nextFilter);
+      }, children: [
+        /* @__PURE__ */ _.jsx("option", { value: "open", children: "Open" }),
+        /* @__PURE__ */ _.jsx("option", { value: "in_review", children: "In review" }),
+        /* @__PURE__ */ _.jsx("option", { value: "all", children: "All" })
+      ] })
+    ] }),
+    /* @__PURE__ */ _.jsxs("div", { className: "owal-support-counts", "aria-label": "Queue totals", children: [
+      /* @__PURE__ */ _.jsxs("span", { children: ["Open ", /* @__PURE__ */ _.jsx("b", { children: Xn(counts.open) })] }),
+      /* @__PURE__ */ _.jsxs("span", { children: ["In review ", /* @__PURE__ */ _.jsx("b", { children: Xn(counts.in_review) })] })
+    ] }),
+    error && /* @__PURE__ */ _.jsxs("div", { className: "owal-support-error", role: "alert", children: [
+      /* @__PURE__ */ _.jsx("span", { children: error }),
+      /* @__PURE__ */ _.jsx("button", { type: "button", onClick: () => (setNotice(""), invalidateAndRefresh()), children: "Try again" })
+    ] }),
+    !data && !error && /* @__PURE__ */ _.jsx("div", { className: "owal-loading", children: "Loading external payment help requests…" }),
+    data && !error && !rows.length && /* @__PURE__ */ _.jsx("div", { className: "owal-empty", children: "No external payment help requests match this filter." }),
+    notice && /* @__PURE__ */ _.jsx("div", { className: "owal-support-notice", role: "status", children: notice }),
+    !!rows.length && /* @__PURE__ */ _.jsx("div", { className: "owal-support-list", children: rows.map((f) => {
+      const p = !!f.host_receipt_confirmed_at || f.payment_status === "received", m = String(f.request_id || "").slice(0, 8) || "unknown", w = String(f.payment_rail || "external transfer").replaceAll("_", " "), b = f.request_state === "cancelled_by_guest" ? "Cancelled by guest" : f.request_state === "cancelled_by_host" ? "Cancelled by host" : String(f.request_state || "—").replaceAll("_", " "), x = f.request_state === "cancelled_by_guest" ? "Not protected; request was cancelled by guest" : f.request_state === "cancelled_by_host" ? "Not protected; request was cancelled by host" : "Not protected";
+      return /* @__PURE__ */ _.jsxs("article", { className: "owal-support-row", children: [
+        /* @__PURE__ */ _.jsxs("div", { className: "owal-support-row-top", children: [
+          /* @__PURE__ */ _.jsxs("div", { children: [
+            /* @__PURE__ */ _.jsx("small", { children: "Request" }),
+            /* @__PURE__ */ _.jsxs("strong", { children: ["#", m] })
+          ] }),
+          /* @__PURE__ */ _.jsx("span", { className: `owal-support-status ${f.status === "in_review" ? "is-reviewing" : ""}`, children: OwPaymentHelpStatus(f.status) })
+        ] }),
+        /* @__PURE__ */ _.jsx("dl", { className: "owal-support-facts", children: [
+          ["Payment rail", w],
+          ["Payment reported", OwPaymentHelpDate(f.payment_reported_at)],
+          ["Help requested", OwPaymentHelpDate(f.help_requested_at)],
+          ["Receipt", p ? "Host receipt recorded" : "Receipt not confirmed"],
+          ["Request", b],
+          ["Dates", f.dates_protected ? "Protected by the booking request" : x],
+          ["Evidence", f.evidence_present ? "Evidence recorded" : "No evidence uploaded"]
+        ].map(([M, C]) => /* @__PURE__ */ _.jsxs("div", { children: [
+          /* @__PURE__ */ _.jsx("dt", { children: M }),
+          /* @__PURE__ */ _.jsx("dd", { children: C })
+        ] }, M)) }),
+        f.status === "open" && /* @__PURE__ */ _.jsx("button", { className: "owal-support-action", type: "button", disabled: busyCaseId !== null, onClick: () => markInReview(f), children: busyCaseId === f.case_id ? "Marking…" : "Mark in review" })
+      ] }, f.case_id);
+    }) }),
+    (data == null ? void 0 : data.next_cursor) && /* @__PURE__ */ _.jsx("button", { className: "owal-support-more", type: "button", disabled: loadingMore || busyCaseId !== null, onClick: loadMore, children: loadingMore ? "Loading…" : "Load more" })
+  ] });
+}
 function ow({ mode: t }) {
   const [e, r] = Z.useState(null), [n, s] = Z.useState("");
   Z.useEffect(() => {
@@ -23233,7 +23405,8 @@ function ow({ mode: t }) {
       /* @__PURE__ */ _.jsx("small", { children: a }),
       /* @__PURE__ */ _.jsx("strong", { children: typeof l === "number" ? Xn(l) : l }),
       /* @__PURE__ */ _.jsx("p", { children: u })
-    ] }, a)) })
+    ] }, a)) }),
+    /* @__PURE__ */ _.jsx(OwExternalPaymentHelpQueue, {})
   ] });
 }
 function Sc({ compact: t = !1, viewAll: e }) {

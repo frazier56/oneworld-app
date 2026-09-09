@@ -192,7 +192,87 @@
 .owal-finance-list dd { max-width: 62%; text-align: right; font-size: .66rem; font-weight: 850; overflow-wrap: anywhere; }
 .owal-finance-total { display: block; margin-top: 1rem; font-size: 1.25rem; line-height: 1.25; overflow-wrap: anywhere; }
 
+.owal-support-queue { display: grid; gap: .75rem; }
+.owal-support-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.owal-support-heading h3 { font-size: .95rem; font-weight: 900; }
+.owal-support-heading p { max-width: 48rem; margin-top: .25rem; font-size: .68rem; line-height: 1.45; opacity: .58; }
+.owal-support-heading select {
+  min-height: 2.75rem;
+  border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+  border-radius: .75rem;
+  background: color-mix(in srgb, currentColor 5%, transparent);
+  color: inherit;
+  padding: .55rem .7rem;
+  font-size: .7rem;
+  font-weight: 800;
+}
+.owal-support-counts { display: flex; flex-wrap: wrap; gap: .4rem; }
+.owal-support-counts span,
+.owal-support-status {
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 7%, transparent);
+  padding: .3rem .55rem;
+  font-size: .62rem;
+  font-weight: 800;
+}
+.owal-support-status.is-reviewing { background: #0d94881f; color: #0d7169; }
+.owal-support-error,
+.owal-support-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  border: 1px solid color-mix(in srgb, #b91c1c 28%, transparent);
+  border-radius: .75rem;
+  background: color-mix(in srgb, #b91c1c 7%, transparent);
+  padding: .65rem .75rem;
+  font-size: .68rem;
+}
+.owal-support-notice { border-color: #0d948847; background: #0d948812; color: #0d615b; }
+.owal-support-error button,
+.owal-support-action,
+.owal-support-more {
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: .7rem;
+  background: #332c26;
+  color: #fff;
+  padding: .55rem .75rem;
+  font-size: .7rem;
+  font-weight: 850;
+}
+.owal-support-error button:disabled,
+.owal-support-action:disabled,
+.owal-support-more:disabled { opacity: .45; }
+.owal-support-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; }
+.owal-support-row {
+  display: grid;
+  min-width: 0;
+  gap: .7rem;
+  border: 1px solid color-mix(in srgb, currentColor 9%, transparent);
+  border-radius: .9rem;
+  background: color-mix(in srgb, var(--card, #fff) 88%, transparent);
+  padding: .8rem;
+}
+.owal-support-row-top { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.owal-support-row-top > div { display: grid; gap: .08rem; min-width: 0; }
+.owal-support-row-top small { font-size: .56rem; font-weight: 850; text-transform: uppercase; letter-spacing: .07em; opacity: .45; }
+.owal-support-row-top strong { overflow: hidden; font-size: .82rem; text-overflow: ellipsis; }
+.owal-support-facts { display: grid; gap: 0; }
+.owal-support-facts > div { display: flex; justify-content: space-between; gap: .75rem; border-top: 1px solid color-mix(in srgb, currentColor 7%, transparent); padding: .42rem 0; }
+.owal-support-facts dt { font-size: .62rem; opacity: .54; }
+.owal-support-facts dd { max-width: 62%; text-align: right; font-size: .64rem; font-weight: 800; overflow-wrap: anywhere; }
+.owal-support-action { justify-self: end; }
+.owal-support-more { justify-self: center; }
+
 @media (max-width: 900px) {
   .owal-section-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .owal-finance-grid { grid-template-columns: 1fr; }
+  .owal-support-list { grid-template-columns: 1fr; }
+  .owal-support-heading { align-items: stretch; flex-direction: column; }
+  .owal-support-heading select { width: 100%; }
+  .owal-support-error { align-items: stretch; flex-direction: column; }
+  .owal-support-error button,
+  .owal-support-action,
+  .owal-support-more { width: 100%; justify-self: stretch; }
 }
