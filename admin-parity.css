@@ -318,3 +318,20 @@
   .owal-support-action,
   .owal-support-more { width: 100%; justify-self: stretch; }
 }
+
+@media (max-width: 480px) {
+  .ow-admin-live nav {
+    display: grid;
+    grid-template-columns: 1.02fr 1.31fr .97fr 1.02fr 1.29fr;
+    align-items: stretch;
+  }
+  .ow-admin-live nav button {
+    min-height: 44px;
+    padding-inline: 1px;
+    font-size: .6875rem;
+    line-height: 1.15;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+}
