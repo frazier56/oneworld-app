@@ -23033,7 +23033,12 @@ function qy() {
 qy() && console.warn("⚠️  Node.js 20 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 22 or later. For more information, visit: https://github.com/orgs/supabase/discussions/45715");
 const Gy = "https://wseblryyqxawvbjmylbo.supabase.co", Jy = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZWJscnl5cXhhd3Ziam15bGJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NDU4NjksImV4cCI6MjA5MzUyMTg2OX0.y2yfMwSC_eh_jzI5eXsp6qD5zkl0OICtESV070EhRQM", Ti = Ky(Gy, Jy, { auth: { storageKey: "sb-wseblryyqxawvbjmylbo-auth-token", persistSession: !0, autoRefreshToken: !0 } }), OwAdminLocaleKey = "oneworld-lang", OwAdminLocaleEvent = "oneworld-language-change", OwAdminFlags = {
   en: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAVBAMAAADGNLEtAAAALVBMVEX////GU3LZjKGzGUINM2PsxtAYPWotT3hed5enma46WoBPa46zGkMkR3Jrgp+6ntXWAAAAiklEQVQY02Nwc0lJcQMSxghgw+CRVdaWkVXWooQEGFxaPLxKWjxcGJCBn1fJExAWRAJglUuAKlEEPdyXgA1A0e62LTu9bFt2CopF3iCh9LItKE5yX5tVe31tVgmq9pL0NLcy95RQJMAAdiUQo2ifCQUoKrECY0xgw6CEBWDXLogFYBfECrBahM1JAItMTcEiMDpsAAAAAElFTkSuQmCC",
-  co: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAbBAMAAAD8PtBdAAAAD1BMVEUAMIfIEC7/zQCWGER/fkQonp92AAAAHklEQVQoz2NQwgIYRrKgCxbAMLDAGAtgEMQC6CYIAA/lM811RVp8AAAAAElFTkSuQmCC"
+  co: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAbBAMAAAD8PtBdAAAAD1BMVEUAMIfIEC7/zQCWGER/fkQonp92AAAAHklEQVQoz2NQwgIYRrKgCxbAMLDAGAtgEMQC6CYIAA/lM811RVp8AAAAAElFTkSuQmCC",
+  es: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAbCAMAAAA5zj1cAAAApVBMVEX6vQCtFRnBPxP3tgCkSRTxsQC9miCtkjL3ugDcdwrVkwndpwauUEi3k3ecLQyvGx01YomtXy3Zhha+gw+4LiCzn4jKeBKyYgjmoAOkXUK/RhC1kJmmKh+0oKCbYwN5OAWWHxSVi0HypQNcdGsDAgC9g1j6vgSWhnLfsSXCn169cE24eBuaNwzQaiOYagW8bxWIOhqoKhPLdq4yUHR+UgVZLWaBHkAs3esWAAAAk0lEQVQ4y+WTVxLDIAxESQwBAwb33tKc3sv9j5YbWJp8JvurNzsrzYpMkCI/BU6RIt9phqIcJSOpEGBu7c2WA+iXOWmbtTmTACh42PdelSgwp+d2nXdvTjuAc3X5vL6qJo4XQEZ9qd8PXaR7yDE5GFOf6XbNRrmB8cgcKaUraJm5z4NiE4RLH3FyIUaG6Pb85XN9AIg9CvrV7UGSAAAAAElFTkSuQmCC",
+  de: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAYAgMAAAD16ldTAAAACVBMVEUAAADdAAD/zgDGIigcAAAAFUlEQVQY02NgoBEIhQPqMlfBAVWZANYST7G6bxb2AAAAAElFTkSuQmCC",
+  ru: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAbAgMAAABzfiX9AAAACVBMVEUAOabVKx7///95ANL1AAAAFUlEQVQY02NYBQcMtGLSAYTCAa2YAJQLWaccQRfwAAAAAElFTkSuQmCC",
+  zh: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAbCAMAAAA5zj1cAAAAOVBMVEXuHCX3jRL//wDuISPyURvvLCH6ugrwPh7xSRz0ZxjwNyD1ehX+6QP7wgn/+AH5ow793wX3lhHzXBqicYSuAAAAX0lEQVQYGe3BSRKCQBAAweplVgYB//9YY/QMdHgmk7+kxB1janvhhjD5mzvD+XHn3CKbriIJsG3lXMqqOipTMa4MVSegvo5d+KqdC61gwmQ5GyG9E+ALMS0XYhKPR9wHPPwBnsz8tAoAAAAASUVORK5CYII=",
+  pt: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAcCAMAAAAkyw3kAAAAkFBMVEUAlED/ywAwJoEOlzwemjdQSI83oDHjxQZKpC2fthhGN3NAM3VZU5fywAjEmyQ/NYf5yQFoU101K4OVd0OvuRRzdKTSwQuOshx8ryFjqifCvQ+p0MFGP4y8w8q+0tKXrLjwyATrxwXltRC+lyhkXp+JdW12XlWkgji0uM+rqnXr8vDS593K4tmZflSJj7ROQ3x/jyqZAAAA70lEQVQ4y82T2RKCMAxFTaEKBSwUcQEUF9y3//87IwVxpEp9cbyPmTNZbpJO56/U7WphxghgZLRzVg9QPasFM20oZX9MOpmDFwaOE4QeLCbv08UAfUYKsT5AbKq5sY8ceQhJf6zyZIiNeawGmYeB4atThhxiPzsektku4i6SW8VQ0hOAtStE6kZZMkVyI2NPTpmDypOqMo2SLGVVdGA2QAchLtnLKWqAdemAins+eifzaaN0PUzICTYniurpWb2hwp6lQzjFjJzQnC5V9lSGr8ppXC5Wbwx/WeH1wwr1j+KLM9M/XPkKvs4r6D/Xz3QDO1IMs+uu/zEAAAAASUVORK5CYII="
 }, OwAdminCoCopy = Object.freeze({
   "Language": "Idioma",
   "Admin Dashboard": "Panel de administración",
@@ -23156,6 +23161,10 @@ const Gy = "https://wseblryyqxawvbjmylbo.supabase.co", Jy = "eyJhbGciOiJIUzI1NiI
   "Explicit refund amounts": "Montos explícitos de reembolso",
   "Connected sources": "Fuentes conectadas",
   "No sources returned": "No se devolvieron fuentes",
+  "OneJob agreements": "Acuerdos de OneJob",
+  "Booking refunds": "Reembolsos de reservas",
+  "OneEvent registrations": "Registros de OneEvent",
+  "Amounts include only explicit bookings.refund_amount values. Agreement and event refunds are count-only because those schemas do not store an authoritative refunded amount.": "Los montos incluyen únicamente los valores explícitos de bookings.refund_amount. Los reembolsos de acuerdos y eventos se cuentan sin monto porque esos esquemas no guardan un monto reembolsado autoritativo.",
   "Recurring source coverage": "Cobertura de fuentes recurrentes",
   "These are source facts and commitments, not an MRR calculation.": "Estos son datos y compromisos de las fuentes, no un cálculo del MRR.",
   "Current subscription rows": "Registros de suscripción actuales",
@@ -23164,11 +23173,13 @@ const Gy = "https://wseblryyqxawvbjmylbo.supabase.co", Jy = "eyJhbGciOiJIUzI1NiI
   "Founder-free rows": "Registros gratuitos del fundador",
   "Scheduled recurring work": "Trabajo recurrente programado",
   "Accepted monthly rent": "Arriendo mensual aceptado",
+  "Scheduled work and accepted monthly rent are commitments, not earned One World recurring revenue.": "El trabajo programado y el arriendo mensual aceptado son compromisos, no ingresos recurrentes devengados por One World.",
   "Recognized platform fees": "Comisiones de plataforma reconocidas",
   "Recorded platform fees on captured, non-refunded agreements. This is earned-fee evidence, not recurring revenue.": "Comisiones de plataforma registradas en acuerdos cobrados y no reembolsados. Esto demuestra comisiones ganadas, no ingresos recurrentes.",
   "Grouped by currency; currencies are never converted or combined.": "Agrupadas por moneda; las monedas nunca se convierten ni se combinan.",
   "Finance evidence is waiting for the server-side Admin summary. Existing payment counts remain available.": "La evidencia financiera está esperando el resumen del servidor para administración. Los conteos de pagos existentes siguen disponibles.",
   "MRR remains intentionally blank.": "El MRR se mantiene intencionalmente sin valor.",
+  "Should MRR include only earned One World subscription fees, or also recurring marketplace and rental platform fees, and which products are in scope?": "¿El MRR debe incluir solo las comisiones de suscripción devengadas por One World, o también las comisiones recurrentes del marketplace y de la plataforma de arriendos, y qué productos deben incluirse?",
   "An approved definition and a priced recurring source are required before this dashboard can calculate it.": "Se requiere una definición aprobada y una fuente recurrente con precio antes de que este panel pueda calcularlo.",
   "Operations": "Operaciones",
   "Incidents, security controls and infrastructure synchronization.": "Incidentes, controles de seguridad y sincronización de infraestructura.",
@@ -23217,14 +23228,40 @@ const Gy = "https://wseblryyqxawvbjmylbo.supabase.co", Jy = "eyJhbGciOiJIUzI1NiI
   "Previous": "Anterior",
   "Page": "Página",
   "of": "de",
-  "Next": "Siguiente"
-}), OwAdminNormalizeLanguage = (t) => t === "co" || t === "es" ? "co" : "en", OwAdminStoredLanguage = () => {
+  "Next": "Siguiente",
+  "Admin": "Administración",
+  "Checking administrator access…": "Verificando el acceso de administración…",
+  "Please wait while we check your session and permissions.": "Espera mientras verificamos tu sesión y tus permisos.",
+  "Sign in to open Admin": "Inicia sesión para abrir Administración",
+  "Use your existing One ID account. Signing in does not grant administrator access.": "Usa tu cuenta de One ID. Iniciar sesión no otorga acceso de administración.",
+  "Administrator access required": "Se requiere acceso de administración",
+  "This signed-in account does not have administrator access. If access was recently changed, try again.": "Esta cuenta no tiene acceso de administración. Si tus permisos cambiaron recientemente, intenta de nuevo.",
+  "We couldn’t check administrator access": "No pudimos verificar el acceso de administración",
+  "The Admin dashboard couldn’t load": "No se pudo cargar el panel de administración",
+  "Your access has not been changed. Try again, or return to your account.": "Tus permisos no han cambiado. Intenta de nuevo o vuelve a tu cuenta.",
+  "Sign in": "Iniciar sesión",
+  "Open my account": "Abrir mi cuenta"
+}), OwAdminMembershipLabel = (t, e) => {
+  const r = String(t || "").toLowerCase();
+  return r === "claimed" ? e("Claimed") : r === "invited" ? e("Invited") : r === "migrated" ? e("Migrated") : t;
+}, OwAdminLanguages = Object.freeze({
+  en: { locale: "en-US", html: "en" }, co: { locale: "es-CO", html: "es-CO" }, es: { locale: "es-ES", html: "es-ES" },
+  de: { locale: "de-DE", html: "de" }, ru: { locale: "ru-RU", html: "ru" }, zh: { locale: "zh-CN", html: "zh-CN" }, pt: { locale: "pt-BR", html: "pt-BR" }
+}), OwAdminExtraCopy = globalThis.OwAdminLocalePacks || Object.freeze({}), OwAdminNormalizeLanguage = (t) => {
+  const e = t === "cn" ? "zh" : t === "br" ? "pt" : t;
+  return Object.prototype.hasOwnProperty.call(OwAdminLanguages, e) ? e : "en";
+}, OwAdminStoredLanguage = () => {
   try {
     return OwAdminNormalizeLanguage(localStorage.getItem(OwAdminLocaleKey));
   } catch {
     return "en";
   }
-}, OwAdminIntlLocale = () => OwAdminStoredLanguage() === "co" ? "es-CO" : "en-US", OwAdminTranslate = (t, e) => t === "co" ? OwAdminCoCopy[e] || e : e, OwAdminLocaleContext = Z.createContext({ language: "en", locale: "en-US", text: (t) => t }), OwAdminUseLocale = () => Z.useContext(OwAdminLocaleContext), Xn = (t) => new Intl.NumberFormat(OwAdminIntlLocale()).format(Number(t || 0)), Qy = (t) => t != null && t.previous ? `${Math.round((t.current - t.previous) / t.previous * 100) > 0 ? "+" : ""}${Math.round((t.current - t.previous) / t.previous * 100)}%` : t != null && t.current ? "+100%" : "—", kc = (t) => t ? new Date(t).toLocaleDateString(OwAdminIntlLocale(), { month: "short", day: "numeric", year: "2-digit" }) : "—";
+}, OwAdminIntlLocale = () => OwAdminLanguages[OwAdminStoredLanguage()].locale, OwAdminTranslate = (t, e) => {
+  const r = OwAdminExtraCopy[t];
+  if (r && Object.prototype.hasOwnProperty.call(r, e)) return r[e];
+  if ((t === "co" || t === "es") && Object.prototype.hasOwnProperty.call(OwAdminCoCopy, e)) return OwAdminCoCopy[e];
+  return e;
+}, OwAdminLocaleContext = Z.createContext({ language: "en", locale: "en-US", text: (t) => t }), OwAdminUseLocale = () => Z.useContext(OwAdminLocaleContext), Xn = (t) => new Intl.NumberFormat(OwAdminIntlLocale()).format(Number(t || 0)), Qy = (t) => t != null && t.previous ? `${Math.round((t.current - t.previous) / t.previous * 100) > 0 ? "+" : ""}${Math.round((t.current - t.previous) / t.previous * 100)}%` : t != null && t.current ? "+100%" : "—", kc = (t) => t ? new Date(t).toLocaleDateString(OwAdminIntlLocale(), { month: "short", day: "numeric", year: "2-digit" }) : "—";
 function Kt({ title: t, rows: e = [] }) {
   const { text: C } = OwAdminUseLocale(), r = Math.max(1, ...e.map((n) => Number(n.value || 0)));
   return /* @__PURE__ */ _.jsxs("section", { className: "owal-card owal-break", children: [
@@ -23563,13 +23600,13 @@ function ow({ mode: t }) {
         /* @__PURE__ */ _.jsx("p", { children: C(d) })
       ] }, c)) }),
       o.generated_at ? /* @__PURE__ */ _.jsxs("div", { className: "owal-finance-grid", children: [
-        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: C("Refund evidence"), intro: C("Only explicit completed-refund lifecycle fields count. Amounts appear only where the source stores a refund amount and currency."), note: a.amount_scope, children: /* @__PURE__ */ _.jsxs("dl", { className: "owal-finance-list", children: [
+        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: C("Refund evidence"), intro: C("Only explicit completed-refund lifecycle fields count. Amounts appear only where the source stores a refund amount and currency."), note: C(a.amount_scope), children: /* @__PURE__ */ _.jsxs("dl", { className: "owal-finance-list", children: [
           /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Confirmed records"), value: Xn(a.confirmed_records) }),
           /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Pending records"), value: Xn(a.pending_records) }),
           /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Explicit refund amounts"), value: OwFinanceAmounts(a.amounts_by_currency, "amount", C) }),
-          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Connected sources"), value: (a.sources || []).map((c) => `${c.label}: ${Xn(c.confirmed_records)}`).join(" · ") || C("No sources returned") })
+          /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Connected sources"), value: (a.sources || []).map((c) => `${C(c.label)}: ${Xn(c.confirmed_records)}`).join(" · ") || C("No sources returned") })
         ] }) }),
-        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: C("Recurring source coverage"), intro: C("These are source facts and commitments, not an MRR calculation."), note: l.commitment_scope, children: /* @__PURE__ */ _.jsxs("dl", { className: "owal-finance-list", children: [
+        /* @__PURE__ */ _.jsx(OwFinancePanel, { title: C("Recurring source coverage"), intro: C("These are source facts and commitments, not an MRR calculation."), note: C(l.commitment_scope), children: /* @__PURE__ */ _.jsxs("dl", { className: "owal-finance-list", children: [
           /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Current subscription rows"), value: Xn(l.current_subscription_rows) }),
           /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Provider-linked rows"), value: Xn(l.provider_linked_subscription_rows) }),
           /* @__PURE__ */ _.jsx(OwFinanceLine, { label: C("Priced rows"), value: Xn(l.priced_subscription_rows) }),
@@ -23582,7 +23619,7 @@ function ow({ mode: t }) {
       /* @__PURE__ */ _.jsxs("div", { className: "owal-card owal-disclosure", children: [
         /* @__PURE__ */ _.jsx("b", { children: C("MRR remains intentionally blank.") }),
         " ",
-        l.decision_question || C("An approved definition and a priced recurring source are required before this dashboard can calculate it.")
+        C(l.decision_question || "An approved definition and a priced recurring source are required before this dashboard can calculate it.")
       ] })
     ] });
   }
@@ -23667,7 +23704,7 @@ function Sc({ compact: t = !1, viewAll: e }) {
             /* @__PURE__ */ _.jsx("td", { children: w.email || "—" }),
             /* @__PURE__ */ _.jsx("td", { children: w.phone || "—" }),
             /* @__PURE__ */ _.jsx("td", { children: x.length ? /* @__PURE__ */ _.jsx("div", { className: "owal-products", children: x.map((M) => /* @__PURE__ */ _.jsxs("span", { children: [M.product.replace(/^one/, "One"), M.plan ? ` · ${M.plan}` : ""] }, M.product)) }) : "—" }),
-            /* @__PURE__ */ _.jsx("td", { children: /* @__PURE__ */ _.jsx("mark", { children: w.onboarding_incomplete ? C("Onboarding incomplete") : w.membership }) }),
+            /* @__PURE__ */ _.jsx("td", { children: /* @__PURE__ */ _.jsx("mark", { children: w.onboarding_incomplete ? C("Onboarding incomplete") : OwAdminMembershipLabel(w.membership, C) }) }),
             /* @__PURE__ */ _.jsx("td", { children: w.score == null ? "—" : Math.round(w.score) }),
             /* @__PURE__ */ _.jsx("td", { children: kc(w.last_sign_in_at) }),
             /* @__PURE__ */ _.jsx("td", { children: C(w.is_public ? "Public" : "Private") })
@@ -23688,7 +23725,12 @@ function OwAdminLanguagePicker({ language: t, onChange: e, text: r }) {
     /* @__PURE__ */ _.jsx("img", { src: OwAdminFlags[t], alt: "", "aria-hidden": "true" }),
     /* @__PURE__ */ _.jsxs("select", { value: t, onChange: e, "aria-label": r("Language"), children: [
       /* @__PURE__ */ _.jsx("option", { value: "en", children: "English" }),
-      /* @__PURE__ */ _.jsx("option", { value: "co", children: "Español (Colombia)" })
+      /* @__PURE__ */ _.jsx("option", { value: "co", children: "Español (Colombia)" }),
+      /* @__PURE__ */ _.jsx("option", { value: "es", children: "Español (España)" }),
+      /* @__PURE__ */ _.jsx("option", { value: "de", children: "Deutsch (Deutschland)" }),
+      /* @__PURE__ */ _.jsx("option", { value: "ru", children: "Русский (Россия)" }),
+      /* @__PURE__ */ _.jsx("option", { value: "zh", children: "中文 (中国)" }),
+      /* @__PURE__ */ _.jsx("option", { value: "pt", children: "Português (Brasil)" })
     ] })
   ] });
 }
@@ -23700,9 +23742,9 @@ function tw() {
       window.removeEventListener("storage", onStorage), window.removeEventListener(OwAdminLocaleEvent, onLanguage);
     };
   }, []), Z.useEffect(() => {
-    document.documentElement.lang = language === "co" ? "es-CO" : "en";
+    document.documentElement.lang = OwAdminLanguages[language].html;
   }, [language]);
-  const text = Z.useCallback((value) => OwAdminTranslate(language, value), [language]), locale = language === "co" ? "es-CO" : "en-US", localeValue = Z.useMemo(() => ({ language, locale, text }), [language, locale, text]), changeLanguage = (event) => {
+  const text = Z.useCallback((value) => OwAdminTranslate(language, value), [language]), locale = OwAdminLanguages[language].locale, localeValue = Z.useMemo(() => ({ language, locale, text }), [language, locale, text]), changeLanguage = (event) => {
     const nextLanguage = OwAdminNormalizeLanguage(event.target.value);
     try {
       localStorage.setItem(OwAdminLocaleKey, nextLanguage);
@@ -23749,32 +23791,31 @@ async function rw() {
   const root = Ld(host);
   let generation = 0, disposed = false, state = "loading";
   const copy = {
-    loading: ["Checking administrator access…", "Verificando el acceso de administración…"],
-    signedout: ["Sign in to open Admin", "Inicia sesión para abrir Administración"],
-    denied: ["Administrator access required", "Se requiere acceso de administración"],
-    error: ["We couldn’t check administrator access", "No pudimos verificar el acceso de administración"],
-    runtime: ["The Admin dashboard couldn’t load", "No se pudo cargar el panel de administración"]
+    loading: "Checking administrator access…",
+    signedout: "Sign in to open Admin",
+    denied: "Administrator access required",
+    error: "We couldn’t check administrator access",
+    runtime: "The Admin dashboard couldn’t load"
   };
   function gate(kind) {
-    const language = OwAdminStoredLanguage(), es = language === "co";
-    const text = (en, co) => es ? co : en;
-    document.documentElement.lang = es ? "es-CO" : "en";
-    const message = kind === "loading" ? text("Please wait while we check your session and permissions.", "Espera mientras verificamos tu sesión y tus permisos.")
-      : kind === "signedout" ? text("Use your existing One ID account. Signing in does not grant administrator access.", "Usa tu cuenta de One ID. Iniciar sesión no otorga acceso de administración.")
-      : kind === "denied" ? text("This signed-in account does not have administrator access. If access was recently changed, try again.", "Esta cuenta no tiene acceso de administración. Si tus permisos cambiaron recientemente, intenta de nuevo.")
-      : text("Your access has not been changed. Try again, or return to your account.", "Tus permisos no han cambiado. Intenta de nuevo o vuelve a tu cuenta.");
+    const language = OwAdminStoredLanguage(), text = (value) => OwAdminTranslate(language, value);
+    document.documentElement.lang = OwAdminLanguages[language].html;
+    const message = kind === "loading" ? text("Please wait while we check your session and permissions.")
+      : kind === "signedout" ? text("Use your existing One ID account. Signing in does not grant administrator access.")
+      : kind === "denied" ? text("This signed-in account does not have administrator access. If access was recently changed, try again.")
+      : text("Your access has not been changed. Try again, or return to your account.");
     return _.jsxs("div", { className: "ow-admin-live", children: [
-      _.jsxs("header", { style: { flexWrap: "wrap" }, children: [_.jsx("h1", { children: text("Admin", "Administración") }),
+      _.jsxs("header", { style: { flexWrap: "wrap" }, children: [_.jsx("h1", { children: text("Admin") }),
         _.jsx(OwAdminLanguagePicker, { language, text: (s) => OwAdminTranslate(language, s), onChange: (next) => {
           try { localStorage.setItem(OwAdminLocaleKey, OwAdminNormalizeLanguage(next.target.value)); } catch {}
           show(state);
         } })] }),
       _.jsxs("section", { className: "owal-card", role: kind === "error" || kind === "runtime" ? "alert" : "status", children: [
-        _.jsx("h2", { children: copy[kind][es ? 1 : 0] }), _.jsx("p", { children: message }),
+        _.jsx("h2", { children: text(copy[kind]) }), _.jsx("p", { children: message }),
         _.jsxs("div", { style: { display: "flex", flexWrap: "wrap", gap: "12px", marginTop: "20px" }, children: [
-          kind === "signedout" && _.jsx("a", { href: "/signin", className: "owal-support-action", style: { display: "inline-flex", alignItems: "center" }, children: text("Sign in", "Iniciar sesión") }),
-          kind !== "loading" && _.jsx("button", { type: "button", className: "owal-support-action", onClick: check, children: text("Try again", "Intentar de nuevo") }),
-          _.jsx("a", { href: "/yourworld", className: "owal-support-action", style: { display: "inline-flex", alignItems: "center" }, children: text("Open my account", "Abrir mi cuenta") })
+          kind === "signedout" && _.jsx("a", { href: "/signin", className: "owal-support-action", style: { display: "inline-flex", alignItems: "center" }, children: text("Sign in") }),
+          kind !== "loading" && _.jsx("button", { type: "button", className: "owal-support-action", onClick: check, children: text("Try again") }),
+          _.jsx("a", { href: "/yourworld", className: "owal-support-action", style: { display: "inline-flex", alignItems: "center" }, children: text("Open my account") })
         ] })
       ] })
     ] });
