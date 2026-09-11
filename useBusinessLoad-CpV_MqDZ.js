@@ -1,0 +1,1 @@
+import{r as n}from"./index-CbBfJDOR.js";function f(o,u){const e=JSON.stringify(u),[s,i]=n.useState();return n.useEffect(()=>{let a=!0;return Promise.resolve().then(o).then(t=>{a&&i({key:e,data:t})}).catch(t=>{a&&i({key:e,error:String((t==null?void 0:t.message)||"Unavailable")})}),()=>{a=!1}},[e]),(s==null?void 0:s.key)===e?s:{key:e,data:void 0,error:void 0}}export{f as u};
