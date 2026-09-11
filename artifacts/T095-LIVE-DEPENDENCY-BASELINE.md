@@ -9,13 +9,13 @@ Read-only retrieval date: 2026-09-11. Supabase project: `wseblryyqxawvbjmylbo`.
 - Bundle SHA-256: `179efafae4696e0536baee8a5f2afa3de83d64e8cd4f68f7b52418b0ac05ff73`
 - Gateway `verify_jwt`: `false`
 - Exact retrieved files:
-  - `artifacts/t095-live-worker-v31/process-event-rolodex-broadcast/index.ts` (60,841 bytes from API response)
-  - `artifacts/t095-live-worker-v31/_shared/whatsapp-broadcast-safety.ts` (5,020 bytes from API response)
+  - `artifacts/t095-live-worker-v31/process-event-rolodex-broadcast/index.ts` (60,841 characters in API response)
+  - `artifacts/t095-live-worker-v31/_shared/whatsapp-broadcast-safety.ts` (5,020 characters in API response)
 
-Local artifact byte hashes after retrieval:
+Local artifact byte hashes after newline normalization (source text is otherwise unchanged; the deployed bundle hash above remains authoritative):
 
-- index: `5a0e9c9d06d1982bce0c82b631545f31ee55dd385525032abb48dd7fc08ae700`
-- shared safety module: `26a518a6595e88d16d75d2652400b632d055535fa731ac0d22521d26c6a48968`
+- index: `3b9071cc4487af4a0ad1274fe7260b080566e2a1fce358aeeda9f52bb75ab86a`
+- shared safety module: `6ed4c45f6ae797fad410d91bb401a3b172d373e094e0b0fbaea253b84ce5a314`
 
 The successor worker source started from those exact two retrieved files. Its intended changes are limited to strict service-key authentication, the SMS claim/authorization/in-flight boundary, conditional dispatch-evidence finalization, and routing every broadcast-summary write through the shared locked RPC.
 
