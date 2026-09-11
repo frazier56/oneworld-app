@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { isSupportedProviderStatus, shouldApplyProviderStatus } from "./provider-status.ts";
+import { isSupportedProviderStatus } from "./provider-status.ts";
 
 const encoder = new TextEncoder();
 
@@ -58,6 +58,27 @@ async function validTwilioSignature(req: Request, form: FormData, authToken: str
     if (constantTimeEqual(expected, supplied)) return true;
   }
   return false;
+}
+
+async function applyProviderStatus(
+  admin: ReturnType<typeof createClient>,
+  target: "outbound" | "reminder" | "recipient",
+  id: string,
+  status: string,
+  at: string,
+  errorCode?: string,
+  errorMessage?: string,
+) {
+  const { data, error } = await admin.rpc("oneevent_apply_twilio_provider_status", {
+    p_target: target,
+    p_id: id,
+    p_provider_status: status,
+    p_status_at: at,
+    p_error_code: errorCode || null,
+    p_error_message: errorMessage || null,
+  });
+  if (error) throw error;
+  return data === true;
 }
 
 Deno.serve(async (req: Request) => {
@@ -122,37 +143,16 @@ Deno.serve(async (req: Request) => {
       console.warn("Twilio reminder callback destination mismatch", { sid });
       return new Response("ok", { status: 200 });
     }
-    const currentStatus = String(reminderDelivery.provider_status || "").toLowerCase();
-    if (!shouldApplyProviderStatus(currentStatus, nextStatus)) {
-      return new Response("ok", { status: 200 });
-    }
     const now = new Date().toISOString();
-    const update: Record<string, unknown> = {
-      provider_message_id: sid,
-      provider_status: nextStatus,
-      provider_status_at: now,
-      provider_error_code: payload.ErrorCode || null,
-      updated_at: now,
-    };
-    if (["accepted", "scheduled", "queued", "sending"].includes(nextStatus)) {
-      update.status = "queued";
-    } else if (nextStatus === "sent") {
-      update.status = "sent";
-      update.sent_at = reminderDelivery.sent_at || now;
-    } else if (nextStatus === "delivered") {
-      update.status = "sent";
-      update.sent_at = reminderDelivery.sent_at || now;
-      update.delivered_at = reminderDelivery.delivered_at || now;
-    } else if (nextStatus === "read") {
-      update.status = "sent";
-      update.sent_at = reminderDelivery.sent_at || now;
-      update.delivered_at = reminderDelivery.delivered_at || now;
-      update.read_at = reminderDelivery.read_at || now;
-    } else {
-      update.status = "failed";
-      update.failure_reason = payload.ErrorMessage || `Twilio ${nextStatus}`;
-    }
-    await admin.from("event_reminder_deliveries").update(update).eq("id", reminderDelivery.id);
+    await applyProviderStatus(
+      admin,
+      "reminder",
+      reminderDelivery.id,
+      nextStatus,
+      now,
+      payload.ErrorCode,
+      payload.ErrorMessage,
+    );
     return new Response("ok", { status: 200 });
   }
 
@@ -164,30 +164,16 @@ Deno.serve(async (req: Request) => {
       return new Response("ok", { status: 200 });
     }
 
-    if (!shouldApplyProviderStatus(outboundMessage.provider_status, nextStatus)) {
-      return new Response("ok", { status: 200 });
-    }
-
     const now = new Date().toISOString();
-    const update: Record<string, unknown> = {
-      provider_status: nextStatus,
-      provider_status_at: now,
-      provider_error_code: payload.ErrorCode || null,
-    };
-    if (nextStatus === "sent") {
-      update.status = "sent";
-      update.sent_at = outboundMessage.sent_at || now;
-    } else if (nextStatus === "delivered" || nextStatus === "read") {
-      update.status = "sent";
-      update.sent_at = outboundMessage.sent_at || now;
-      update.delivered_at = outboundMessage.delivered_at || now;
-      update.last_error = null;
-    } else if (["undelivered", "failed", "canceled"].includes(nextStatus)) {
-      update.status = "failed";
-      update.failed_at = now;
-      update.last_error = payload.ErrorMessage || `Twilio ${nextStatus}`;
-    }
-    await admin.from("outbound_messages").update(update).eq("id", outboundMessage.id);
+    await applyProviderStatus(
+      admin,
+      "outbound",
+      outboundMessage.id,
+      nextStatus,
+      now,
+      payload.ErrorCode,
+      payload.ErrorMessage,
+    );
     return new Response("ok", { status: 200 });
   }
 
@@ -200,41 +186,19 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { status: 200 });
   }
 
-  const currentStatus = String(recipient.provider_status || "").toLowerCase();
-  if (!shouldApplyProviderStatus(currentStatus, nextStatus)) {
+  const now = new Date().toISOString();
+  const applied = await applyProviderStatus(
+    admin,
+    "recipient",
+    recipient.id,
+    nextStatus,
+    now,
+    payload.ErrorCode,
+    payload.ErrorMessage,
+  );
+  if (!applied) {
     return new Response("ok", { status: 200 });
   }
-
-  const now = new Date().toISOString();
-  const update: Record<string, unknown> = {
-    provider_message_id: sid,
-    provider_status: nextStatus,
-    provider_status_at: now,
-    provider_error_code: payload.ErrorCode || null,
-  };
-
-  if (["accepted", "scheduled", "queued", "sending"].includes(nextStatus)) {
-    update.status = "queued";
-    update.queued_at = now;
-  } else if (nextStatus === "sent") {
-    update.status = "sent";
-    update.sent_at = now;
-  } else if (nextStatus === "delivered") {
-    update.status = "sent";
-    update.sent_at = recipient.status === "sent" ? undefined : now;
-    update.delivered_at = recipient.delivered_at || now;
-  } else if (nextStatus === "read") {
-    update.status = "sent";
-    update.delivered_at = recipient.delivered_at || now;
-    update.opened_at = recipient.opened_at || now;
-  } else {
-    update.status = "failed";
-    update.error_message = payload.ErrorMessage || `Twilio ${nextStatus}`;
-    update.undelivered_at = now;
-  }
-
-  Object.keys(update).forEach((key) => update[key] === undefined && delete update[key]);
-  await admin.from("event_rolodex_broadcast_recipients").update(update).eq("id", recipient.id);
 
   let kickSmsFallback = false;
   if (recipient.channel === "whatsapp" && ["delivered", "read", "failed", "undelivered"].includes(nextStatus)) {
@@ -321,4 +285,3 @@ Deno.serve(async (req: Request) => {
 
   return new Response("ok", { status: 200 });
 });
-
