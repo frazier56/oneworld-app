@@ -1,0 +1,9 @@
+{
+  "exactWorkerHandler": true,
+  "gatewayVerifyJwtLiveBaseline": false,
+  "productionWrites": false,
+  "missingTokenStatus": 403,
+  "forgedRoleTokenStatus": 403,
+  "exactServiceKeyStatus": 200,
+  "invalidReachedPrivilegedClient": false
+}

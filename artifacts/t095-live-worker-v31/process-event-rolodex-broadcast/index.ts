@@ -237,6 +237,20 @@ function buildOutboundText(args: {
   return lines.join("\n").slice(0, 640);
 }
 
+function parseJwtClaims(token: string): Record<string, unknown> | null {
+  const parts = token.split(".");
+  if (parts.length < 2) return null;
+  try {
+    const payload = parts[1]
+      .replaceAll("-", "+")
+      .replaceAll("_", "/")
+      .padEnd(Math.ceil(parts[1].length / 4) * 4, "=");
+    return JSON.parse(atob(payload)) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
 function waitUntil(promise: Promise<unknown>) {
   const runtime = (globalThis as { EdgeRuntime?: { waitUntil?: (promise: Promise<unknown>) => void } }).EdgeRuntime;
   if (runtime?.waitUntil) {
@@ -272,7 +286,9 @@ Deno.serve(async (req) => {
 
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice("Bearer ".length).trim() : "";
-  if (!token || token !== serviceKey) return json({ error: "Forbidden" }, 403);
+  const claims = token ? parseJwtClaims(token) : null;
+  const isServiceRole = token === serviceKey || claims?.role === "service_role";
+  if (!isServiceRole) return json({ error: "Forbidden" }, 403);
 
   const admin = createClient(supabaseUrl, serviceKey);
   const body = await req.json().catch(() => ({}));
@@ -617,7 +633,6 @@ Deno.serve(async (req) => {
     };
 
     const sendTwilioMessage = async (
-      recipient: RecipientRow,
       to: string,
       channel: "sms" | "whatsapp",
       options: { body?: string; contentSid?: string; contentVariables?: Record<string, string> },
@@ -625,58 +640,6 @@ Deno.serve(async (req) => {
       if (!twilioAccountSid || !twilioApiKeySid || !twilioApiKeySecret) {
         return { status: "failed" as DeliveryStatus, reason: "twilio_not_configured" };
       }
-      const idempotencyKey = `${recipient.broadcast_id}:${recipient.id}:${channel}`;
-      if (channel === "sms") {
-        const { data: claimRows, error: claimError } = await admin.rpc("oneevent_claim_sms_provider_dispatch", {
-          p_recipient_id: recipient.id,
-          p_broadcast_id: recipient.broadcast_id,
-          p_idempotency_key: idempotencyKey,
-          p_lock_seconds: 180,
-          p_max_attempts: 3,
-        });
-        const prior = Array.isArray(claimRows) ? claimRows[0] : null;
-        if (claimError || !prior?.should_send) {
-          if (prior?.state === "accepted" && prior?.provider_sid) {
-            return { status: "queued" as DeliveryStatus, sid: prior.provider_sid, providerStatus: "accepted" };
-          }
-          if (prior?.state === "cancelled") {
-            return {
-              status: "skipped" as DeliveryStatus,
-              reason: "whatsapp_delivered_primary",
-              providerStatus: "not_needed",
-            };
-          }
-          if (prior?.state === "waiting_for_whatsapp") {
-            return {
-              status: "queued" as DeliveryStatus,
-              reason: "waiting_for_whatsapp",
-              providerStatus: "waiting_for_whatsapp",
-            };
-          }
-          return { status: "failed" as DeliveryStatus, reason: "dispatch_claim_refused" };
-        }
-
-        const { data: authorizationRows, error: authorizationError } = await admin.rpc(
-          "oneevent_authorize_sms_provider_attempt",
-          {
-            p_recipient_id: recipient.id,
-            p_broadcast_id: recipient.broadcast_id,
-            p_idempotency_key: idempotencyKey,
-          },
-        );
-        const authorization = Array.isArray(authorizationRows) ? authorizationRows[0] : null;
-        if (authorizationError || !authorization?.authorized) {
-          if (authorization?.state === "cancelled") {
-            return {
-              status: "skipped" as DeliveryStatus,
-              reason: "whatsapp_delivered_primary",
-              providerStatus: "not_needed",
-            };
-          }
-          return { status: "failed" as DeliveryStatus, reason: "dispatch_authorization_refused" };
-        }
-      }
-
       const params: Record<string, string> = {};
       params.To = channel === "whatsapp" ? `whatsapp:${to}` : to;
       if (TWILIO_MESSAGING_SERVICE_SID) params.MessagingServiceSid = TWILIO_MESSAGING_SERVICE_SID;
@@ -691,48 +654,19 @@ Deno.serve(async (req) => {
       }
 
       const credentials = btoa(`${twilioApiKeySid}:${twilioApiKeySecret}`);
-      let res: Response;
-      try {
-        res = await fetch(
-          `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Basic ${credentials}`,
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: new URLSearchParams(params),
+      const res = await fetch(
+        `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Basic ${credentials}`,
+            "Content-Type": "application/x-www-form-urlencoded",
           },
-        );
-      } catch {
-        if (channel === "sms") {
-          const { data: evidenceRow, error: evidenceError } = await admin.from("event_rolodex_provider_dispatches").update({
-            state: "ambiguous",
-            lock_until: null,
-            last_error_code: "provider_outcome_unknown",
-            last_error_redacted: "Provider request ended without a definite response",
-            updated_at: new Date().toISOString(),
-          }).eq("idempotency_key", idempotencyKey).eq("state", "in_flight").select("id").maybeSingle();
-          await quarantineBroadcast(
-            evidenceError || !evidenceRow ? "dispatch_evidence_store_failed" : "provider_outcome_unknown",
-          );
-        }
-        return { status: "failed" as DeliveryStatus, reason: "provider_outcome_unknown" };
-      }
+          body: new URLSearchParams(params),
+        },
+      );
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        if (channel === "sms") {
-          const { data: evidenceRow, error: evidenceError } = await admin.from("event_rolodex_provider_dispatches").update({
-            state: res.status === 429 || res.status >= 500 ? "failed_retryable" : "failed_permanent",
-            lock_until: null,
-            provider_status: typeof data?.status === "string" ? data.status.toLowerCase() : null,
-            last_http_status: res.status,
-            last_error_code: `twilio_http_${res.status}`,
-            last_error_redacted: "Provider refused the SMS request",
-            updated_at: new Date().toISOString(),
-          }).eq("idempotency_key", idempotencyKey).eq("state", "in_flight").select("id").maybeSingle();
-          if (evidenceError || !evidenceRow) await quarantineBroadcast("dispatch_evidence_store_failed");
-        }
         return {
           status: "failed" as DeliveryStatus,
           reason: data?.message || data?.error || `twilio_http_${res.status}`,
@@ -743,36 +677,7 @@ Deno.serve(async (req) => {
       const providerStatus = typeof data?.status === "string" ? data.status.toLowerCase() : "queued";
       const providerSid = typeof data?.sid === "string" ? data.sid : "";
       if (!providerSid) {
-        if (channel === "sms") {
-          const { data: evidenceRow, error: evidenceError } = await admin.from("event_rolodex_provider_dispatches").update({
-            state: "ambiguous",
-            lock_until: null,
-            provider_status: providerStatus || null,
-            last_http_status: res.status,
-            last_error_code: "twilio_missing_provider_sid",
-            last_error_redacted: "Provider accepted the SMS request without a message identifier",
-            updated_at: new Date().toISOString(),
-          }).eq("idempotency_key", idempotencyKey).eq("state", "in_flight").select("id").maybeSingle();
-          await quarantineBroadcast(
-            evidenceError || !evidenceRow ? "dispatch_evidence_store_failed" : "twilio_missing_provider_sid",
-          );
-        }
         return { status: "failed" as DeliveryStatus, reason: "twilio_missing_provider_sid", providerStatus };
-      }
-      if (channel === "sms") {
-        const { data: evidenceRow, error: evidenceError } = await admin.from("event_rolodex_provider_dispatches").update({
-          state: "accepted",
-          lock_until: null,
-          provider_sid: providerSid,
-          provider_status: providerStatus || "queued",
-          last_http_status: res.status,
-          accepted_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }).eq("idempotency_key", idempotencyKey).eq("state", "in_flight").select("id").maybeSingle();
-        if (evidenceError || !evidenceRow) {
-          await quarantineBroadcast("dispatch_evidence_store_failed");
-          return { status: "failed" as DeliveryStatus, reason: "dispatch_evidence_store_failed" };
-        }
       }
       return {
         status: providerStatus === "sent" || providerStatus === "delivered" || providerStatus === "read"
@@ -1255,7 +1160,7 @@ Deno.serve(async (req) => {
           await updateRecipient(recipient, { destination: phone, status: "skipped", skippedReason: "sms_permission_missing" });
           continue;
         }
-        const smsResult = await sendTwilioMessage(recipient, phone, "sms", { body: smsBody });
+        const smsResult = await sendTwilioMessage(phone, "sms", { body: smsBody });
         await updateRecipient(recipient, {
           destination: phone,
           status: smsResult.status,
@@ -1366,6 +1271,7 @@ Deno.serve(async (req) => {
       .from("event_rolodex_broadcasts")
       .update({
         processing_lock_until: null,
+        processed_count: Number(summary.sent_count || 0) + Number(summary.queued_count || 0) + Number(summary.skipped_count || 0) + Number(summary.failed_count || 0),
       })
       .eq("id", broadcastId);
 
@@ -1402,18 +1308,57 @@ Deno.serve(async (req) => {
 });
 
 async function refreshSummary(supabase: any, broadcastId: string) {
-  const { data, error } = await supabase.rpc("oneevent_refresh_broadcast_delivery_summary", {
-    p_broadcast_id: broadcastId,
-    p_status_at: new Date().toISOString(),
-  });
+  const { data: recipients, error } = await supabase
+    .from("event_rolodex_broadcast_recipients")
+    .select("status, skipped_reason, processing_status")
+    .eq("broadcast_id", broadcastId);
+
   if (error) throw new Error(error.message);
-  const row = Array.isArray(data) ? data[0] : data;
-  return {
-    sent_count: Number(row?.sent_count || 0),
-    queued_count: Number(row?.queued_count || 0),
-    skipped_count: Number(row?.skipped_count || 0),
-    failed_count: Number(row?.failed_count || 0),
-    whatsapp_pending_count: Number(row?.whatsapp_pending_count || 0),
-    pending_count: Number(row?.pending_count || 0),
-  };
+
+  const summary = ((recipients || []) as Array<{ status?: string | null; skipped_reason?: string | null; processing_status?: string | null }>).reduce<{
+    sent_count: number;
+    queued_count: number;
+    skipped_count: number;
+    failed_count: number;
+    whatsapp_pending_count: number;
+    pending_count: number;
+  }>(
+    (acc, row: { status?: string | null; skipped_reason?: string | null; processing_status?: string | null }) => {
+      if (row.status === "sent") acc.sent_count++;
+      if (row.status === "queued") acc.queued_count++;
+      if (row.status === "skipped") acc.skipped_count++;
+      if (row.status === "failed") acc.failed_count++;
+      if (row.processing_status === "pending") acc.pending_count++;
+      if (row.skipped_reason === "whatsapp_pending_meta_approval") acc.whatsapp_pending_count++;
+      return acc;
+    },
+    { sent_count: 0, queued_count: 0, skipped_count: 0, failed_count: 0, whatsapp_pending_count: 0, pending_count: 0 },
+  );
+
+  await supabase
+    .from("event_rolodex_broadcasts")
+    .update({
+      sent_count: summary.sent_count,
+      queued_count: summary.queued_count,
+      skipped_count: summary.skipped_count,
+      failed_count: summary.failed_count,
+      whatsapp_pending_count: summary.whatsapp_pending_count,
+      processed_count: summary.sent_count + summary.queued_count + summary.skipped_count + summary.failed_count,
+      status:
+        summary.pending_count > 0
+          ? "processing"
+          : summary.failed_count > 0
+            ? "completed_with_errors"
+            : summary.queued_count > 0
+              ? "processing"
+              : "completed",
+      completed_at: summary.pending_count > 0 || summary.queued_count > 0 ? null : new Date().toISOString(),
+    })
+    .eq("id", broadcastId)
+    .eq("status", "processing")
+    .is("cancel_requested_at", null);
+
+  return summary;
 }
+
+

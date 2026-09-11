@@ -38,6 +38,9 @@ function statusCall(id, status) {
 function claimCall(id, broadcastId) {
   return `select should_send,state from oneevent_claim_sms_provider_dispatch('${id}','${broadcastId}','${broadcastId}:${id}:sms',180,3);`;
 }
+function authorizeCall(id, broadcastId) {
+  return `select authorized,state from oneevent_authorize_sms_provider_attempt('${id}','${broadcastId}','${broadcastId}:${id}:sms');`;
+}
 function fixture(serial) {
   const suffix = String(serial).padStart(12, "0");
   const broadcastId = `10000000-0000-4000-8000-${suffix}`;
@@ -102,7 +105,7 @@ async function heldFirst(firstSql, secondSql) {
         id uuid primary key, sent_count integer default 0, queued_count integer default 0,
         skipped_count integer default 0, failed_count integer default 0,
         whatsapp_pending_count integer default 0, processed_count integer default 0,
-        status text default 'processing', completed_at timestamptz
+        status text default 'processing', completed_at timestamptz, cancel_requested_at timestamptz
       );
       create table event_rolodex_broadcast_recipients(
         id uuid primary key, broadcast_id uuid not null, rolodex_id uuid not null,
@@ -179,6 +182,27 @@ async function heldFirst(firstSql, secondSql) {
     assert.equal(sql(`select provider_status||'|'||status from event_rolodex_broadcast_recipients where id='${d.fallbackId}'`), "not_needed|skipped");
     results.push({ case: "worker_claim_then_delivery", blockedMs: dRace.blockedMs, delivery: dRace.second });
 
+    const d2 = fixture(7);
+    assert.match(sql(statusCall(d2.primaryId, "failed")), /t\|t/);
+    assert.match(sql(claimCall(d2.fallbackId, d2.broadcastId)), /t\|processing/);
+    const d2Race = await heldFirst(
+      statusCall(d2.primaryId, "delivered"),
+      authorizeCall(d2.fallbackId, d2.broadcastId),
+    );
+    assert.match(d2Race.second, /f\|cancelled/);
+    results.push({ case: "delivery_then_provider_authorization", blockedMs: d2Race.blockedMs, authorization: d2Race.second });
+
+    const d3 = fixture(8);
+    assert.match(sql(statusCall(d3.primaryId, "failed")), /t\|t/);
+    assert.match(sql(claimCall(d3.fallbackId, d3.broadcastId)), /t\|processing/);
+    const d3Race = await heldFirst(
+      authorizeCall(d3.fallbackId, d3.broadcastId),
+      statusCall(d3.primaryId, "delivered"),
+    );
+    assert.equal(sql(`select state from event_rolodex_provider_dispatches where recipient_id='${d3.fallbackId}'`), "in_flight");
+    assert.equal(sql(`select status from event_rolodex_broadcast_recipients where id='${d3.fallbackId}'`), "queued");
+    results.push({ case: "provider_authorization_then_delivery", blockedMs: d3Race.blockedMs, delivery: d3Race.second, dispatch: "in_flight" });
+
     const e = fixture(5);
     const secondPrimary = "20000000-0000-4000-8000-000000000006";
     const secondFallback = "30000000-0000-4000-8000-000000000006";
@@ -201,21 +225,62 @@ async function heldFirst(firstSql, secondSql) {
     assert.equal(summary, "2|0|2|0|completed");
     results.push({ case: "concurrent_summary_publication", blockedMs: eRace.blockedMs, summary });
 
+    const f = fixture(9);
+    const fPrimary = "20000000-0000-4000-8000-000000000011";
+    const fFallback = "30000000-0000-4000-8000-000000000011";
+    const fRolodex = "40000000-0000-4000-8000-000000000011";
+    sql(`
+      insert into event_rolodex_broadcast_recipients
+        (id,broadcast_id,rolodex_id,channel,status,processing_status,provider_status)
+      values
+        ('${fPrimary}','${f.broadcastId}','${fRolodex}','whatsapp','queued','done','queued'),
+        ('${fFallback}','${f.broadcastId}','${fRolodex}','sms','queued','done','waiting_for_whatsapp');
+    `);
+    const workerSummaryCall = `select * from oneevent_refresh_broadcast_delivery_summary('${f.broadcastId}',clock_timestamp());`;
+    const fRace = await heldFirst(workerSummaryCall, statusCall(fPrimary, "delivered"));
+    const fSummary = sql(`select sent_count||'|'||queued_count||'|'||skipped_count from event_rolodex_broadcasts where id='${f.broadcastId}'`);
+    assert.equal(fSummary, "1|2|1");
+    results.push({ case: "worker_summary_then_callback_summary", blockedMs: fRace.blockedMs, summary: fSummary });
+
+    const g = fixture(10);
+    const gPrimary = "20000000-0000-4000-8000-000000000012";
+    const gFallback = "30000000-0000-4000-8000-000000000012";
+    const gRolodex = "40000000-0000-4000-8000-000000000012";
+    sql(`
+      insert into event_rolodex_broadcast_recipients
+        (id,broadcast_id,rolodex_id,channel,status,processing_status,provider_status)
+      values
+        ('${gPrimary}','${g.broadcastId}','${gRolodex}','whatsapp','queued','done','queued'),
+        ('${gFallback}','${g.broadcastId}','${gRolodex}','sms','queued','done','waiting_for_whatsapp');
+    `);
+    const gRace = await heldFirst(
+      statusCall(gPrimary, "delivered"),
+      `select * from oneevent_refresh_broadcast_delivery_summary('${g.broadcastId}',clock_timestamp());`,
+    );
+    const gSummary = sql(`select sent_count||'|'||queued_count||'|'||skipped_count from event_rolodex_broadcasts where id='${g.broadcastId}'`);
+    assert.equal(gSummary, "1|2|1");
+    results.push({ case: "callback_summary_then_worker_summary", blockedMs: gRace.blockedMs, summary: gSummary });
+
     const grants = sql(`
       select has_function_privilege('anon','public.oneevent_apply_twilio_recipient_status(uuid,text,timestamptz,text,text)','execute'),
         has_function_privilege('authenticated','public.oneevent_apply_twilio_recipient_status(uuid,text,timestamptz,text,text)','execute'),
         has_function_privilege('service_role','public.oneevent_apply_twilio_recipient_status(uuid,text,timestamptz,text,text)','execute'),
         has_function_privilege('anon','public.oneevent_claim_sms_provider_dispatch(uuid,uuid,text,integer,integer)','execute'),
         has_function_privilege('authenticated','public.oneevent_claim_sms_provider_dispatch(uuid,uuid,text,integer,integer)','execute'),
-        has_function_privilege('service_role','public.oneevent_claim_sms_provider_dispatch(uuid,uuid,text,integer,integer)','execute')
+        has_function_privilege('service_role','public.oneevent_claim_sms_provider_dispatch(uuid,uuid,text,integer,integer)','execute'),
+        has_function_privilege('anon','public.oneevent_authorize_sms_provider_attempt(uuid,uuid,text)','execute'),
+        has_function_privilege('authenticated','public.oneevent_authorize_sms_provider_attempt(uuid,uuid,text)','execute'),
+        has_function_privilege('service_role','public.oneevent_authorize_sms_provider_attempt(uuid,uuid,text)','execute'),
+        has_function_privilege('service_role','public.oneevent_refresh_broadcast_delivery_summary(uuid,timestamptz)','execute')
     `);
-    assert.equal(grants, "f|f|t|f|f|t");
+    assert.equal(grants, "f|f|t|f|f|t|f|f|t|t");
 
     sql(fs.readFileSync(
       path.join(root, "supabase", "rollbacks", "20260911180000_oneevent_atomic_whatsapp_fallback.sql"),
       "utf8",
     ));
     assert.equal(sql(`select coalesce(to_regprocedure('public.oneevent_apply_twilio_recipient_status(uuid,text,timestamptz,text,text)')::text,'')`), "");
+    assert.equal(sql(`select coalesce(to_regprocedure('public.oneevent_authorize_sms_provider_attempt(uuid,uuid,text)')::text,'')`), "");
     sql(fs.readFileSync(
       path.join(root, "supabase", "rollbacks", "20260911170000_oneevent_atomic_provider_status.sql"),
       "utf8",

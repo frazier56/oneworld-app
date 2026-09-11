@@ -6,29 +6,50 @@
   "cases": [
     {
       "case": "delivery_then_failure",
-      "blockedMs": 325,
+      "blockedMs": 198,
       "second": "f|f"
     },
     {
       "case": "failure_then_delivery",
-      "blockedMs": 193,
+      "blockedMs": 194,
       "second": "t|f"
     },
     {
       "case": "retry_then_delivery_before_worker_claim",
-      "blockedMs": 202,
+      "blockedMs": 203,
       "claim": "f|cancelled"
     },
     {
       "case": "worker_claim_then_delivery",
-      "blockedMs": 208,
+      "blockedMs": 196,
       "delivery": "t|f"
     },
     {
+      "case": "delivery_then_provider_authorization",
+      "blockedMs": 199,
+      "authorization": "f|cancelled"
+    },
+    {
+      "case": "provider_authorization_then_delivery",
+      "blockedMs": 198,
+      "delivery": "t|f",
+      "dispatch": "in_flight"
+    },
+    {
       "case": "concurrent_summary_publication",
-      "blockedMs": 203,
+      "blockedMs": 213,
       "summary": "2|0|2|0|completed"
+    },
+    {
+      "case": "worker_summary_then_callback_summary",
+      "blockedMs": 202,
+      "summary": "1|2|1"
+    },
+    {
+      "case": "callback_summary_then_worker_summary",
+      "blockedMs": 212,
+      "summary": "1|2|1"
     }
   ],
-  "grants": "f|f|t|f|f|t"
+  "grants": "f|f|t|f|f|t|f|f|t|t"
 }

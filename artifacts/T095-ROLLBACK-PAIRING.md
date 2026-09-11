@@ -11,3 +11,5 @@ If the successor is later released and must be rolled back:
 5. Never remove the already-live 15:30 observability columns, callback dedupe index, or operations view while v13 is deployed.
 
 Restoring v13 deliberately returns to the known read/write callback race; it is degraded recovery, not acceptance.
+
+The 18:00 rollback first converts any `in_flight` dispatch evidence to `ambiguous` before restoring the prior state constraint and the exact live provider-claim function. This is intentional: an external request that crossed the provider-attempt boundary cannot safely be labelled cancelled or retried.

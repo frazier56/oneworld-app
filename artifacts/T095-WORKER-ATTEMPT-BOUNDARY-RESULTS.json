@@ -1,0 +1,42 @@
+{
+  "exactNestedWorkerFunction": true,
+  "network": false,
+  "productionWrites": false,
+  "cases": [
+    {
+      "mode": "delivery_before_authorization",
+      "dispatchState": "cancelled",
+      "providerRequests": 0,
+      "quarantines": 0,
+      "rpcCalls": 2,
+      "result": {
+        "status": "skipped",
+        "reason": "whatsapp_delivered_primary",
+        "providerStatus": "not_needed"
+      }
+    },
+    {
+      "mode": "authorization_before_delivery",
+      "dispatchState": "accepted",
+      "providerRequests": 1,
+      "quarantines": 0,
+      "rpcCalls": 2,
+      "result": {
+        "status": "queued",
+        "sid": "SM00000000000000000000000000000951",
+        "providerStatus": "queued"
+      }
+    },
+    {
+      "mode": "forced_cancel_after_authorization",
+      "dispatchState": "cancelled",
+      "providerRequests": 1,
+      "quarantines": 1,
+      "rpcCalls": 2,
+      "result": {
+        "status": "failed",
+        "reason": "dispatch_evidence_store_failed"
+      }
+    }
+  ]
+}
