@@ -8,6 +8,29 @@ const source = fs.readFileSync(
   path.join(__dirname, "..", "supabase", "functions", "process-event-rolodex-broadcast", "index.ts"),
   "utf8",
 );
+const safeRollbackSource = fs.readFileSync(
+  path.join(
+    __dirname,
+    "..",
+    "supabase",
+    "rollbacks",
+    "edge",
+    "process-event-rolodex-broadcast-v31-safe",
+    "process-event-rolodex-broadcast",
+    "index.ts",
+  ),
+  "utf8",
+);
+assert(safeRollbackSource.includes('if (!token || token !== serviceKey) return json({ error: "Forbidden" }, 403);'));
+assert(!safeRollbackSource.includes("claims?.role === \"service_role\""));
+const rollbackSyntax = ts.transpileModule(safeRollbackSource.replace(/^import .*\n/gm, ""), {
+  compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None },
+  reportDiagnostics: true,
+});
+assert.equal(
+  (rollbackSyntax.diagnostics || []).filter((item) => item.category === ts.DiagnosticCategory.Error).length,
+  0,
+);
 let handler;
 let clientCreations = 0;
 const serviceKey = "synthetic-service-key-exact-match";
@@ -80,6 +103,8 @@ function post(token) {
     forgedRoleTokenStatus: forgedResponse.status,
     exactServiceKeyStatus: validResponse.status,
     invalidReachedPrivilegedClient: false,
+    safeRollbackRetainsExactServiceKeyAuth: true,
+    safeRollbackSyntaxClean: true,
   };
   fs.writeFileSync(
     path.join(__dirname, "..", "artifacts", "T095-WORKER-AUTH-RESULTS.json"),

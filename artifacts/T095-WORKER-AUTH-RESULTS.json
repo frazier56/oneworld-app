@@ -5,5 +5,7 @@
   "missingTokenStatus": 403,
   "forgedRoleTokenStatus": 403,
   "exactServiceKeyStatus": 200,
-  "invalidReachedPrivilegedClient": false
+  "invalidReachedPrivilegedClient": false,
+  "safeRollbackRetainsExactServiceKeyAuth": true,
+  "safeRollbackSyntaxClean": true
 }

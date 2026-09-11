@@ -1,7 +1,6 @@
--- Run only after restoring the previous deployed versions of both:
---   twilio-message-status
---   process-event-rolodex-broadcast
--- The previous Edge bundles do not call these functions.
+-- Run only after deploying the supplied v13 callback rollback bundle and the
+-- v31-safe worker rollback bundle, then draining successor invocations.
+-- Those Edge bundles do not call these functions; v31-safe retains strict auth.
 
 drop function if exists public.oneevent_apply_twilio_recipient_status(
   uuid, text, timestamptz, text, text
