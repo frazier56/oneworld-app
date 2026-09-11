@@ -1,0 +1,34 @@
+{
+  "localOnly": true,
+  "productionWrites": false,
+  "exactMigrationsCompiled": true,
+  "exactRollbacksCompiled": true,
+  "cases": [
+    {
+      "case": "delivery_then_failure",
+      "blockedMs": 325,
+      "second": "f|f"
+    },
+    {
+      "case": "failure_then_delivery",
+      "blockedMs": 193,
+      "second": "t|f"
+    },
+    {
+      "case": "retry_then_delivery_before_worker_claim",
+      "blockedMs": 202,
+      "claim": "f|cancelled"
+    },
+    {
+      "case": "worker_claim_then_delivery",
+      "blockedMs": 208,
+      "delivery": "t|f"
+    },
+    {
+      "case": "concurrent_summary_publication",
+      "blockedMs": 203,
+      "summary": "2|0|2|0|completed"
+    }
+  ],
+  "grants": "f|f|t|f|f|t"
+}

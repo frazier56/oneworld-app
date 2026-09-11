@@ -81,6 +81,29 @@ async function applyProviderStatus(
   return data === true;
 }
 
+async function applyRecipientProviderStatus(
+  admin: ReturnType<typeof createClient>,
+  id: string,
+  status: string,
+  at: string,
+  errorCode?: string,
+  errorMessage?: string,
+) {
+  const { data, error } = await admin.rpc("oneevent_apply_twilio_recipient_status", {
+    p_recipient_id: id,
+    p_provider_status: status,
+    p_status_at: at,
+    p_error_code: errorCode || null,
+    p_error_message: errorMessage || null,
+  });
+  if (error) throw error;
+  const result = Array.isArray(data) ? data[0] : data;
+  return {
+    applied: result?.applied === true,
+    kickSmsFallback: result?.kick_sms_fallback === true,
+  };
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return new Response("POST required", { status: 405 });
 
@@ -187,57 +210,19 @@ Deno.serve(async (req: Request) => {
   }
 
   const now = new Date().toISOString();
-  const applied = await applyProviderStatus(
+  const recipientResult = await applyRecipientProviderStatus(
     admin,
-    "recipient",
     recipient.id,
     nextStatus,
     now,
     payload.ErrorCode,
     payload.ErrorMessage,
   );
-  if (!applied) {
+  if (!recipientResult.applied && !recipientResult.kickSmsFallback) {
     return new Response("ok", { status: 200 });
   }
 
-  let kickSmsFallback = false;
-  if (recipient.channel === "whatsapp" && ["delivered", "read", "failed", "undelivered"].includes(nextStatus)) {
-    const { data: smsFallback } = await admin
-      .from("event_rolodex_broadcast_recipients")
-      .select("id")
-      .eq("broadcast_id", recipient.broadcast_id)
-      .eq("rolodex_id", recipient.rolodex_id)
-      .eq("channel", "sms")
-      .eq("provider_status", "waiting_for_whatsapp")
-      .maybeSingle();
-    if (smsFallback) {
-      if (nextStatus === "delivered" || nextStatus === "read") {
-        await admin.from("event_rolodex_broadcast_recipients").update({
-          status: "skipped",
-          skipped_reason: "whatsapp_delivered_primary",
-          provider_status: "not_needed",
-          provider_status_at: now,
-          processing_status: "done",
-          processed_at: now,
-        }).eq("id", smsFallback.id);
-      } else {
-        await admin.from("event_rolodex_broadcast_recipients").update({
-          status: "queued",
-          skipped_reason: null,
-          error_message: null,
-          provider_status: null,
-          provider_status_at: null,
-          provider_error_code: null,
-          processing_status: "pending",
-          processed_at: null,
-          queued_at: now,
-        }).eq("id", smsFallback.id);
-        kickSmsFallback = true;
-      }
-    }
-  }
-
-  if (kickSmsFallback) {
+  if (recipientResult.kickSmsFallback) {
     const workerResponse = await fetch(`${supabaseUrl}/functions/v1/process-event-rolodex-broadcast`, {
       method: "POST",
       headers: {
@@ -253,35 +238,6 @@ Deno.serve(async (req: Request) => {
       console.error("SMS fallback worker returned", workerResponse.status);
     }
   }
-
-  const { data: rows } = await admin
-    .from("event_rolodex_broadcast_recipients")
-    .select("status, processing_status, skipped_reason")
-    .eq("broadcast_id", recipient.broadcast_id);
-  const summary = (rows || []).reduce((acc: Record<string, number>, row: any) => {
-    if (row.status === "sent") acc.sent_count++;
-    if (row.status === "queued") acc.queued_count++;
-    if (row.status === "skipped") acc.skipped_count++;
-    if (row.status === "failed") acc.failed_count++;
-    if (row.processing_status === "pending") acc.pending_count++;
-    if (row.skipped_reason === "whatsapp_pending_meta_approval") acc.whatsapp_pending_count++;
-    return acc;
-  }, { sent_count: 0, queued_count: 0, skipped_count: 0, failed_count: 0, pending_count: 0, whatsapp_pending_count: 0 });
-
-  await admin.from("event_rolodex_broadcasts").update({
-    sent_count: summary.sent_count,
-    queued_count: summary.queued_count,
-    skipped_count: summary.skipped_count,
-    failed_count: summary.failed_count,
-    whatsapp_pending_count: summary.whatsapp_pending_count,
-    processed_count: summary.sent_count + summary.queued_count + summary.skipped_count + summary.failed_count,
-    status: summary.pending_count > 0 || summary.queued_count > 0
-      ? "processing"
-      : summary.failed_count > 0
-        ? "completed_with_errors"
-        : "completed",
-    completed_at: summary.pending_count > 0 || summary.queued_count > 0 ? null : now,
-  }).eq("id", recipient.broadcast_id);
 
   return new Response("ok", { status: 200 });
 });

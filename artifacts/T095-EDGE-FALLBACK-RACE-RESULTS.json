@@ -1,0 +1,22 @@
+{
+  "exactCallbackHandler": true,
+  "productionWrites": false,
+  "raceFinalPrimary": "delivered",
+  "raceFinalFallback": {
+    "status": "skipped",
+    "provider_status": "not_needed",
+    "processing_status": "done"
+  },
+  "retryPrimary": "failed",
+  "retryFallback": {
+    "status": "queued",
+    "provider_status": null,
+    "processing_status": "pending"
+  },
+  "workerWakes": 2,
+  "callbackCodes": [
+    200,
+    200
+  ],
+  "durableSmsClaimPrecedesProviderFetch": true
+}
