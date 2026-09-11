@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { isSupportedProviderStatus, shouldApplyProviderStatus } from "./provider-status.ts";
 
 const encoder = new TextEncoder();
 
@@ -15,6 +16,11 @@ const constantTimeEqual = (left: string, right: string) => {
 
 const signedUrlCandidates = (req: Request) => {
   const candidates = new Set([req.url]);
+  const supabaseUrl = (Deno.env.get("SUPABASE_URL") || "").replace(/\/+$/, "");
+  if (supabaseUrl) {
+    const current = new URL(req.url);
+    candidates.add(`${supabaseUrl}/functions/v1/twilio-message-status${current.search}`);
+  }
   const forwardedHost = req.headers.get("x-forwarded-host");
   if (forwardedHost) {
     const forwardedProto = req.headers.get("x-forwarded-proto") || "https";
@@ -54,36 +60,6 @@ async function validTwilioSignature(req: Request, form: FormData, authToken: str
   return false;
 }
 
-async function sha256Hex(value: string) {
-  const bytes = new TextEncoder().encode(value);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
-async function validToken(admin: ReturnType<typeof createClient>, supplied: string) {
-  if (!supplied || supplied.length < 32) return false;
-  const { data } = await admin
-    .from("integration_webhook_tokens")
-    .select("token_sha256, enabled")
-    .eq("name", "twilio_oneevent_status")
-    .maybeSingle();
-  if (!data?.enabled || !data.token_sha256) return false;
-  return (await sha256Hex(supplied)) === data.token_sha256;
-}
-
-const statusRank: Record<string, number> = {
-  accepted: 10,
-  scheduled: 15,
-  queued: 20,
-  sending: 30,
-  sent: 40,
-  delivered: 50,
-  read: 60,
-  undelivered: 70,
-  failed: 70,
-  canceled: 70,
-};
-
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return new Response("POST required", { status: 405 });
 
@@ -92,20 +68,20 @@ Deno.serve(async (req: Request) => {
   if (!supabaseUrl || !serviceKey) return new Response("Unavailable", { status: 503 });
 
   const admin = createClient(supabaseUrl, serviceKey);
-  const url = new URL(req.url);
-  if (!(await validToken(admin, url.searchParams.get("token") || ""))) {
-    return new Response("Forbidden", { status: 403 });
-  }
-
   const form = await req.formData();
   const twilioAuthToken = Deno.env.get("TWILIO_AUTH_TOKEN") || "";
   if (!(await validTwilioSignature(req, form, twilioAuthToken))) {
-    return new Response("Forbidden", { status: 403 });
+    console.warn("Twilio status callback rejected: signature", {
+      has_signature: Boolean(req.headers.get("x-twilio-signature")),
+      auth_token_length: twilioAuthToken.length,
+      signed_url_candidates: signedUrlCandidates(req).length,
+    });
+    return new Response("Forbidden signature", { status: 403 });
   }
   const payload = Object.fromEntries([...form.entries()].map(([key, value]) => [key, String(value)]));
   const sid = String(payload.MessageSid || payload.SmsSid || "");
   const nextStatus = String(payload.MessageStatus || payload.SmsStatus || payload.status || "").toLowerCase();
-  if (!/^[A-Z]{2}[0-9a-fA-F]{32}$/.test(sid) || !(nextStatus in statusRank)) {
+  if (!/^[A-Z]{2}[0-9a-fA-F]{32}$/.test(sid) || !isSupportedProviderStatus(nextStatus)) {
     return new Response("Bad callback", { status: 400 });
   }
 
@@ -119,15 +95,24 @@ Deno.serve(async (req: Request) => {
     .select("id, channel, destination, status, provider_status, sent_at, delivered_at, read_at")
     .eq("provider_message_id", sid)
     .maybeSingle();
+  const { data: outboundMessage } = await admin
+    .from("outbound_messages")
+    .select("id, channel, to_address, status, provider_status, sent_at, delivered_at")
+    .eq("provider_id", sid)
+    .maybeSingle();
 
-  await admin.from("event_message_provider_callbacks").insert({
+  await admin.from("event_message_provider_callbacks").upsert({
     recipient_id: recipient?.id || null,
+    outbound_message_id: outboundMessage?.id || null,
     provider_message_id: sid,
     provider_status: nextStatus,
-    channel: recipient?.channel || reminderDelivery?.channel || null,
+    channel: recipient?.channel || reminderDelivery?.channel || outboundMessage?.channel || null,
     error_code: payload.ErrorCode || null,
     error_message: payload.ErrorMessage || null,
     payload,
+  }, {
+    onConflict: "provider,provider_message_id,provider_status,error_code",
+    ignoreDuplicates: true,
   });
 
   if (!recipient && reminderDelivery) {
@@ -138,7 +123,7 @@ Deno.serve(async (req: Request) => {
       return new Response("ok", { status: 200 });
     }
     const currentStatus = String(reminderDelivery.provider_status || "").toLowerCase();
-    if ((statusRank[nextStatus] || 0) < (statusRank[currentStatus] || 0)) {
+    if (!shouldApplyProviderStatus(currentStatus, nextStatus)) {
       return new Response("ok", { status: 200 });
     }
     const now = new Date().toISOString();
@@ -171,6 +156,41 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { status: 200 });
   }
 
+  if (!recipient && outboundMessage) {
+    const callbackTo = String(payload.To || "").replace(/^whatsapp:/i, "");
+    const expectedTo = String(outboundMessage.to_address || "").replace(/^whatsapp:/i, "");
+    if (callbackTo && expectedTo && callbackTo !== expectedTo) {
+      console.warn("Twilio outbound callback destination mismatch", { sid });
+      return new Response("ok", { status: 200 });
+    }
+
+    if (!shouldApplyProviderStatus(outboundMessage.provider_status, nextStatus)) {
+      return new Response("ok", { status: 200 });
+    }
+
+    const now = new Date().toISOString();
+    const update: Record<string, unknown> = {
+      provider_status: nextStatus,
+      provider_status_at: now,
+      provider_error_code: payload.ErrorCode || null,
+    };
+    if (nextStatus === "sent") {
+      update.status = "sent";
+      update.sent_at = outboundMessage.sent_at || now;
+    } else if (nextStatus === "delivered" || nextStatus === "read") {
+      update.status = "sent";
+      update.sent_at = outboundMessage.sent_at || now;
+      update.delivered_at = outboundMessage.delivered_at || now;
+      update.last_error = null;
+    } else if (["undelivered", "failed", "canceled"].includes(nextStatus)) {
+      update.status = "failed";
+      update.failed_at = now;
+      update.last_error = payload.ErrorMessage || `Twilio ${nextStatus}`;
+    }
+    await admin.from("outbound_messages").update(update).eq("id", outboundMessage.id);
+    return new Response("ok", { status: 200 });
+  }
+
   if (!recipient) return new Response("ok", { status: 200 });
 
   const callbackTo = String(payload.To || "").replace(/^whatsapp:/i, "");
@@ -181,8 +201,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const currentStatus = String(recipient.provider_status || "").toLowerCase();
-  const currentRank = statusRank[currentStatus] || 0;
-  if ((statusRank[nextStatus] || 0) < currentRank) {
+  if (!shouldApplyProviderStatus(currentStatus, nextStatus)) {
     return new Response("ok", { status: 200 });
   }
 
