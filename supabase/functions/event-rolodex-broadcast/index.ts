@@ -1,4 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import {
+  buildWhatsAppSafetyPlan,
+  canonicalizePhone,
+} from "../_shared/whatsapp-broadcast-safety.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,6 +27,8 @@ const TWILIO_MESSAGING_SERVICE_SID =
 const EMAIL_SENDS_ENABLED = envFlag("EVENT_ROLODEX_EMAIL_SENDS_ENABLED", true);
 const MAX_ROLODEX_RECIPIENTS = Math.min(Math.max(Number(Deno.env.get("EVENT_ROLODEX_MAX_RECIPIENTS") || "2000"), 1), 5000);
 const ASYNC_CONTACT_THRESHOLD = Math.min(Math.max(Number(Deno.env.get("EVENT_ROLODEX_ASYNC_CONTACT_THRESHOLD") || "40"), 1), 5000);
+const DATA_API_PAGE_SIZE = 500;
+const DATA_API_FILTER_CHUNK_SIZE = 200;
 
 type Channel = "in_app" | "email" | "sms" | "whatsapp";
 type DeliveryStatus = "sent" | "queued" | "skipped" | "failed";
@@ -36,6 +42,42 @@ interface RolodexRow {
   phone: string | null;
   tags: string[] | null;
   custom_fields: Record<string, unknown> | null;
+  email_ok?: boolean | null;
+  sms_ok?: boolean | null;
+  whatsapp_ok?: boolean | null;
+  updated_at?: string | null;
+}
+
+type QueryError = { message: string } | null;
+
+async function collectPagedRows<T>(
+  makeQuery: (from: number, to: number) => any,
+): Promise<{ data: T[]; error: QueryError }> {
+  const rows: T[] = [];
+  for (let from = 0;; from += DATA_API_PAGE_SIZE) {
+    const to = from + DATA_API_PAGE_SIZE - 1;
+    const { data, error } = await makeQuery(from, to);
+    if (error) return { data: rows, error };
+    const page = (data || []) as T[];
+    rows.push(...page);
+    if (page.length < DATA_API_PAGE_SIZE) break;
+  }
+  return { data: rows, error: null };
+}
+
+async function collectRowsByInChunks<T>(
+  values: string[],
+  makeQuery: (chunk: string[], from: number, to: number) => any,
+): Promise<{ data: T[]; error: QueryError }> {
+  const uniqueValues = [...new Set(values.filter(Boolean))];
+  const rows: T[] = [];
+  for (let offset = 0; offset < uniqueValues.length; offset += DATA_API_FILTER_CHUNK_SIZE) {
+    const chunk = uniqueValues.slice(offset, offset + DATA_API_FILTER_CHUNK_SIZE);
+    const result = await collectPagedRows<T>((from, to) => makeQuery(chunk, from, to));
+    rows.push(...result.data);
+    if (result.error) return { data: rows, error: result.error };
+  }
+  return { data: rows, error: null };
 }
 
 function json(body: Record<string, unknown>, status = 200) {
@@ -261,29 +303,98 @@ Deno.serve(async (req) => {
     if (userError || !user) return json({ error: "Authentication required" }, 401);
 
     const body = await req.json().catch(() => ({}));
+    const action = typeof body.action === "string" ? body.action.trim().toLowerCase() : "hold";
+    const existingBroadcastId = typeof body.broadcastId === "string" ? body.broadcastId.trim() : "";
+
+    if (action === "cancel" || action === "release") {
+      if (!existingBroadcastId) return json({ error: "broadcastId required" }, 400);
+      const { data: existingBroadcast, error: existingBroadcastError } = await admin
+        .from("event_rolodex_broadcasts")
+        .select("id, host_id, event_id, status, cancel_requested_at, preflight_fingerprint, channels")
+        .eq("id", existingBroadcastId)
+        .maybeSingle();
+      if (existingBroadcastError || !existingBroadcast) return json({ error: "Broadcast not found" }, 404);
+      if (existingBroadcast.host_id !== user.id) return json({ error: "Only the event host can manage this broadcast" }, 403);
+
+      if (action === "cancel") {
+        const now = new Date().toISOString();
+        const { error: cancelError } = await admin
+          .from("event_rolodex_broadcasts")
+          .update({ status: "cancelled", cancel_requested_at: now, processing_lock_until: null })
+          .eq("id", existingBroadcastId)
+          .in("status", ["held", "processing"]);
+        if (cancelError) return json({ error: "The broadcast could not be cancelled" }, 500);
+        await admin
+          .from("event_rolodex_broadcast_recipients")
+          .update({ status: "skipped", skipped_reason: "campaign_cancelled", processing_status: "done", processed_at: now })
+          .eq("broadcast_id", existingBroadcastId)
+          .eq("processing_status", "pending");
+        return json({ ok: true, broadcast_id: existingBroadcastId, status: "cancelled", messages_sent: false });
+      }
+
+      if (existingBroadcast.cancel_requested_at || existingBroadcast.status === "cancelled") {
+        return json({ error: "A cancelled broadcast cannot be released" }, 409);
+      }
+      if (existingBroadcast.status !== "held") {
+        return json({ error: `Only a held broadcast can be released (current status: ${existingBroadcast.status})` }, 409);
+      }
+      if (body.confirmRelease !== true) {
+        return json({ error: "confirmRelease must be true" }, 400);
+      }
+      const heldChannels = Array.isArray(existingBroadcast.channels)
+        ? existingBroadcast.channels.filter((channel: unknown) => typeof channel === "string")
+        : [];
+      const includesWhatsApp = heldChannels.includes("whatsapp");
+      const releaseFingerprint = typeof body.preflightFingerprint === "string" ? body.preflightFingerprint : "";
+      if (includesWhatsApp && (!releaseFingerprint || releaseFingerprint !== existingBroadcast.preflight_fingerprint)) {
+        return json({ error: "The review changed. Refresh it before release." }, 409);
+      }
+      const { data: pendingRecipients } = await admin
+        .from("event_rolodex_broadcast_recipients")
+        .select("id, channel")
+        .eq("broadcast_id", existingBroadcastId)
+        .eq("processing_status", "pending")
+        .limit(1);
+      if (!pendingRecipients?.length) return json({ error: "There are no eligible recipients to release" }, 409);
+
+      const releasedAt = new Date().toISOString();
+      const { data: released, error: releaseError } = await admin
+        .from("event_rolodex_broadcasts")
+        .update({ status: "processing", released_at: releasedAt, processing_started_at: releasedAt, processing_lock_until: null })
+        .eq("id", existingBroadcastId)
+        .eq("status", "held")
+        .is("cancel_requested_at", null)
+        .select("id")
+        .maybeSingle();
+      if (releaseError || !released) return json({ error: "The held broadcast changed before release; refresh and review it again" }, 409);
+      waitUntil(kickBroadcastWorker(supabaseUrl, serviceKey, existingBroadcastId));
+      return json({ ok: true, broadcast_id: existingBroadcastId, status: "processing", released_at: releasedAt });
+    }
+
+    if (!['hold', 'preflight'].includes(action)) return json({ error: "Unsupported broadcast action" }, 400);
     const eventId = typeof body.eventId === "string" ? body.eventId : "";
     const rolodexIds = Array.isArray(body.rolodexIds)
       ? [...new Set(body.rolodexIds.filter((id: unknown) => typeof id === "string"))].slice(0, MAX_ROLODEX_RECIPIENTS)
       : [];
-    const requestedChannels = Array.isArray(body.channels)
+    const requestedChannels: Channel[] = Array.isArray(body.channels)
       ? body.channels.filter((channel: unknown): channel is Channel =>
           ["in_app", "email", "sms", "whatsapp"].includes(String(channel))
         )
       : [];
-    const channels = [...new Set(requestedChannels)];
+    const channels: Channel[] = [...new Set<Channel>(requestedChannels)];
     const message = cleanMessage(body.message);
     const includeTicketLink = body.includeTicketLink !== false;
     const includeGroupChatLink = body.includeGroupChatLink === true;
     const respectSuppressionTags = body.respectSuppressionTags !== false;
-    const followupOffsetsMinutes = Array.isArray(body.followupOffsetsMinutes)
-      ? [...new Set(body.followupOffsetsMinutes
+    const followupOffsetsMinutes: number[] = Array.isArray(body.followupOffsetsMinutes)
+      ? [...new Set<number>(body.followupOffsetsMinutes
           .map((value: unknown) => Number(value))
           .filter((value: number) => [120, 1440, 4320].includes(value)))]
       : [];
     const externalChannels = channels.filter((channel) => channel !== "in_app");
     const attestExternalPermission = body.attestExternalPermission === true;
     const controlledTest = body.controlledTest === true;
-    const preflightOnly = body.preflightOnly === true;
+    const preflightOnly = body.preflightOnly === true || action === "preflight";
     const requestId = typeof body.requestId === "string" ? body.requestId.trim() : "";
 
     if (!eventId) return json({ error: "eventId required" }, 400);
@@ -309,7 +420,7 @@ Deno.serve(async (req) => {
     if (event.host_id !== user.id) return json({ error: "Only the event host can send this broadcast" }, 403);
     if (event.status !== "published") return json({ error: "Publish the event before sending Rolodex invites" }, 400);
 
-    if (requestId) {
+    if (requestId && !preflightOnly) {
       const { data: existing, error: existingError } = await admin
         .from("event_rolodex_broadcasts")
         .select("id, status, recipient_count, sent_count, queued_count, skipped_count, failed_count, whatsapp_pending_count")
@@ -359,11 +470,15 @@ Deno.serve(async (req) => {
     const hostName = hostProfile?.full_name || "Your host";
     const broadcastMessage = message || `${hostName} invited you to ${event.title} on OneEvent.`;
 
-    const { data: contactsRaw, error: contactsError } = await admin
-      .from("host_rolodex")
-      .select("id, host_id, contact_id, name, email, phone, tags, custom_fields")
-      .eq("host_id", user.id)
-      .in("id", rolodexIds);
+    const { data: contactsRaw, error: contactsError } = await collectRowsByInChunks<RolodexRow>(
+      rolodexIds,
+      (chunk, from, to) => admin
+        .from("host_rolodex")
+        .select("id, host_id, contact_id, name, email, phone, tags, custom_fields, email_ok, sms_ok, whatsapp_ok, updated_at")
+        .eq("host_id", user.id)
+        .in("id", chunk)
+        .range(from, to),
+    );
     if (contactsError) return json({ error: contactsError.message }, 500);
 
     const contacts = ((contactsRaw || []) as RolodexRow[]);
@@ -376,29 +491,65 @@ Deno.serve(async (req) => {
       const raw = typeof row.phone === "string" ? row.phone.trim() : "";
       return [raw, normalized].filter(Boolean);
     }))];
-    const { data: profilesRaw } = contactIds.length
-      ? await admin.from("profiles").select("id, full_name, email, phone").in("id", contactIds)
-      : { data: [] as any[] };
-    const { data: profilesByEmailRaw } = contactEmails.length
-      ? await admin.from("profiles").select("id, full_name, email, phone").in("email", contactEmails)
-      : { data: [] as any[] };
-    const { data: profilesByPhoneRaw } = contactPhones.length
-      ? await admin.from("profiles").select("id, full_name, email, phone").in("phone", contactPhones)
-      : { data: [] as any[] };
+    const { data: profilesRaw } = await collectRowsByInChunks<any>(
+      contactIds,
+      (chunk, from, to) => admin.from("profiles").select("id, full_name, email, phone").in("id", chunk).range(from, to),
+    );
+    const { data: profilesByEmailRaw } = await collectRowsByInChunks<any>(
+      contactEmails,
+      (chunk, from, to) => admin.from("profiles").select("id, full_name, email, phone").in("email", chunk).range(from, to),
+    );
+    const { data: profilesByPhoneRaw } = await collectRowsByInChunks<any>(
+      contactPhones,
+      (chunk, from, to) => admin.from("profiles").select("id, full_name, email, phone").in("phone", chunk).range(from, to),
+    );
     const profileMap = new Map((profilesRaw || []).map((profile: any) => [profile.id, profile]));
     const emailProfileMap = new Map(
       (profilesByEmailRaw || []).map((profile: any) => [normalizeEmail(profile.email), profile]),
     );
     const phoneProfileMap = new Map(
       (profilesByPhoneRaw || [])
-        .map((profile: any) => [normalizePhone(profile.phone), profile])
-        .filter(([phone]: [string, any]) => Boolean(phone)),
+        .map((profile: any) => [normalizePhone(profile.phone), profile] as const)
+        .filter(([phone]) => Boolean(phone)),
     );
     const resolveProfile = (row: RolodexRow) =>
       (row.contact_id ? profileMap.get(row.contact_id) : null) ||
       emailProfileMap.get(normalizeEmail(row.email)) ||
       phoneProfileMap.get(normalizePhone(row.phone)) ||
       null;
+
+    const { data: whatsappOptoutsRaw, error: whatsappOptoutsError } = channels.includes("whatsapp")
+      ? await collectPagedRows<{ destination?: string | null }>((from, to) => admin
+          .from("contact_optouts")
+          .select("destination")
+          .eq("channel", "whatsapp")
+          .or(`host_id.is.null,host_id.eq.${user.id}`)
+          .range(from, to))
+      : { data: [] as Array<{ destination?: string | null }>, error: null };
+    if (whatsappOptoutsError) return json({ error: "WhatsApp suppression status could not be checked" }, 503);
+    const optedOutWhatsApp = new Set(
+      (whatsappOptoutsRaw || [])
+        .map((entry: { destination?: string | null }) => canonicalizePhone(entry.destination)?.e164 || "")
+        .filter(Boolean),
+    );
+    const whatsappPlan = channels.includes("whatsapp")
+      ? await buildWhatsAppSafetyPlan(contacts.map((row) => {
+          const profile = resolveProfile(row);
+          const custom = row.custom_fields || {};
+          const rawCountry = typeof custom.country_code === "string" ? custom.country_code.trim().toUpperCase() : "";
+          return {
+            id: row.id,
+            name: profile?.full_name || row.name,
+            phone: row.phone,
+            profilePhone: profile?.phone,
+            whatsappLink: typeof custom.whatsapp_link === "string" ? custom.whatsapp_link : null,
+            whatsappOk: row.whatsapp_ok,
+            tags: row.tags,
+            updatedAt: row.updated_at,
+            defaultCountry: /^[A-Z]{2}$/.test(rawCountry) ? rawCountry as any : null,
+          };
+        }), optedOutWhatsApp)
+      : null;
 
     // A production-safe planning path. It exercises the same authentication, event,
     // contact selection, profile resolution, destination normalization, and dedupe
@@ -458,13 +609,41 @@ Deno.serve(async (req) => {
         whatsapp_sends_enabled: envFlag("EVENT_ROLODEX_WHATSAPP_SENDS_ENABLED", false),
         whatsapp_approved: envFlag("EVENT_ROLODEX_WHATSAPP_APPROVED", false),
       };
+      // SMS preflight mirrors worker v32's existing env/runtime OR policy.
+      // Read only boolean gate keys; fail closed without exposing query details.
+      let effectiveSmsEnabled = false;
+      if (channels.includes("sms")) {
+        try {
+          const { data: runtimeRows, error: runtimeError } = await admin
+            .from("app_secrets")
+            .select("key, value")
+            .in("key", ["EVENT_ROLODEX_EXTERNAL_SENDS_ENABLED", "EVENT_ROLODEX_SMS_SENDS_ENABLED"]);
+          if (runtimeError) return json({ error: "SMS availability could not be verified", writes_performed: false, messages_sent: false }, 503);
+          const runtimeConfig = new Map((runtimeRows || []).map((row: { key: string; value: unknown }) => [row.key, row.value]));
+          const configFlag = (value: unknown) =>
+            typeof value === "string" && ["1", "true", "yes", "on"].includes(value.toLowerCase());
+          const externalSendsEnabled = channelGates.external_sends_enabled || configFlag(runtimeConfig.get("EVENT_ROLODEX_EXTERNAL_SENDS_ENABLED"));
+          effectiveSmsEnabled = channelGates.sms_sends_enabled || configFlag(runtimeConfig.get("EVENT_ROLODEX_SMS_SENDS_ENABLED")) || externalSendsEnabled;
+        } catch {
+          return json({ error: "SMS availability could not be verified", writes_performed: false, messages_sent: false }, 503);
+        }
+        channelGates.effective_sms_sends_enabled = effectiveSmsEnabled;
+      }
       const channelEnabled = (channel: Channel) => {
         if (channel === "in_app") return true;
+        if (channel === "sms") return effectiveSmsEnabled;
         if (!channelGates.external_sends_enabled) return false;
         if (channel === "email") return channelGates.email_sends_enabled;
-        if (channel === "sms") return channelGates.sms_sends_enabled;
         return channelGates.whatsapp_sends_enabled && channelGates.whatsapp_approved;
       };
+
+      if (whatsappPlan) {
+        const plan = channelPlan.whatsapp;
+        plan.destination_present = whatsappPlan.selected - whatsappPlan.reasonCounts.missing_whatsapp_phone;
+        plan.missing_destination = whatsappPlan.reasonCounts.missing_whatsapp_phone;
+        plan.duplicate_destination = whatsappPlan.reasonCounts.duplicate_destination;
+        plan.unique_destinations = whatsappPlan.eligible;
+      }
 
       return json({
         ok: true,
@@ -475,6 +654,15 @@ Deno.serve(async (req) => {
         unmatched_contacts: Math.max(rolodexIds.length - contacts.length, 0),
         channels,
         channel_plan: channelPlan,
+        whatsapp_eligibility: whatsappPlan ? {
+          selected_contacts: rolodexIds.length,
+          matched_contacts: whatsappPlan.matched,
+          eligible_contacts: whatsappPlan.eligible,
+          skipped_contacts: whatsappPlan.skipped,
+          reason_counts: whatsappPlan.reasonCounts,
+          fingerprint: whatsappPlan.fingerprint,
+          rows: whatsappPlan.publicRows,
+        } : null,
         planned_recipient_rows: plannedRecipientRows,
         processing_batch_size: batchSize,
         expected_worker_batches: Math.ceil(plannedRecipientRows / batchSize),
@@ -513,11 +701,8 @@ Deno.serve(async (req) => {
       if (attestationError) return json({ error: attestationError.message }, 500);
       attestationId = attestation.id;
 
-      const update: Record<string, unknown> = { attestation_id: attestationId };
-      if (channels.includes("email")) update.email_ok = true;
-      if (channels.includes("sms")) update.sms_ok = true;
-      if (channels.includes("whatsapp")) update.whatsapp_ok = true;
-      await admin.from("host_rolodex").update(update).eq("host_id", user.id).in("id", contacts.map((row) => row.id));
+      // This is campaign-level audit evidence only. It must never turn an
+      // individual contact's channel permission on in bulk.
     }
 
     const broadcastMetadata = {
@@ -557,6 +742,9 @@ Deno.serve(async (req) => {
         recipient_count: contacts.length,
         accepted_count: contacts.length,
         processing_batch_size: 50,
+        status: "held",
+        held_at: new Date().toISOString(),
+        preflight_fingerprint: whatsappPlan?.fingerprint || null,
         metadata: broadcastMetadata,
       })
       .select("id")
@@ -619,6 +807,7 @@ Deno.serve(async (req) => {
     if (contacts.length > 0) {
       const now = new Date().toISOString();
       const seenDestinations = new Set<string>();
+      const whatsappRowMap = new Map((whatsappPlan?.rows || []).map((row) => [row.id, row]));
       const recipientRows = contacts.flatMap((row) => {
         const profile = resolveProfile(row);
         const linkedContactId = row.contact_id || profile?.id || null;
@@ -630,10 +819,13 @@ Deno.serve(async (req) => {
         };
 
         return channels.map((channel) => {
-          const destination = destinations[channel];
+          const safetyRow = channel === "whatsapp" ? whatsappRowMap.get(row.id) : null;
+          const destination = safetyRow ? safetyRow.canonicalDestination : destinations[channel];
           const destinationKey = destination ? `${channel}:${destination}` : "";
-          const duplicateDestination = Boolean(destinationKey && seenDestinations.has(destinationKey));
+          const safetyReason = safetyRow?.reason || null;
+          const duplicateDestination = Boolean(!safetyReason && destinationKey && seenDestinations.has(destinationKey));
           if (destinationKey && !duplicateDestination) seenDestinations.add(destinationKey);
+          const skippedReason = safetyReason || (duplicateDestination ? "duplicate_destination" : null);
 
           return {
             broadcast_id: broadcast.id,
@@ -643,11 +835,11 @@ Deno.serve(async (req) => {
             contact_id: linkedContactId,
             channel,
             destination: destination || null,
-            status: duplicateDestination ? "skipped" : "queued",
-            queued_at: duplicateDestination ? null : now,
-            processing_status: duplicateDestination ? "done" : "pending",
-            processed_at: duplicateDestination ? now : null,
-            skipped_reason: duplicateDestination ? "duplicate_destination" : null,
+            status: skippedReason ? "skipped" : "queued",
+            queued_at: skippedReason ? null : now,
+            processing_status: skippedReason ? "done" : "pending",
+            processed_at: skippedReason ? now : null,
+            skipped_reason: skippedReason,
             metadata: {
               processing_mode: "batched",
               event_url: buildEventUrl(event),
@@ -669,7 +861,7 @@ Deno.serve(async (req) => {
       const summary = {
         sent_count: 0,
         queued_count: recipientRows.filter((row) => row.processing_status === "pending").length,
-        skipped_count: recipientRows.filter((row) => row.skipped_reason === "duplicate_destination").length,
+        skipped_count: recipientRows.filter((row) => Boolean(row.skipped_reason)).length,
         failed_count: 0,
         whatsapp_pending_count: 0,
         scheduled_followup_count: scheduledFollowups.length,
@@ -680,23 +872,28 @@ Deno.serve(async (req) => {
         .update({
           ...summary,
           processed_count: 0,
-          processing_started_at: now,
+          processing_started_at: null,
         })
         .eq("id", broadcast.id);
-
-      await admin
-        .from("host_rolodex")
-        .update({ last_notified_at: now, last_broadcast_id: broadcast.id })
-        .eq("host_id", user.id)
-        .in("id", contacts.map((row) => row.id));
-
-      waitUntil(kickBroadcastWorker(supabaseUrl, serviceKey, broadcast.id));
 
       return json({
         ok: true,
         broadcast_id: broadcast.id,
         accepted: true,
-        processing: "batched",
+        processing: "held",
+        status: "held",
+        release_required: true,
+        messages_sent: false,
+        preflight_fingerprint: whatsappPlan?.fingerprint || null,
+        whatsapp_eligibility: whatsappPlan ? {
+          selected_contacts: rolodexIds.length,
+          matched_contacts: whatsappPlan.matched,
+          eligible_contacts: whatsappPlan.eligible,
+          skipped_contacts: whatsappPlan.skipped,
+          reason_counts: whatsappPlan.reasonCounts,
+          fingerprint: whatsappPlan.fingerprint,
+          rows: whatsappPlan.publicRows,
+        } : null,
         summary,
         results: [],
         config: {
@@ -1090,7 +1287,13 @@ Deno.serve(async (req) => {
       }),
     );
 
-    const summary = results.reduce(
+    const summary = results.reduce<{
+      sent_count: number;
+      queued_count: number;
+      skipped_count: number;
+      failed_count: number;
+      whatsapp_pending_count: number;
+    }>(
       (acc, result) => {
         const status = result.status as DeliveryStatus;
         if (status === "sent") acc.sent_count++;
@@ -1113,11 +1316,15 @@ Deno.serve(async (req) => {
       })
       .eq("id", broadcast.id);
 
-    await admin
-      .from("host_rolodex")
-      .update({ last_notified_at: new Date().toISOString(), last_broadcast_id: broadcast.id })
-      .eq("host_id", user.id)
-      .in("id", contacts.map((row) => row.id));
+    const notifiedAt = new Date().toISOString();
+    const notifiedContactIds = contacts.map((row) => row.id);
+    for (let offset = 0; offset < notifiedContactIds.length; offset += DATA_API_FILTER_CHUNK_SIZE) {
+      await admin
+        .from("host_rolodex")
+        .update({ last_notified_at: notifiedAt, last_broadcast_id: broadcast.id })
+        .eq("host_id", user.id)
+        .in("id", notifiedContactIds.slice(offset, offset + DATA_API_FILTER_CHUNK_SIZE));
+    }
 
     return json({
       ok: true,
@@ -1137,3 +1344,5 @@ Deno.serve(async (req) => {
     return json({ error: String(err) }, 500);
   }
 });
+
+
