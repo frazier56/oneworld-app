@@ -154,6 +154,7 @@ declare
   v_probe public.event_rolodex_broadcast_recipients%rowtype;
   v_sms public.event_rolodex_broadcast_recipients%rowtype;
   v_primary public.event_rolodex_broadcast_recipients%rowtype;
+  v_dispatch public.event_rolodex_provider_dispatches%rowtype;
 begin
   select * into v_probe
   from public.event_rolodex_broadcast_recipients
@@ -187,11 +188,24 @@ begin
     return;
   end if;
 
+  select * into v_dispatch
+  from public.event_rolodex_provider_dispatches
+  where recipient_id = p_recipient_id
+    and channel = 'sms'
+    and idempotency_key = p_idempotency_key
+  for update;
+
   if v_primary.id is not null and (
     v_primary.delivered_at is not null
     or v_primary.opened_at is not null
     or lower(coalesce(v_primary.provider_status, '')) in ('delivered', 'read')
   ) then
+    if v_dispatch.id is not null and v_dispatch.state in ('in_flight', 'accepted', 'ambiguous') then
+      return query
+      select false, v_dispatch.state, v_dispatch.attempt_count, v_dispatch.provider_sid;
+      return;
+    end if;
+
     update public.event_rolodex_broadcast_recipients as sms
     set
       status = 'skipped',
@@ -212,12 +226,12 @@ begin
       v_sms.id, p_broadcast_id, 'sms', p_idempotency_key, 'cancelled',
       'whatsapp_delivered_primary', 'SMS fallback cancelled because WhatsApp delivered'
     ) on conflict (idempotency_key) do update set
-      state = case when public.event_rolodex_provider_dispatches.state = 'accepted'
+      state = case when public.event_rolodex_provider_dispatches.state in ('in_flight', 'accepted', 'ambiguous')
         then public.event_rolodex_provider_dispatches.state else 'cancelled' end,
       lock_until = null,
-      last_error_code = case when public.event_rolodex_provider_dispatches.state = 'accepted'
+      last_error_code = case when public.event_rolodex_provider_dispatches.state in ('in_flight', 'accepted', 'ambiguous')
         then public.event_rolodex_provider_dispatches.last_error_code else 'whatsapp_delivered_primary' end,
-      last_error_redacted = case when public.event_rolodex_provider_dispatches.state = 'accepted'
+      last_error_redacted = case when public.event_rolodex_provider_dispatches.state in ('in_flight', 'accepted', 'ambiguous')
         then public.event_rolodex_provider_dispatches.last_error_redacted
         else 'SMS fallback cancelled because WhatsApp delivered' end,
       updated_at = now();

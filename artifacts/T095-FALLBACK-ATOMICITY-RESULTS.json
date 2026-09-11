@@ -6,38 +6,48 @@
   "cases": [
     {
       "case": "delivery_then_failure",
-      "blockedMs": 198,
+      "blockedMs": 204,
       "second": "f|f"
     },
     {
       "case": "failure_then_delivery",
-      "blockedMs": 194,
+      "blockedMs": 193,
       "second": "t|f"
     },
     {
       "case": "retry_then_delivery_before_worker_claim",
-      "blockedMs": 203,
+      "blockedMs": 200,
       "claim": "f|cancelled"
     },
     {
       "case": "worker_claim_then_delivery",
-      "blockedMs": 196,
+      "blockedMs": 205,
       "delivery": "t|f"
     },
     {
       "case": "delivery_then_provider_authorization",
-      "blockedMs": 199,
+      "blockedMs": 201,
       "authorization": "f|cancelled"
     },
     {
-      "case": "provider_authorization_then_delivery",
-      "blockedMs": 198,
+      "case": "provider_authorization_then_delivery_then_reclaim",
+      "blockedMs": 200,
       "delivery": "t|f",
       "dispatch": "in_flight"
     },
     {
+      "case": "reclaim_preserves_ambiguous",
+      "dispatch": "ambiguous",
+      "fallback": "queued"
+    },
+    {
+      "case": "reclaim_preserves_accepted",
+      "dispatch": "accepted",
+      "fallback": "queued"
+    },
+    {
       "case": "concurrent_summary_publication",
-      "blockedMs": 213,
+      "blockedMs": 202,
       "summary": "2|0|2|0|completed"
     },
     {
@@ -47,7 +57,7 @@
     },
     {
       "case": "callback_summary_then_worker_summary",
-      "blockedMs": 212,
+      "blockedMs": 208,
       "summary": "1|2|1"
     }
   ],

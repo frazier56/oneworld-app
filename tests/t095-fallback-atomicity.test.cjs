@@ -201,7 +201,26 @@ async function heldFirst(firstSql, secondSql) {
     );
     assert.equal(sql(`select state from event_rolodex_provider_dispatches where recipient_id='${d3.fallbackId}'`), "in_flight");
     assert.equal(sql(`select status from event_rolodex_broadcast_recipients where id='${d3.fallbackId}'`), "queued");
-    results.push({ case: "provider_authorization_then_delivery", blockedMs: d3Race.blockedMs, delivery: d3Race.second, dispatch: "in_flight" });
+    assert.match(sql(claimCall(d3.fallbackId, d3.broadcastId)), /f\|in_flight/);
+    assert.equal(sql(`select state from event_rolodex_provider_dispatches where recipient_id='${d3.fallbackId}'`), "in_flight");
+    results.push({ case: "provider_authorization_then_delivery_then_reclaim", blockedMs: d3Race.blockedMs, delivery: d3Race.second, dispatch: "in_flight" });
+
+    for (const [serial, terminalState] of [[13, "ambiguous"], [14, "accepted"]]) {
+      const x = fixture(serial);
+      assert.match(sql(statusCall(x.primaryId, "failed")), /t\|t/);
+      assert.match(sql(claimCall(x.fallbackId, x.broadcastId)), /t\|processing/);
+      assert.match(sql(authorizeCall(x.fallbackId, x.broadcastId)), /t\|in_flight/);
+      sql(`
+        update event_rolodex_provider_dispatches
+        set state='${terminalState}', provider_sid=${terminalState === "accepted" ? "'SM00000000000000000000000000000951'" : "null"}
+        where recipient_id='${x.fallbackId}';
+      `);
+      assert.match(sql(statusCall(x.primaryId, "delivered")), /t\|f/);
+      assert.match(sql(claimCall(x.fallbackId, x.broadcastId)), new RegExp(`f\\|${terminalState}`));
+      assert.equal(sql(`select state from event_rolodex_provider_dispatches where recipient_id='${x.fallbackId}'`), terminalState);
+      assert.equal(sql(`select status from event_rolodex_broadcast_recipients where id='${x.fallbackId}'`), "queued");
+      results.push({ case: `reclaim_preserves_${terminalState}`, dispatch: terminalState, fallback: "queued" });
+    }
 
     const e = fixture(5);
     const secondPrimary = "20000000-0000-4000-8000-000000000006";
