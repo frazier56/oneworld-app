@@ -1,0 +1,931 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   ONE WORLD — the shared glass system.
+   ------------------------------------------------------------------------------------------
+   THIS FILE IS THE PRODUCT'S ENTIRE STYLESHEET ENTRY POINT. Import it and nothing else:
+
+       import "@oneworld/shell/tokens.css";
+
+   The three `@tailwind` directives live HERE, not in the product. They have to: this file uses
+   `@layer components`, and Tailwind rejects that with "no matching @tailwind components
+   directive is present" — a hard build error, which is what the render test hit on its first
+   run. A product that also declares the directives in its own CSS would emit Tailwind's base
+   layer twice.
+
+   A product with extra styles of its own appends them to a file that does NOT carry the
+   directives, and imports it after this one.
+   ------------------------------------------------------------------------------------------
+   Extracted from OneJob's index.css on 3 August 2026. This file is HUE-AGNOSTIC: every
+   product-specific colour is read from a CSS custom property that `applyHue()` writes at boot
+   from the app's `AppConfig.hue`. Nothing in here names a product.
+
+   Applies ONE_WORLD_COLOUR_RULES v3. Five roles — only VOICE changes per product:
+
+     --brand      VOICE      where you are   ⛔ NEVER carries text
+     --teal       STATE      what's chosen / true / ready / held      (shared, never varies)
+     clay         ACTION     the one thing you press                  (shared, never varies)
+     --selection  SELECTION  a filter or toggle currently ON          (shared, never varies)
+     --teal-depth DEPTH      the dark anchor of a teal gradient       (shared, never varies)
+
+   THE CONTRAST TRAP — read this before writing a fill. An identity hue is chosen to glow, and
+   a hue that glows does not measure. OneJob's #17A45C is 3.23:1 on white: it fails as text AND
+   as a flat fill carrying a white label. That is why `HueRamp` has BOTH a `bright` step (the
+   identity: aurora, glows, gradient starts, the mark) and a `DEFAULT` step (the text). This is
+   not a nicety — it was found after ~175 call sites had already been written against the wrong
+   one, and `assertConfig` now throws if a new app repeats it.
+
+   Two things make a pane read as glass rather than a grey box: the blur, and the specular
+   highlight on the top edge. If a pane looks flat, add blur and brighten that edge. NEVER add
+   opacity — more opacity makes a pane more frosted and LESS glass, and you end up with a grey
+   box wondering why.
+
+   The specular highlight is baked in as a background LAYER, not a ::before, so it can never
+   collide with an element that already uses ::before.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light;
+
+  /* ── VOICE. Written by applyHue() from AppConfig.hue. The values below are neutral
+        placeholders so the shell still renders if an app forgets to call it — grey is an
+        obvious "unconfigured", whereas a plausible colour would hide the mistake. */
+  --brand:         #64748B;
+  --brand-deep:    #475569;
+  --brand-dark:    #334155;
+  --brand-darkest: #1E293B;
+  --brand-light:   #CBD5E1;
+  --brand-tint:    #F1F5F9;
+  --brand-line:    #E2E8F0;
+
+  /* ── STATE and DEPTH. Shared across the whole family and NOT per-product. A product that
+        recolours these has broken the one thing that makes eight products read as one company:
+        "chosen / true / ready" must look the same everywhere. */
+  --teal: #15C2B2; --teal2: #0E9B8E; --teal3: #0B7F74; --teal-depth: #0F766E;
+  --selection: #0B0F1A;
+
+  /* ── The shared frost. Identical in every product; only the light behind it changes hue. */
+  --frost: blur(40px) saturate(192%);
+  --frost-nav: blur(30px) saturate(180%);
+  --frostedge: inset 0 1px 0 rgba(255,255,255,.85), inset 0 -1px 0 rgba(255,255,255,.30);
+  --glass-shadow: 0 20px 48px -20px rgba(15,23,42,.22);
+  --glass-fill: linear-gradient(152deg, rgba(255,255,255,.58) 0%, rgba(255,255,255,0) 46%),
+                linear-gradient(152deg, rgba(255,255,255,.56), rgba(255,255,255,.34));
+  --glass-border: rgba(255,255,255,.68);
+  --glass-bg: linear-gradient(135deg, rgba(255,255,255,.92), rgba(255,255,255,.75));
+
+  /* OVERLAY OPACITY RULE — a popover floats over live content, so it may be translucent; a
+     MENU must be readable over anything, so it is not. One variable, so a menu can never be
+     accidentally built out of popover glass. */
+  --overlay-bg: rgba(255,255,255,.97);
+
+  /* ── CHROME IS NOT A POPOVER (Lee, 12 Aug 2026) ─────────────────────────────────────────
+     Lee sent seven screenshots across OneEvent, OneAgent and OneJob and said: *"I think this is
+     a persistent problem across multiple or all of our apps. So check this across the board and
+     in the shell to make sure we can fix this everywhere."* He is right on all three counts —
+     it is everywhere, it is one bug, and it lives here.
+
+     In his OneJob contract form you can READ "How do you want to describe the work?" and the
+     Speak it / Type it buttons THROUGH the bottom tab bar, and "Contract basics" through the top
+     bar. `.ow-chrome` painted `--glass-fill`, which peaks at 56% white in light mode and is
+     **5.5% white in dark mode** — very nearly clear. All the hiding was being done by
+     `backdrop-filter: blur(30px)`, and blur is the wrong tool for this: it smears high-contrast
+     black-on-white text into grey ghosts rather than removing it. It looks fine over a photo and
+     falls apart over a form, which is exactly the pattern across his screenshots.
+
+     The distinction that was missed: a popover is TEMPORARY and floats over content you just
+     came from, so translucency reads as depth. Chrome is PERMANENT and sits over content you are
+     still trying to use, so translucency reads as a rendering fault. Same rule as `--overlay-bg`
+     one line up, at a level that keeps the frosted look: 93% is opaque enough that nothing reads
+     through it while the gradient, the blur and the edge highlight keep the frosted look.
+
+     I FIRST TRIED 93% AND MEASURED IT FAILING. `chrome-opacity-check.mjs` scored 15–20 across
+     all six apps in light mode, and the arithmetic says why: 7% of a black-on-white edge is
+     0.07 × 255 ≈ 18 levels of ghost, which is exactly what it measured and exactly what is
+     readable in Lee's screenshots. To get the ghost under ~6 levels the base has to be ~97.5%.
+     That is the same number `--overlay-bg` above already uses, arrived at from the other
+     direction — which is a good sign the 97% floor in this file was right the first time. */
+  --chrome-bg: rgba(250,250,248,.975);
+}
+
+.dark {
+  color-scheme: dark;
+  --frostedge: inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(255,255,255,.05);
+  --glass-shadow: 0 24px 60px -22px rgba(0,0,0,.75);
+  --glass-fill: linear-gradient(152deg, rgba(255,255,255,.085) 0%, rgba(255,255,255,0) 46%),
+                linear-gradient(152deg, rgba(255,255,255,.055), rgba(255,255,255,.022));
+  --glass-border: rgba(255,255,255,.13);
+  --glass-bg: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+  --overlay-bg: rgba(17,22,34,.97);
+  /* Dark mode was the worse of the two: 5.5% white over #0B0F1A is functionally a clear pane. */
+  --chrome-bg: rgba(11,15,26,.975);
+}
+
+html, body, #root { height: 100%; }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   NO SCROLL BARS. ANYWHERE. (Lee, 10 Aug 2026)
+   ------------------------------------------------------------------------------------------
+   *"You should never have any type of horizontals. You should have no scroll bars, period.
+   This is an application. You don't need scroll bars. So no vertical, no horizontal scroll
+   bars."*
+
+   THE SCROLLING STAYS. Only the BAR goes. Every filter-chip strip, composer row, language row,
+   tab rail, drawer, sheet and long page still scrolls by touch, wheel, trackpad, keyboard and
+   scrollIntoView exactly as before — `overflow` is untouched, and none of the ~64 `overflow-*`
+   utilities across the shell and the five products needed editing.
+
+   WHY IT IS ONE RULE HERE AND NOT FORTY FIXES OUT THERE. Lee asked for it in the shell's global
+   CSS with a utility class, and he was right for a reason worth writing down: a per-instance
+   sweep is only ever correct on the day it is run. The 65th scroller — the one a product adds
+   next week — would arrive with a bar, nobody would notice in review, and we would be doing the
+   sweep again. Every product imports this file (it is the entire stylesheet entry point), so a
+   rule at the root is the only version of this fix that also covers code nobody has written yet.
+
+   Both engines are needed and neither is optional: Firefox only honours `scrollbar-width`,
+   WebKit/Blink only honour the `::-webkit-scrollbar` pseudo-element.
+
+   ACCESSIBILITY, DELIBERATELY: this hides the bar, it does not disable scrolling or trap focus.
+   Keyboard scrolling, focus-visible outlines and `prefers-reduced-motion` are all unaffected.
+   The one thing genuinely lost is the bar as a *position indicator* — which is the trade Lee
+   made knowingly, and it is the same trade every native mobile app makes.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+html { scrollbar-width: none; -ms-overflow-style: none; }
+*, *::before, *::after { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+/* `.ow-scroll` is Lee's named utility. After the rule above it is a NO-OP for appearance — it
+   is kept because it declares INTENT at the call site: "this element is deliberately a scroller."
+   Use it on new horizontal strips so the next reader knows the overflow is on purpose, and so a
+   future decision to bring bars back on one surface has a hook that already exists. */
+.ow-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+.ow-scroll::-webkit-scrollbar { display: none; }
+
+
+/* Warm ink on light, warm white on dark — never pure black. Black on aurora glass reads as a
+   hole punched in the page. */
+body { @apply bg-paper antialiased font-sans; color: #2C2622; }
+.dark body { @apply bg-ink; color: #F1F1EE; }
+
+/* ── The field ─────────────────────────────────────────────────────────────────────────────
+   Each product runs ONE hue. The multi-colour aurora belongs to One World Labs and nowhere
+   else — if a product also looks like the rainbow, the rainbow stops meaning "parent".
+
+   Two counter-rotating layers at 46s and 58s: one layer looks static, two look alive, and
+   anything faster reads as a loading state. FIXED to the viewport rather than sized in vh,
+   which is what fixed the "screen about to go out" flicker — mobile Safari changes 100vh every
+   time the URL bar collapses, repainting the whole page. A fixed element, NOT
+   `background-attachment: fixed`, which has its own iOS repaint bug.
+
+   `will-change` lives on these two layers ONLY. Put it on panes and you create a compositing
+   layer per pane and scrolling dies.
+
+   The radial stops read `--aurora-*`, written by applyHue() from the product's `bright` and
+   `dark` steps. That is the whole of what makes OneEvent orange and OneJob green. */
+body::before, body::after {
+  content: ""; position: fixed; inset: -18%; z-index: -1; pointer-events: none;
+  will-change: transform; transform: translateZ(0);
+}
+body::before {
+  background:
+    radial-gradient(46% 38% at 18% 20%, var(--aurora-1, rgba(100,116,139,.30)), transparent 66%),
+    radial-gradient(42% 34% at 82% 14%, var(--aurora-2, rgba(148,163,184,.24)), transparent 64%);
+  filter: blur(64px);
+  animation: auroraA 46s ease-in-out infinite alternate;
+}
+body::after {
+  background:
+    radial-gradient(44% 36% at 74% 74%, var(--aurora-3, rgba(71,85,105,.24)), transparent 66%),
+    radial-gradient(38% 30% at 12% 84%, var(--aurora-4, rgba(51,65,85,.16)), transparent 64%);
+  filter: blur(70px);
+  animation: auroraB 58s ease-in-out infinite alternate;
+}
+@keyframes auroraA {
+  from { transform: translate3d(-3%,-2%,0) rotate(0deg) scale(1); }
+  to   { transform: translate3d(4%,3%,0) rotate(8deg) scale(1.1); }
+}
+@keyframes auroraB {
+  from { transform: translate3d(3%,2%,0) rotate(0deg) scale(1.05); }
+  to   { transform: translate3d(-4%,-3%,0) rotate(-9deg) scale(1); }
+}
+
+/* Reduced motion STOPS the aurora. It does not fade — a fading background is still movement. */
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none; }
+}
+
+/* Heavy backdrop-filter is expensive on phone GPUs. Reduce the blur on small viewports rather
+   than dropping the effect — with less room, flat panels have nowhere to hide, so mobile needs
+   MORE frost, not less. */
+@media (max-width: 640px) {
+  :root { --frost: blur(18px) saturate(180%); --frost-nav: blur(16px) saturate(170%); }
+}
+
+@layer components {
+  /* ── Panes ───────────────────────────────────────────────────────────────────────────────
+     Nothing that holds content sits flat. No hard white, no hard grey, no flat tint on the
+     aurora. If it holds content, it's a pane. */
+  .card {
+    @apply rounded-2xl p-4;
+    background: var(--glass-fill);
+    backdrop-filter: var(--frost); -webkit-backdrop-filter: var(--frost);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--frostedge), var(--glass-shadow);
+  }
+
+  /* Chrome — header and tab strip. The .34–.52 fill band: lighter than a card, so content
+     reads THROUGH it as you scroll, with the specular top edge doing the work opacity used
+     to. */
+  /* The glass gradient stays — it is the sheen and the tint — but it now sits ON an opaque
+     base rather than on the page. Two background layers: the last one listed is the bottom. */
+  .ow-chrome {
+    background: var(--glass-fill), var(--chrome-bg);
+    backdrop-filter: var(--frost-nav); -webkit-backdrop-filter: var(--frost-nav);
+    box-shadow: var(--frostedge);
+  }
+
+  /* Lee's selected A: light frosted, floating pill. Header remains unchanged. */
+  .ow-floating-tabs {
+    left: 50%;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    width: min(calc(100% - 32px), 480px);
+    height: 66px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.79);
+    background: rgba(250,250,248,.48);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 9px 28px rgba(25,57,64,.15);
+    transform: translateX(-50%) translateY(0);
+    transition: transform 300ms cubic-bezier(.22,.7,.2,1);
+  }
+  .ow-floating-tabs-hidden { transform: translateX(-50%) translateY(calc(100% + 32px + env(safe-area-inset-bottom, 0px))); transition-duration: 500ms; pointer-events: none; }
+  .ow-floating-tab { min-width: 44px; height: 50px; border-radius: 999px; }
+  .ow-floating-tab:focus-visible { outline: 3px solid var(--brand, #0d9488); outline-offset: 2px; }
+  .dark .ow-floating-tabs { background: rgba(18,34,45,.48); border-color: rgba(255,255,255,.21); box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 9px 28px rgba(0,0,0,.32); }
+  @media (prefers-reduced-motion: reduce) { .ow-floating-tabs, .ow-floating-tabs-hidden { transition: none; } }
+  @supports not (backdrop-filter: blur(20px)) { .ow-floating-tabs { background: rgba(250,250,248,.96); } .dark .ow-floating-tabs { background: rgba(18,34,45,.96); } }
+
+  /* ── Action: the ONE thing you press ─────────────────────────────────────────────────────
+     Clay (warm graphite), and only clay. The OnePage reference is the family canon: two quiet
+     gradient layers create a glass-lit espresso surface, while one restrained shadow keeps the
+     button attached to the page. It should read polished, not inflated.
+
+     This is family-wide and does NOT take the product hue. The action colour being identical
+     everywhere is what lets someone move between products and always know what to press. */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-extrabold text-white
+           transition disabled:opacity-40 disabled:pointer-events-none;
+    position: relative; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.24);
+    background:
+      linear-gradient(160deg, rgba(255,255,255,.25) 0%, rgba(255,255,255,.055) 42%, rgba(255,255,255,0) 62%),
+      linear-gradient(140deg, #5C4F44 0%, #383028 55%, #201B16 100%);
+    box-shadow: 0 10px 26px -10px rgba(36,30,25,.48);
+  }
+  .btn-primary::after { content: none; }
+  .btn-primary:hover { filter: brightness(1.06); }
+  .btn-primary:active {
+    transform: translateY(1px);
+    box-shadow: 0 5px 14px -9px rgba(36,30,25,.48);
+  }
+
+  /* Voice-coloured button — for actions that are NAVIGATION rather than commitment (open the
+     QR, view the public profile). Same shape, different job.
+
+     THE MID STOP IS AT 30%, NOT 50%, AND THAT IS LOAD-BEARING. The label spans roughly 25–75%
+     of the button's height. With a 50% midpoint the top of the text sits on the halfway colour,
+     white on which measures under 4:1 and FAILS. Pulling the midpoint up puts the whole label
+     past the deep step. The identity hue survives only as the first 25%, where nothing is
+     written. Never make this a flat fill of `--brand`. */
+  .btn-brand {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-extrabold text-white
+           transition disabled:opacity-40 disabled:pointer-events-none;
+    position: relative; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.24); /* v12: same hairline outline as btn-primary */
+    background: linear-gradient(160deg, var(--brand) 0%, var(--brand-deep) 30%, var(--brand-dark) 100%);
+    box-shadow: 0 18px 38px -14px rgba(11,15,26,.55), 0 12px 26px -10px rgba(11,15,26,.50),
+                0 2px 5px rgba(0,0,0,.12),
+                inset 0 1px 0 rgba(255,255,255,.30);
+  }
+  .btn-brand::after {
+    content: ""; position: absolute; inset: 0 0 56% 0; pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0));
+  }
+  .btn-brand:hover { filter: brightness(1.05); }
+  .btn-brand:active { transform: scale(.985); }
+
+  /* ── v12: SELECTED STATE FOR BLACK CHIPS (Lee, 18 Aug 2026) ─────────────────────────────
+     The flat `bg-ink` selected chips (language rows, view toggles, currency picker, form
+     choice pills) get the same design language as the big buttons, scaled down: a soft ink
+     gradient instead of a flat fill, the hairline light outline, an inset top highlight and
+     a small lifted shadow. Dark mode flips to the white chip with the same treatment. One
+     class, so every selected chip in every app matches. */
+  .ow-ink-sel {
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.22);
+    background: linear-gradient(165deg, #3A3F4E 0%, #171B26 60%, #0B0F1A 100%);
+    box-shadow: 0 6px 14px -6px rgba(11,15,26,.45), 0 1px 3px rgba(0,0,0,.15),
+                inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  .dark .ow-ink-sel {
+    color: var(--ink, #0B0F1A);
+    border-color: rgba(11,15,26,.14);
+    background: linear-gradient(165deg, #FFFFFF 0%, #EDEDEA 100%);
+    box-shadow: 0 6px 14px -6px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-semibold
+           transition active:scale-[.98];
+    border: 1px solid var(--brand-line);
+    background: linear-gradient(152deg, rgba(255,255,255,.42), rgba(255,255,255,.24));
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  }
+  .dark .btn-ghost {
+    border-color: rgba(255,255,255,.18);
+    background: linear-gradient(152deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+  }
+
+  /* ── Inputs ──────────────────────────────────────────────────────────────────────────────
+     Deliberately the MOST opaque thing on the page. Typed text has to stay readable; showing
+     the background through a text field is a nice demo and a bad product. */
+  .input {
+    @apply w-full rounded-2xl px-4 py-3 outline-none transition;
+    border: 1px solid var(--brand-line);
+    background: linear-gradient(152deg, rgba(255,255,255,.80), rgba(255,255,255,.68));
+    backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+    color: #2C2622;
+  }
+  .dark .input {
+    border-color: rgba(255,255,255,.13); color: #F1F1EE;
+    background: linear-gradient(152deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  }
+  .input::placeholder { color: #8A8079; }
+  .dark .input::placeholder { color: rgba(255,255,255,.32); }
+  .input:focus {
+    border-color: var(--brand-deep);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 0 0 3px var(--brand-line);
+  }
+
+  /* ── A TEXTAREA'S RESIZE GRIP ──────────────────────────────────────────────────────────────
+     Lee, 11 Aug 2026: *"you still have a little dot in the bottom right hand corner… it's so tiny
+     as, like, literally a dot."*
+
+     That is Chrome's native `::-webkit-resizer`: three hairline diagonals, ~7px, rendered in the
+     browser's own grey with no relationship to anything else on the screen. It is invisible on a
+     phone and it looks like dirt on the glass.
+
+     OneJob painted it out and drew its own on 31 Jul (`.oj-rte-body`). The rule stayed inside
+     OneJob, so every OTHER product's textarea kept the dot. This is that rule, promoted: the
+     native resizer becomes transparent and keeps doing the dragging, and the component draws a
+     visible grip on top of it. Extra bottom padding so a full box's last line does not run
+     underneath the glyph. */
+  .ow-ta {
+    resize: vertical;
+    padding-bottom: 1.75rem;
+  }
+  .ow-ta::-webkit-resizer { background: transparent; }
+
+  /* 13px floor for body copy on glass. Thin grey type over a moving background is where
+     legibility fails first, and the small print is usually the part explaining the money. */
+  .label { @apply mb-1.5 block text-[13px] font-semibold; color: #6B6257; }
+  .dark .label { color: #BAB9B3; }
+
+  /* THE WARM PANEL. A light-mode pane that sits beside a photograph needs to be warm, or the
+     photo makes it read as dirty white. Dark mode has no equivalent problem, so it falls back
+     to the standard glass fill. */
+  .ow-card-warm {
+    background:
+      linear-gradient(152deg, rgba(255,255,255,.46) 0%, rgba(255,255,255,0) 52%),
+      linear-gradient(160deg, rgba(232,228,222,.95), rgba(223,217,208,.90));
+  }
+  .dark .ow-card-warm { background: var(--glass-fill); }
+
+  /* ── THE AVAILABILITY CALENDAR ────────────────────────────────────────────────────────────
+     Found by Max on 13 Aug 2026 auditing shell 1.8.9: AvailabilityCalendar.tsx carried
+     `class="ow-cal"` and nothing defined it. A class name that resolves to nothing is worse than
+     no class at all — it reads in the markup as though the styling is handled, so the next person
+     to touch the component adds their spacing somewhere else and the two fight.
+
+     Everything the calendar needs beyond this is Tailwind utilities on the cells themselves. What
+     belongs HERE is only what a utility cannot express: the tabular figures, and stopping a drag
+     across the grid from selecting the numbers as text. */
+  .ow-cal {
+    /* Same-width digits, so the columns do not shuffle between a 1 and a 30. */
+    font-variant-numeric: tabular-nums;
+    -webkit-tap-highlight-color: transparent;
+    @apply select-none;
+  }
+  .ow-cal button { -webkit-tap-highlight-color: transparent; }
+  /* A struck-through night is a BOOKED night, not a disabled one. Keep the line legible at 13px
+     in both themes — the default decoration thickness disappears against a dimmed cell. */
+  .ow-cal button.line-through { text-decoration-thickness: 1.5px; text-underline-offset: 0; }
+
+  /* A tappable that must not show a text-selection flash or a blue tap highlight. */
+  .ow-tap {
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    @apply select-none transition active:scale-[.97];
+  }
+  /* ── 44 × 44, EVERYWHERE ──────────────────────────────────────────────────────────────────
+     The header controls measure 40×28, 36×28 and 38×34 — all under Apple's minimum, all missed
+     by a thumb on a moving bus. Padding would fix the number and move the header spacing that
+     was tuned by hand. This grows the HIT AREA only: an invisible centred box. The control
+     looks identical and stops being a miss.
+
+     Dropping this from the extraction regressed the rule across all eight products at once,
+     which is the whole hazard of a shared package cutting both ways. */
+  .ow-tap::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%; height: 100%;
+    min-width: 44px; min-height: 44px;
+  }
+  /* A button that paints its own ::after (`.btn-primary`, `.btn-brand`) must not have it
+     stolen for the hit area — those two are already well over 44px tall. */
+  .btn-primary.ow-tap::after, .btn-brand.ow-tap::after { min-width: 0; min-height: 0; }
+
+  /* ── THE SCROLL-FLICKER FIX ──────────────────────────────────────────────────────────────
+     Found 2 Aug 2026. `.card` carries `backdrop-filter: blur(40px)`; a list with two cards per
+     row over an ANIMATING aurora asks the GPU to resample a moving backdrop sixty times a
+     second, per pane. Thirty rows is sixty samplers. It flickers, and it is worse in dark mode
+     because the dark fill is 2–5% opaque, so almost everything visible IS the blurred backdrop.
+
+     A row inside a long list therefore opts OUT of the blur and paints its own fill. `contain:
+     paint` stops it participating in the parent's compositing at all. Rows are small, so they
+     lose nothing by not being glass; the page around them still is. */
+  .ow-row {
+    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+    contain: paint;
+  }
+
+  /* Text that must not wrap. Lee, 2 Aug 2026: *"if the words don't fit, don't wrap the text —
+     just make them fade away."* An ellipsis says "there is more, and you cannot have it"; a
+     fade says the layout simply ran out of room, which is the truth. */
+  .ow-fade {
+    white-space: nowrap; overflow: hidden;
+    mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 34px), transparent 100%);
+  }
+
+  /* A photo standing on its own, with no panel behind it. Lee, 2 Aug 2026: the picture *"should
+     stand alone"* — a nested panel behind an image is two frames around one thing. The photo
+     keeps the family's edge and shadow so it still belongs to the glass system. */
+  .ow-photo {
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--frostedge), var(--glass-shadow);
+  }
+
+  /* A MENU, not a popover. Opaque by the OVERLAY OPACITY RULE above. */
+  .ow-menu {
+    background: var(--overlay-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    @apply rounded-xl border border-ink/10 shadow-xl dark:border-white/10;
+  }
+
+  /* Modals, sheets and the drawer — the same glass, at the readable end of it.
+     THE 88% FLOOR: an overlay covers content, so anything under ~88% opacity means reading two
+     things at once. Lee, 2 Aug 2026: *"it needs to be translucent, but still dark enough to
+     read without being disturbed by the translucency."* Every sheet uses this; nothing
+     hard-codes its own gradient. */
+  .ow-sheet {
+    background: var(--overlay-bg);
+    backdrop-filter: blur(26px) saturate(180%); -webkit-backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--frostedge), 0 26px 70px rgba(11,15,26,.28);
+  }
+  .dark .ow-sheet { box-shadow: var(--frostedge), 0 26px 70px rgba(0,0,0,.6); }
+}
+
+/* Hide scrollbars on horizontal strips (chip rows, media rails). */
+/* ── The raised centre tab (the "money button") — themed paint, BottomTabs wears the class ──
+   LIGHT: the product-hue gradient, bright→deep→dark, white glyph past the midpoint (measures).
+   DARK (redesigned 8 Aug 2026, Lee's review): deep frosted glass + thin hue ring + soft hue
+   glow, glyph in the hue's LIGHT step — the step the ramp already certifies as text-on-dark.
+   The hue gradient on ink read harsh on every product; a glow reads premium and still pops. */
+.ow-tab-primary {
+  color: #fff;
+  background: linear-gradient(158deg, var(--brand) 0%, var(--brand-deep) 52%, var(--brand-dark) 100%);
+  box-shadow: 0 16px 32px -10px rgba(11,15,26,.55), 0 3px 8px rgba(0,0,0,.2), inset 0 1.5px 0 rgba(255,255,255,.40);
+}
+.ow-tab-primary-active {
+  background: linear-gradient(158deg, var(--brand-deep) 0%, var(--brand-dark) 55%, var(--brand-darkest) 100%);
+}
+.ow-tab-primary-sheen { background: linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,0)); }
+/* ── DARK PRIMARY BUTTONS (Lee, 8 Aug round 3): espresso reads as a flat brown block on ink.
+   On dark, the action button wears the product hue's LIGHT step with INK text — the step the
+   ramp certifies for text-on-dark, flipped into a surface. Modern, not flat: a soft light→
+   bright gradient, an inset top sheen, a lifted shadow. Light mode keeps espresso (unchanged —
+   the shared action colour still rules daylight). */
+.dark .btn-primary {
+  color: #0B0F1A;
+  background:
+    linear-gradient(160deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,.08) 44%, rgba(255,255,255,0) 64%),
+    linear-gradient(140deg, var(--brand-light) 0%, color-mix(in srgb, var(--brand-light) 62%, var(--brand)) 100%);
+  box-shadow: 0 8px 22px -10px color-mix(in srgb, var(--brand) 42%, transparent);
+}
+.dark .btn-primary:hover { filter: brightness(1.04); }
+
+/* ── DARK CARDS, ROUND 2 (Lee, 8 Aug 2026): "there's too many panels… you only need panels
+   when you need panels." In dark mode the frost gradient made every card read as a heavy pane
+   and a screen of them read as clutter. Dark cards are now HAIRLINE panels: near-flat fill,
+   thin border, no frost gradient, soft shadow — his reference checkout screen's card language.
+   Light mode keeps the full frost (his call: "in the light mode you can keep the panels"). */
+.dark .card {
+  background: rgba(255,255,255,.028);
+  border: 1px solid rgba(255,255,255,.09);
+  box-shadow: 0 8px 24px rgba(0,0,0,.28);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+
+.dark .ow-tab-primary {
+  color: var(--brand-light);
+  background: linear-gradient(158deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.03) 60%, rgba(255,255,255,.015) 100%),
+              rgba(15,19,33,.72);
+  border: 1px solid color-mix(in srgb, var(--brand-light) 42%, transparent);
+  box-shadow: 0 14px 30px -12px rgba(0,0,0,.65),
+              0 0 22px -4px color-mix(in srgb, var(--brand) 38%, transparent),
+              inset 0 1px 0 rgba(255,255,255,.16);
+  backdrop-filter: var(--frost); -webkit-backdrop-filter: var(--frost);
+}
+.dark .ow-tab-primary-active {
+  color: #fff;
+  background: linear-gradient(158deg, color-mix(in srgb, var(--brand) 55%, #10141f) 0%, color-mix(in srgb, var(--brand-dark) 70%, #0B0F1A) 100%);
+  border: 1px solid color-mix(in srgb, var(--brand-light) 55%, transparent);
+}
+.dark .ow-tab-primary-sheen { background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0)); }
+
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* Filter and chip rows measure ~32px tall on every screen that has one — under the minimum.
+   They always live in a horizontal scroller, so the pattern is fixed in ONE place rather than
+   on each page. Fix the pattern, not the instance. */
+.scrollbar-none > button,
+.scrollbar-none > a { position: relative; }
+.scrollbar-none > button::after,
+.scrollbar-none > a::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 0; right: 0;
+  transform: translateY(-50%);
+  height: 44px;
+}
+
+/* Native date/time pickers follow the app theme instead of the OS default black. */
+input, select, textarea { color-scheme: light; }
+.dark input, .dark select, .dark textarea { color-scheme: dark; }
+
+/* WARM INK, never pure black. Body already inherits it; a heading that sets `text-ink`
+   explicitly would otherwise get the cold near-black, which on aurora glass reads as a hole
+   punched in the page. The wordmark's first half uses `text-ink`, so dropping this made every
+   product's wordmark cold. */
+.text-ink { color: #2C2622; }
+.dark .text-ink { color: #F1F1EE; }
+
+/* ── The dark-mode text flip ────────────────────────────────────────────────────────────────
+   DO NOT DELETE. Every hue's DEFAULT step is measured against #FAFAF8 and fails on #0B0F1A;
+   the `light` step is measured against #0B0F1A. Without this rule every product's links and
+   headings drop to roughly 2:1 in dark mode. */
+.dark .text-brand,
+.dark .text-brand-deep { color: var(--brand-light); }
+.dark .border-brand    { border-color: var(--brand-light); }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════
+   THE PASSPORT & PROFILE SURFACES  (migrated from OneJob with the profile half, 2026-08-08)
+   ------------------------------------------------------------------------------------------
+   Hue-free: the passport is a profile-level object that reads identically on every app, so it
+   wears its own `--pp-*` skin (light frosted glass by default, passport-navy in dark) rather
+   than the product hue. The card markup is written once and reads every colour from these vars.
+   ══════════════════════════════════════════════════════════════════════════════════════════ */
+:root {
+  --pp-surface: #FFFFFF;
+  --pp-bg: linear-gradient(158deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.62) 46%, rgba(234,249,240,.72) 100%);
+  --pp-blur: blur(28px) saturate(190%);
+  --pp-fg: #241E19;
+  --pp-muted: rgba(36,30,25,.62);
+  --pp-faint: rgba(36,30,25,.42);
+  --pp-line: rgba(36,30,25,.10);
+  --pp-chip: rgba(36,30,25,.05);
+  --pp-gloss: linear-gradient(118deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.45) 26%, rgba(255,255,255,0) 52%);
+  --pp-edge: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(255,255,255,.45);
+  --pp-ring-gap: #FAFAF8;
+}
+.dark {
+  --pp-surface: #0E1421;
+  --pp-bg: linear-gradient(160deg, rgba(48,60,78,.95) 0%, rgba(16,22,33,.98) 52%, rgba(11,15,26,1) 100%);
+  --pp-blur: none;
+  --pp-fg: #FFFFFF;
+  --pp-muted: rgba(255,255,255,.58);
+  --pp-faint: rgba(255,255,255,.42);
+  --pp-line: rgba(255,255,255,.10);
+  --pp-chip: rgba(255,255,255,.06);
+  --pp-gloss: linear-gradient(118deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,.03) 30%, rgba(255,255,255,0) 52%);
+  --pp-edge: inset 0 1px 0 rgba(255,255,255,.15), inset 0 -1px 0 rgba(255,255,255,.04);
+  --pp-ring-gap: #0B0F1A;
+}
+
+@layer components {
+  /* THE PASSPORT CARD — the reference is 384×576, portrait, passport-shaped. */
+  .ow-pp {
+    position: relative;
+    width: min(384px, 100%);
+    margin-inline: auto;
+    border-radius: 32px;
+    overflow: hidden;
+    color: var(--pp-fg);
+    background-color: var(--pp-surface);
+    background-image: var(--pp-bg);
+    backdrop-filter: var(--pp-blur);
+    -webkit-backdrop-filter: var(--pp-blur);
+  }
+  .ow-pp::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background: var(--pp-gloss);
+  }
+  .ow-pp > * { position: relative; z-index: 2; }
+
+  /* The travelling shimmer on the tier pill — one pass every 3s, clipped, non-blocking. */
+  .ow-shimmer { position: relative; overflow: hidden; }
+  .ow-shimmer > * { position: relative; z-index: 2; }
+  .ow-shimmer::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(105deg, transparent 30%, rgba(255,255,255,.34) 42%, rgba(255,255,255,.10) 50%, transparent 62%);
+    animation: owShimmer 3s ease-in-out infinite;
+  }
+
+  /* Two semicircular bites so the tier badge reads as a stamped credential, not a button. */
+  .ow-notch {
+    -webkit-mask:
+      radial-gradient(circle 7px at 0 50%, transparent 98%, #000 100%),
+      radial-gradient(circle 7px at 100% 50%, transparent 98%, #000 100%);
+    mask:
+      radial-gradient(circle 7px at 0 50%, transparent 98%, #000 100%),
+      radial-gradient(circle 7px at 100% 50%, transparent 98%, #000 100%);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
+
+  /* THE PASSPORT STRIP surface — thicker glass than a pane, a faint brand cast, a deeper shadow,
+     so a credential reads as a credential. Light by default, dark only in dark mode. */
+  .ow-passport {
+    position: relative;
+    border-radius: 24px;
+    background:
+      linear-gradient(152deg, rgba(255,255,255,.72) 0%, rgba(255,255,255,0) 44%),
+      linear-gradient(152deg, rgba(255,255,255,.62), rgba(234,249,240,.46));
+    border: 1px solid rgba(255,255,255,.78);
+    backdrop-filter: blur(44px) saturate(200%);
+    -webkit-backdrop-filter: blur(44px) saturate(200%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(255,255,255,.38), 0 26px 56px -24px rgba(7,63,35,.40);
+  }
+  .dark .ow-passport {
+    background:
+      linear-gradient(152deg, rgba(255,255,255,.17) 0%, rgba(255,255,255,0) 44%),
+      linear-gradient(152deg, rgba(255,255,255,.10), rgba(23,164,92,.07));
+    border-color: rgba(255,255,255,.16);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(255,255,255,.06), 0 26px 56px -24px rgba(0,0,0,.8);
+  }
+
+  /* The full-screen passport modal backdrop — a soft brand-lit field, not a flat scrim. */
+  .ow-create-page {
+    background:
+      radial-gradient(900px 420px at 50% -8%, rgba(23,164,92,.20), transparent 62%),
+      radial-gradient(700px 380px at -10% 108%, rgba(14,130,72,.13), transparent 58%),
+      #FAFAF8;
+  }
+  .dark .ow-create-page {
+    background:
+      radial-gradient(900px 420px at 50% -8%, rgba(23,164,92,.24), transparent 62%),
+      radial-gradient(700px 380px at -10% 108%, rgba(11,101,57,.20), transparent 58%),
+      #0B0F1A;
+  }
+}
+
+@keyframes owShimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ow-shimmer::after { animation: none; opacity: .5; }
+}
+
+/* ── AI WRITING ASSIST ────────────────────────────────────────────────────────────────────────
+   `.glass-modal` was defined ONLY in `products/oneevent/oneevent.css` and imported only by
+   OneEvent's routes file. OneJob's assist modal used it and rendered correctly purely because
+   Vite flattens every product stylesheet into one sheet — so the class happened to be present.
+   That is a coincidence, not a contract: lazy-load OneJob without OneEvent and the modal loses
+   its surface. Now that the modal is a SHELL component it must own its own styling.
+
+   `.ow-rte-body` is the rich-text editing surface, renamed from `oj-rte-body` on the way in —
+   the shell does not carry a product's prefix, and `tests/shell.chrome-uat-r2.cjs` asserts it. */
+/* ── THE 88% FLOOR APPLIES HERE TOO (Lee, 11 Aug 2026) ──────────────────────────────────────
+   Lee: *"a lot of the pop-up boxes are too translucent. You can barely read them… it's like a
+   dark grey frost, and you can't read anything."* He sent the Filters sheet: grey labels — City,
+   Price range, Bedrooms, Type of place — sitting over the feed's own photographs bleeding
+   through, so "City" was legible against one listing and invisible against the next.
+
+   This class was 86% opaque in light and 82% in dark. `.ow-sheet` directly above already carries
+   the rule and the reason — *"an overlay covers content, so anything under ~88% opacity means
+   reading two things at once"* — and `--overlay-bg` is the value that rule resolves to (97%).
+   `.glass-modal` simply never adopted it, and it is the class behind nearly every popup in the
+   product: the filter sheet, the pickers, the AI assist, the payment sheet, every OneEvent
+   dialog, popover and select.
+
+   So it uses the same token as every other overlay now. The blur stays — the frost is the look
+   Lee asked for — but the surface underneath is opaque enough that the text on it is text on a
+   surface, not text on somebody's sunset photograph. One class, every popup. */
+.glass-modal {
+  background: var(--overlay-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid color-mix(in srgb, var(--ink) 8%, transparent);
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.35);
+}
+.dark .glass-modal {
+  background: var(--overlay-bg);
+  border-color: color-mix(in srgb, #fff 10%, transparent);
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.65);
+}
+.ow-rte-body {
+  min-height: 180px;
+  outline: none;
+  resize: vertical;
+  overflow: auto;
+}
+.ow-rte-body:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.45;
+  pointer-events: none;
+}
+/* Chrome draws its own resizer under a custom grip. The original documented this fix as living
+   in an `index.css` that does not exist in the tree, so the rule was never actually applied. */
+.ow-rte-body::-webkit-resizer { display: none; }
+
+/* ── FORM SECTION — the panel the OneJob contract form always looked like it had ──────────────
+   `ContractForm.tsx` writes `<section className="oj-sec">` on every one of its sections, and
+   `oj-sec` was NEVER DEFINED — not here, not in a product stylesheet, not in the built CSS. The
+   form reads as well as it does purely because the controls inside carry their own styling; the
+   grouping itself was doing nothing. Found 11 Aug 2026 while promoting that form's controls into
+   the shell so OneHome could reuse them.
+
+   This is the rule it should have had: a soft panel, hairline edge, generous inner padding, and
+   real separation between sections so a long form reads as a sequence of decisions rather than
+   one wall of inputs. `.oj-sec` is aliased to it so the contract form gains the panel without a
+   single edit to that file. */
+/* ── A SECTION HAS TO LOOK LIKE IT STARTS SOMEWHERE (Lee, 12 Aug 2026) ──────────────────────
+   *"The frost is very, very faint on this page — it's nearly nonexistent. I would make the frost
+   stronger or darker at the top side of each one of these sections, and it will gradually get
+   lighter. What that does is help the user signify that this is the beginning of a new section,
+   because otherwise it's hard to tell. I would make the overall gradient just a little darker in
+   general — maybe ten percent, seven percent — but the top side where the titles are, maybe
+   twenty percent darker."*
+
+   He is describing a real failure, not a preference: a flat 82% panel on an 82%-ish page has
+   almost no edge, so eight stacked panels read as one very long form and nobody can tell where
+   "The property" stops and "Rooms" begins.
+
+   So: the base is ~8% denser than it was, and a gradient runs from ~20% denser at the top to the
+   base by 120px — the height of a heading plus its subtitle, which is exactly the band that
+   should read as a header. Below that the panel is calm, so the extra weight costs nothing where
+   the actual fields live. Both numbers are his. */
+.ow-form-sec,
+.oj-sec {
+  margin-top: 14px;
+  padding: 16px 14px;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  background:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--ink) 7%, transparent) 0px,
+      transparent 120px),
+    color-mix(in srgb, var(--paper) 90%, transparent);
+  box-shadow: 0 1px 3px rgba(11, 15, 26, .06), inset 0 1px 0 rgba(255, 255, 255, .5);
+}
+.dark .ow-form-sec,
+.dark .oj-sec {
+  border-color: rgba(255, 255, 255, .14);
+  background:
+    linear-gradient(to bottom, rgba(255, 255, 255, .07) 0px, transparent 120px),
+    rgba(255, 255, 255, .055);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+
+/* ── THE SECTION SOMEBODY STILL HAS TO FILL IN (Lee, 12 Aug 2026) ────────────────────────────
+   *"If people try to publish and there's still something required, that text at the bottom needs
+   to turn red like normal, and it needs to highlight the section that it's applicable to. They
+   scroll back up and see — oh, this is the section I need to complete, because it turned red."*
+
+   A message at the bottom of a nine-panel form tells you something is wrong and not where. This
+   is the where. */
+.ow-form-sec[data-invalid="true"],
+.oj-sec[data-invalid="true"] {
+  border-color: color-mix(in srgb, #ef4444 55%, transparent);
+  background:
+    linear-gradient(to bottom, rgba(239, 68, 68, .10) 0px, rgba(239, 68, 68, .028) 120px),
+    color-mix(in srgb, var(--paper) 90%, transparent);
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, .16), 0 1px 3px rgba(239, 68, 68, .12);
+}
+.dark .ow-form-sec[data-invalid="true"],
+.dark .oj-sec[data-invalid="true"] {
+  background:
+    linear-gradient(to bottom, rgba(239, 68, 68, .16) 0px, rgba(239, 68, 68, .05) 120px),
+    rgba(255, 255, 255, .055);
+}
+/* The sections inside `ow-form-sec` already space themselves; this only guards the gap between
+   a section and whatever the screen puts between two of them. */
+.ow-form-sec + .ow-form-sec,
+.oj-sec + .oj-sec { margin-top: 14px; }
+
+/* BookingBar names these selectors so products and harnesses can find the pinned bar and sheet.
+   The layout lives in its utility classes; these keep the anchors in the compiled CSS. */
+.ow-bookbar,
+.ow-booksheet { isolation: isolate; }
+
+/* ── PRICE HISTOGRAM (Airbnb audit pattern five, 14 Aug 2026) ────────────────────────────────
+   Two stacked <input type=range> draw the handles. They are native on purpose — arrow keys and
+   screen readers come free — but their default track is a grey bar that would sit on top of the
+   histogram, so the track is made transparent and only the thumb is styled. Both vendor prefixes
+   are needed: WebKit and Gecko do not share a pseudo-element for this and neither falls back to
+   the other. */
+.ow-hist-thumb { pointer-events: none; }
+.ow-hist-thumb::-webkit-slider-runnable-track { background: transparent; height: 24px; }
+.ow-hist-thumb::-moz-range-track { background: transparent; height: 24px; }
+.ow-hist-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none; pointer-events: auto; cursor: grab;
+  width: 22px; height: 22px; border-radius: 999px;
+  background: #fff; border: 1px solid rgba(10,14,28,.14);
+  box-shadow: 0 2px 8px -2px rgba(10,14,28,.45);
+  margin-top: 1px;
+}
+.ow-hist-thumb::-moz-range-thumb {
+  pointer-events: auto; cursor: grab;
+  width: 22px; height: 22px; border-radius: 999px;
+  background: #fff; border: 1px solid rgba(10,14,28,.14);
+  box-shadow: 0 2px 8px -2px rgba(10,14,28,.45);
+}
+.ow-hist-thumb:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--ow-brand,#0D9488); outline-offset: 2px; }
+.ow-hist-thumb:focus-visible::-moz-range-thumb     { outline: 2px solid var(--ow-brand,#0D9488); outline-offset: 2px; }
+html.dark .ow-hist-thumb::-webkit-slider-thumb { background: #EDEEF2; border-color: rgba(255,255,255,.2); }
+html.dark .ow-hist-thumb::-moz-range-thumb     { background: #EDEEF2; border-color: rgba(255,255,255,.2); }
+
+/* ── v80 · U17 · THIS IS AN APP; IT DOES NOT SLIDE SIDEWAYS ─────────────────────────────────
+   Lee, on a phone: "I could take the whole screen and scroll to the left... it should be fixed in
+   place." Nothing here ever stopped horizontal scrolling, so any element that overhangs — a photo
+   carousel, a wide row — let the entire page be dragged off centre.
+
+   ⚠️ `clip`, NOT `hidden`. `overflow-x: hidden` on the page root makes the body a scroll
+   container, which silently breaks every `position: sticky` element in the product: the header,
+   the booking bar, the bottom tabs. `clip` stops the scroll without creating that container.
+   `hidden` stays below it only as a fallback for browsers that do not know `clip`, and only on
+   `body`, where it does not carry the sticky problem. */
+html.ow-no-sideways,
+body.ow-no-sideways {
+  overflow-x: clip;
+  max-width: 100%;
+}
+@supports not (overflow-x: clip) {
+  body.ow-no-sideways { overflow-x: hidden; }
+}
+
+/* One ID onboarding: crisp progress and comfortably separated secondary actions. */
+.ow-onboarding-action {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; min-height: 48px; margin-top: 28px !important;
+  padding: 12px 24px; border: 1px solid var(--brand-line); border-radius: 999px;
+  background: rgba(255,255,255,.56); color: var(--brand-dark);
+  font-size: 16px; font-weight: 600; line-height: 1.5;
+  transition: background-color .15s, border-color .15s;
+}
+.ow-onboarding-action + .ow-onboarding-action { margin-top: 16px !important; }
+.ow-onboarding-action:hover { background: var(--brand-tint); border-color: var(--brand-deep); }
+.ow-onboarding-action:focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 4px; }
+.ow-onboarding-action:disabled { opacity: .45; cursor: wait; }
+.dark .ow-onboarding-action { color: var(--brand-light); border-color: rgba(157,188,250,.3); background: rgba(255,255,255,.05); }
+.ow-onboarding-progress { margin-bottom: 24px; }
+.ow-onboarding-progress-caption { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: var(--brand-dark); font-size: 13px; font-weight: 700; letter-spacing: .06em; }
+.dark .ow-onboarding-progress-caption { color: var(--brand-light); }
+.ow-onboarding-progress-track { display: flex; gap: 6px; }
+.ow-onboarding-progress-track > span { height: 6px; flex: 1; border-radius: 2px; background: rgba(27,73,184,.14); }
+.ow-onboarding-progress-track > [data-state="complete"] { background: var(--brand-deep); }
+.ow-onboarding-progress-track > [data-state="current"] { background: var(--brand-deep); outline: 2px solid var(--brand-deep); outline-offset: 3px; }
+.dark .ow-onboarding-progress-track > span { background: rgba(157,188,250,.2); }
+.dark .ow-onboarding-progress-track > [data-state="complete"], .dark .ow-onboarding-progress-track > [data-state="current"] { background: var(--brand-light); outline-color: var(--brand-light); }
+.ow-onboarding-agreement { padding: 14px 0 8px; }
+.ow-onboarding-agreement input:focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 3px; }
+.ow-onboarding-location .pac-container { box-sizing: border-box; margin-top: 8px; padding: 8px; border: 1px solid var(--brand-line); border-radius: 18px; background: rgba(250,250,248,.98); font-family: inherit; box-shadow: 0 12px 32px rgba(11,15,26,.14); }
+.ow-onboarding-location .pac-item { min-height: 48px; padding: 10px 8px; border: 0; border-radius: 10px; font-family: inherit; font-size: 14px; line-height: 24px; color: #485264; cursor: pointer; }
+.ow-onboarding-location .pac-item-query { font-size: 15px; color: #0B0F1A; }
+.ow-onboarding-location .pac-item:hover, .ow-onboarding-location .pac-item-selected { background: var(--brand-tint); }
+.dark .ow-onboarding-location .pac-container { background: #141c2b; border-color: rgba(157,188,250,.3); }
+.dark .ow-onboarding-location .pac-item { color: #cad4e5; }
+.dark .ow-onboarding-location .pac-item-query { color: #fff; }
+.dark .ow-onboarding-location .pac-item:hover, .dark .ow-onboarding-location .pac-item-selected { background: rgba(157,188,250,.15); }

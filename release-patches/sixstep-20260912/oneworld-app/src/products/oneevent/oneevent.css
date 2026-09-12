@@ -1,0 +1,175 @@
+/**
+ * ONEEVENT — the ported build's semantic tokens, re-based from teal to ORANGE #E2711D.
+ * ============================================================================================
+ * The 2026-07-23 OneEvent screens speak shadcn's var vocabulary (bg-background, text-primary,
+ * border-input…). Rather than re-type ~27k lines of JSX, the vocabulary is kept and the VALUES
+ * are re-pointed at OneEvent's own ramp (hues.ts: bright #E2711D · deep #9C4A0C · light
+ * #F5A468). Rules that already cost real time elsewhere:
+ *   · --primary is the DEEP step on light — the identity hue fails 4.5:1 as text/button ground.
+ *   · Teal appears NOWHERE here. Teal is the family's STATE colour and arrives via the shell's
+ *     own tokens, never via a product variable.
+ *   · Shell classes WIN on collision: .card, .btn-primary, .scrollbar-none come from tokens.css
+ *     (the shared frost and the shared action button ARE the modernization). Only classes the
+ *     shell does not define are carried over below.
+ */
+:root {
+  --background: 60 20% 98%; --foreground: 222 47% 8%;
+  --card: 0 0% 100%; --card-foreground: 222 47% 8%;
+  --popover: 0 0% 100%; --popover-foreground: 222 47% 8%;
+  --primary: 26 86% 33%; --primary-foreground: 0 0% 100%;
+  --secondary: 30 25% 96%; --secondary-foreground: 222 47% 15%;
+  --muted: 30 20% 94%; --muted-foreground: 222 15% 45%;
+  --accent: 28 84% 94%; --accent-foreground: 26 86% 28%;
+  --destructive: 0 72% 51%; --destructive-foreground: 0 0% 100%;
+  --border: 222 16% 82%; --input: 222 16% 80%; --ring: 26 77% 45%;
+}
+.dark {
+  --background: 222 47% 7%; --foreground: 60 20% 98%;
+  --card: 222 40% 11%; --card-foreground: 60 20% 98%;
+  --popover: 222 44% 9%; --popover-foreground: 60 20% 98%;
+  --primary: 26 88% 68%; --primary-foreground: 222 47% 8%;
+  --secondary: 222 30% 16%; --secondary-foreground: 60 20% 96%;
+  --muted: 222 28% 18%; --muted-foreground: 220 12% 62%;
+  --accent: 222 30% 20%; --accent-foreground: 26 88% 72%;
+  --destructive: 0 63% 45%; --destructive-foreground: 0 0% 100%;
+  --border: 220 20% 20%; --input: 220 20% 22%; --ring: 26 88% 60%;
+}
+
+/* Legacy utilities the ported markup uses and the shell does not define. PLAIN CSS on purpose:
+   this file is a secondary stylesheet, and `@apply`/`@layer` only work in the file that carries
+   the `@tailwind` directives (the shell's tokens.css — the ONE CSS entry point). The values
+   mirror the shared frost tokens, so these panels read as family. */
+.tile {
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
+  min-height: 96px; position: relative; overflow: hidden;
+  border-radius: 1rem; padding: 1rem;
+  background: var(--glass-fill);
+  backdrop-filter: var(--frost); -webkit-backdrop-filter: var(--frost);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--frostedge), var(--glass-shadow);
+  transition: transform .15s ease;
+}
+.tile:active { transform: scale(.98); }
+.tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.35) 45%, transparent 60%); transform: translateX(-120%); transition: transform .9s ease; pointer-events: none; }
+.tile:hover::after { transform: translateX(120%); }
+.btn-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  border-radius: .75rem; border: 1px solid rgba(11,15,26,.10);
+  padding: .75rem 1.25rem; font-weight: 600; transition: transform .15s ease;
+}
+.btn-ghost:active { transform: scale(.98); }
+.dark .btn-ghost { border-color: rgba(255,255,255,.15); }
+.input {
+  width: 100%; border-radius: .75rem; border: 1px solid rgba(11,15,26,.25);
+  background: rgba(11,15,26,.025); padding: .75rem 1rem; outline: none;
+}
+.input:focus { box-shadow: 0 0 0 2px hsl(var(--ring) / .4); border-color: hsl(var(--ring) / .5); }
+.input::placeholder { color: rgba(11,15,26,.30); }
+.dark .input { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.20); }
+.dark .input::placeholder { color: rgba(255,255,255,.25); }
+.label { display: block; font-size: .875rem; font-weight: 500; margin-bottom: .375rem; opacity: .7; }
+
+/* ── DARK SELECTED CHIPS (Lee, 8 Aug dark-mode review): the selected segment / sub-tab
+   rendered as a FLAT plain orange pill — "no styling on it at all". Selected chips now
+   speak tokens.css's `.dark .btn-primary` language, scaled for chips: the hue's LIGHT
+   step sliding slightly darker toward the bright step (a touch darker than the old flat
+   fill), INK text, an inset top sheen, a soft hue glow. LIGHT MODE IS UNTOUCHED — this
+   class only exists under `.dark` (Lee approved light), so the Tailwind bg-primary/
+   text-primary-foreground utilities keep ruling daylight. */
+.dark .evt-chip-active {
+  color: #0B0F1A;
+  background: linear-gradient(165deg, var(--brand-light) 0%, color-mix(in srgb, var(--brand-light) 55%, var(--brand)) 100%);
+  border-color: transparent;
+  box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--brand) 45%, transparent),
+              0 1px 3px rgba(0,0,0,.35),
+              inset 0 1px 0 rgba(255,255,255,.5);
+}
+.dark .evt-chip-active:hover { filter: brightness(1.04); }
+
+
+.glass-modal {
+  background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,255,255,.86));
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255,255,255,.6);
+}
+.dark .glass-modal {
+  background: linear-gradient(135deg, rgba(23,28,45,.92), rgba(15,19,33,.9));
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+@keyframes micbar { from { transform: scaleY(0.6); } to { transform: scaleY(1.25); } }
+
+/* ── v18 ESPRESSO BUTTON (Lee, 18 Aug, OnePage reference screenshot): the big dark CTAs
+   get the OnePage treatment — a deep burnt-orange→espresso gradient, a hairline light
+   outline so the button "stands off the page", an inset top sheen, and a soft glow.
+   Same design language as the shell's v12 .btn-primary, tuned to OneEvent's hue.
+   Apply with `ow-btn-espresso` on any primary dark button. */
+.ow-btn-espresso {
+  color: #fff;
+  background: linear-gradient(165deg,
+    color-mix(in srgb, var(--brand) 78%, #ffffff 6%) 0%,
+    var(--brand-deep) 52%,
+    var(--brand-darkest) 100%);
+  border: 1px solid rgba(255, 255, 255, .25);
+  box-shadow:
+    0 18px 38px -14px color-mix(in srgb, var(--brand-darkest) 62%, transparent),
+    0 2px 6px rgba(0, 0, 0, .28),
+    inset 0 1px 0 rgba(255, 255, 255, .28);
+  transition: filter .15s ease, transform .1s ease, box-shadow .15s ease;
+}
+.ow-btn-espresso:hover { filter: brightness(1.07); }
+.ow-btn-espresso:active { transform: translateY(1px); }
+.ow-btn-espresso:disabled { opacity: .5; }
+.dark .ow-btn-espresso {
+  border-color: rgba(255, 255, 255, .22);
+  box-shadow:
+    0 18px 38px -14px rgba(0, 0, 0, .6),
+    0 2px 6px rgba(0, 0, 0, .4),
+    inset 0 1px 0 rgba(255, 255, 255, .22);
+}
+
+/* Global sweep (same v18 ruling): EVERY solid-primary button in OneEvent gets the espresso
+   treatment automatically — no per-site class hunting, no missed CTA. Targets the exact
+   utility pair the codebase uses for its solid CTAs; selected-segment chips opt out via
+   .evt-chip-active (they have their own dark treatment and Lee approved light as-is). */
+button.bg-primary.text-primary-foreground:not(.evt-chip-active):not(:disabled),
+a.bg-primary.text-primary-foreground:not(.evt-chip-active) {
+  color: #fff;
+  background: linear-gradient(165deg,
+    color-mix(in srgb, var(--brand) 78%, #ffffff 6%) 0%,
+    var(--brand-deep) 52%,
+    var(--brand-darkest) 100%);
+  border: 1px solid rgba(255, 255, 255, .25);
+  box-shadow:
+    0 10px 24px -10px color-mix(in srgb, var(--brand-darkest) 55%, transparent),
+    0 1px 4px rgba(0, 0, 0, .25),
+    inset 0 1px 0 rgba(255, 255, 255, .28);
+}
+button.bg-primary.text-primary-foreground:not(.evt-chip-active):hover,
+a.bg-primary.text-primary-foreground:not(.evt-chip-active):hover { filter: brightness(1.07); }
+button.bg-primary.text-primary-foreground:not(.evt-chip-active):active { transform: translateY(1px); }
+
+/* Edge supplies its own password-reveal control. ExpressJoin already renders one
+   accessible reveal button, so suppress the browser duplicate. */
+.ow-password-input::-ms-reveal,
+.ow-password-input::-ms-clear {
+  display: none;
+}
+
+/* v23 CT (Lee, 18 Aug 2026): the rich-text editor draws its OWN resize grip — three bold
+   diagonal lines on a chip — so Chrome's faint native resizer is painted out. The native
+   resizer still does the actual drag underneath. */
+.ow-rte-body::-webkit-resizer { display: none; background: transparent; }
+
+/* v24 DO (Lee): the BLACK primary — same polish family as ow-btn-espresso (gradient,
+   hairline, inset sheen) but on ink, for Create Event and active filter chips. */
+.ow-btn-ink {
+  color: #fff;
+  background: linear-gradient(180deg, #35302b 0%, #1c1917 55%, #0c0a09 100%);
+  border: 1px solid rgba(255, 255, 255, .22);
+  box-shadow: 0 6px 16px rgba(12, 10, 9, .35), inset 0 1px 0 rgba(255, 255, 255, .18);
+  transition: filter .15s ease, transform .05s ease;
+}
+.ow-btn-ink:hover { filter: brightness(1.15); }
+.ow-btn-ink:active { transform: translateY(1px); }
+.ow-btn-ink:disabled { opacity: .5; }
