@@ -1,0 +1,27 @@
+.ow-reveal-space{height:calc(78px + env(safe-area-inset-top,0px))}
+.ow-reveal{position:fixed;z-index:45;top:calc(8px + env(safe-area-inset-top,0px));left:50%;width:62px;height:62px;transform:translateX(-50%);border-radius:999px;border:1px solid transparent;transition:width 500ms cubic-bezier(.22,.7,.2,1),transform 500ms cubic-bezier(.22,.7,.2,1);isolation:isolate}
+.ow-reveal.has-glass,.ow-classic-frost .ow-chrome{background:rgba(250,250,248,.58);border-color:rgba(255,255,255,.79);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);box-shadow:inset 0 1px 0 #ffffff99,0 9px 28px #19394026}
+.dark .ow-reveal.has-glass,.dark .ow-classic-frost .ow-chrome{background:rgba(18,34,45,.58);border-color:#ffffff36;box-shadow:inset 0 1px 0 #ffffff24,0 9px 28px #0005}
+.ow-reveal.is-expanded{width:min(calc(100% - 24px),480px)}
+.ow-reveal.is-away{transform:translateX(-50%) translateY(calc(-100% - 24px - env(safe-area-inset-top,0px)));pointer-events:none}
+.ow-reveal-logo{position:absolute;left:0;top:0;width:60px;height:60px;border-radius:999px;display:grid;place-items:center;transition:width 500ms cubic-bezier(.22,.7,.2,1);touch-action:manipulation}
+.ow-reveal-mark{height:46px;width:46px;object-fit:contain;transform:translate(5px,2px);filter:drop-shadow(0 0 4px white) drop-shadow(0 2px 2px #17334e66);transition:opacity 300ms}
+.ow-reveal-wordmark{position:absolute;left:14px;top:11px;opacity:0;pointer-events:none;transition:opacity 220ms;max-width:100%;overflow:hidden}
+.ow-reveal.is-expanded .ow-reveal-logo{width:calc(100% - 146px)}
+.ow-reveal.is-expanded .ow-reveal-mark{opacity:0}
+.ow-reveal.is-expanded .ow-reveal-wordmark{opacity:1;transition-delay:130ms}
+.ow-reveal-controls{position:absolute;right:10px;top:8px;display:flex;align-items:center;gap:0;opacity:0;visibility:hidden;transform:scaleX(.75);transform-origin:right;transition:opacity 160ms,transform 300ms,visibility 0s 160ms}
+.ow-reveal.is-expanded .ow-reveal-controls{opacity:1;visibility:visible;transform:scaleX(1);transition-delay:160ms}
+.ow-reveal-menu{display:grid;place-items:center;width:44px;height:44px;border-radius:50%}
+.ow-reveal-pin{position:absolute;top:48px;right:12px;font-size:11px;padding:3px 10px;border-radius:16px;background:var(--chrome-bg,#fafaf8);box-shadow:0 2px 6px #0002;min-height:28px}
+.ow-reveal-notice{position:fixed;top:calc(90px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:60;pointer-events:none;border-radius:20px;font-size:12px;background:#153e5b;color:white;white-space:nowrap}
+.ow-reveal-notice:not(:empty){padding:6px 12px}
+.ow-reveal button:focus-visible{outline:2px solid var(--brand,#1576ae);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.ow-reveal,.ow-reveal *{transition:none!important}}
+@supports not(backdrop-filter:blur(20px)){.ow-reveal.has-glass{background:#fafaf8}.dark .ow-reveal.has-glass{background:#12222d}}
+/* Home follows Lee's final blue preview, using the original PNG without replacing artwork. */
+.ow-reveal[data-brand="Home"] .ow-reveal-mark{filter:hue-rotate(35deg) drop-shadow(0 0 4px white) drop-shadow(0 2px 2px #17334e66)}
+.ow-reveal[data-brand="Home"] .ow-reveal-wordmark img{filter:hue-rotate(35deg)}
+/* Keep an equivalent keyboard action without adding a permanent extra pill. */
+.ow-reveal-pin:not(:focus-visible){clip-path:inset(50%);width:1px;height:1px;min-height:0;padding:0;overflow:hidden}
+.ow-classic-frost{display:contents}
