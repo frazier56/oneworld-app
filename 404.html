@@ -4,6 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#FAFAF8" />
+    <script>
+      /* Dark mode BEFORE the first paint. React applies the class in an effect, which runs
+         after the browser has already painted, so frame one was the LIGHT page for every
+         dark-mode member - a white flash on every cold start. Inline in the head is the only
+         place this can work: anything the browser has to fetch is already too late.
+         try/catch because localStorage THROWS ON ACCESS in Safari Lockdown Mode. */
+      (function () {
+        try {
+          if (localStorage.getItem("oneworld-theme") === "dark") {
+            document.documentElement.classList.add("dark");
+            var m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.setAttribute("content", "#0B0F1A");
+          }
+        } catch (e) {}
+      })();
+    </script>
     <title>One World</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -45,10 +61,10 @@
         import('/onehome-review-app.js?v=20260906-owner-auth1')
           .then(() => import('/onehome-owner-qa.js?v=20260907-price-v5'));
       } else {
-        import('/index-fMnHtIql.js');
+        import('/index-BPB-0m9A.js');
       }
     </script>
-    <link rel="stylesheet" crossorigin href="/index-o8crbARC.css">
+    <link rel="stylesheet" crossorigin href="/index-B7E3AZFw.css">
   </head>
   <body class="ow-no-sideways">
     <div id="root"></div>
