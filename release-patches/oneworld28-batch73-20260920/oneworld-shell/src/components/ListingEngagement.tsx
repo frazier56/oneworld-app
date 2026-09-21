@@ -1,0 +1,382 @@
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
+import { W } from "../lib/i18n";
+import { useOneId } from "../lib/oneId";
+
+/**
+ * LIKE · COMMENT · SHARE — on the LISTING, as one object.
+ * ============================================================================================
+ * Lee, 11 Aug 2026: *"Remember, you can like, share, comment on each of them still, and they can
+ * write a comment, and people can like, share. They gonna share the ENTIRE set."*
+ *
+ * That last sentence settles the design question the rest of the sentence leaves open. A like per
+ * photograph means a property with fifty photos has fifty like counts and not one of them is "how
+ * many people liked this place" — which is the only number anybody wants. So the unit of
+ * engagement is the LISTING. Somebody looking at photo 34 who taps the heart has liked the home.
+ *
+ * ── NO NEW TABLES ───────────────────────────────────────────────────────────────────────────
+ * `media_likes`, `media_comments` and `media_shares` already carry a `media_source` discriminator
+ * next to `media_item_id`, and neither column has a foreign key. So a listing is just another
+ * source: `media_source = 'rental_property'` with the listing's own id. Verified against the live
+ * policies — INSERT requires `user_id = auth.uid()` and nothing constrains the source value.
+ *
+ * That is worth more than the saved migration: likes, comments and shares now mean the same thing
+ * and are counted the same way whether the subject is a post, an album item or a home. A separate
+ * `listing_likes` table would have been a second implementation of a solved problem, and the first
+ * feature that wants "everything this person liked" would have to union them.
+ *
+ * ⚠️ While confirming this, the admin policies on all three tables were found to still carry a
+ * HARD-CODED UUID literal — one person, for ever, as the only possible moderator. Fixed to use
+ * `is_platform_admin()` in `media_engagement_admin_policies_use_role_table`.
+ */
+
+/**
+ * ── TWO MORE SOURCES, AND NO MIGRATION TO ADD THEM (R18 note 1) ─────────────────────────────
+ * Lee: *"the right rail only exists on Homes. Put the same five controls on Events, Jobs and
+ * Socials, each acting on that lane's item."*
+ *
+ * Events and Jobs were the two lanes with no save and no comment, and the reason given was that
+ * they had nowhere to write. That was wrong, and checking the live schema is what showed it:
+ * `media_likes.media_source`, `media_comments.media_source` and `saved_items.item_type` are all
+ * plain `text` with NO check constraint. The discriminator was designed to be open. So an event
+ * and a job become two more values in it, the same way a rental already is — no column, no
+ * enum, no migration, and every existing row untouched.
+ *
+ * `profile` is the fifth: the Jobs lane shows people as well as postings, and a person you want
+ * to hire later is exactly the thing a save is for.
+ */
+export type EngagementSource =
+  | "rental_property" | "sale_property" | "media_post" | "album_item"
+  | "event" | "job" | "profile";
+
+export default function ListingEngagement({
+  itemId, source, shareUrl, shareTitle, allowShare = true, lang, compact = false, onDark = false,
+  commentCount, onComments, hideComments, savesAs, vertical = false,
+}: {
+  itemId: string;
+  /**
+   * ── THE SAME THREE CONTROLS, STACKED (World Feed 30, 20 September 2026) ──────────────────
+   * The world feed puts save, comments and share in a column down the right edge of a video,
+   * the way every full-screen feed does. That is a different SHAPE, not different behaviour —
+   * the same hearts, the same `media_likes` and `saved_items` writes, the same share sheet.
+   * A second component would have been a second place for the heart to disagree with itself,
+   * which is the exact defect this file already carries a paragraph about.
+   */
+  vertical?: boolean;
+  source: EngagementSource;
+  /** Absolute, because this is what gets pasted into WhatsApp. */
+  shareUrl: string;
+  shareTitle: string;
+  /** The owner's toggle. False hides the share control entirely — see the note below. */
+  allowShare?: boolean;
+  /**
+   * ── ⚠️ THE HEART AND "SAVED PROPERTIES" WERE TWO DIFFERENT TABLES (17 September 2026) ────
+   * Lee: *"liking a place must reach a view saved properties section under the middle footer
+   * button."* It could not. This heart has always written `media_likes`, which is the PUBLIC
+   * like count on a listing. `Saved.tsx` and the counter on the centre-tab hub read
+   * `saved_items`, which is the member's own private list. Nothing in OneHome had ever written
+   * a single row to `saved_items` — verified across both products and the shell — so a tenant
+   * could heart twenty homes and their saved list would say zero, for ever.
+   *
+   * Passing `savesAs` makes one tap do both: the public count AND the member's own list, with
+   * this string as the `item_type`. Products that do not pass it are unchanged, which is why
+   * OneEvent (which writes `saved_items` itself, from its own Save button) is untouched.
+   */
+  savesAs?: "rental_property" | "sale_property" | "event" | "job" | "profile" | "media_post";
+  lang: string;
+  compact?: boolean;
+  /**
+   * ── WHEN THE COMMENTS LIVE SOMEWHERE ELSE (13 Aug 2026) ─────────────────────────────────
+   * Pass `onComments` and this button stops opening its own `media_comments` panel and simply
+   * reports the tap. OneHome does that: its comments are a PROPERTY thread shown below the card
+   * by `ListingComments`, and the two were previously separate tables that could never see each
+   * other's messages. `commentCount` then comes from that thread so the number beside the icon
+   * counts the conversation the reader can actually see.
+   *
+   * Products with no property thread pass neither and keep the built-in panel unchanged.
+   */
+  onComments?: () => void;
+  commentCount?: number;
+  /** v77 · Property surfaces set this. A person's post is a conversation and keeps its comments;
+   *  a flat is not, and OneHome's comments were removed. Hidden here rather than deleted from the
+   *  component, because OneSocial and OneJob still want the button. */
+  hideComments?: boolean;
+  /**
+   * Rendered on top of a photograph rather than on the paper.
+   *
+   * The feed card is now the photograph — every fact sits on it against a scrim (Lee, 11 Aug 2026:
+   * *"you shouldn't have a white strip at all"*). Inherited `currentColor` there is the app's ink,
+   * which is invisible on a dark scrim, so this forces white and swaps the hover tint. It changes
+   * colour only: the controls, counts and behaviour are identical.
+   */
+  onDark?: boolean;
+}) {
+  const { userId } = useOneId();
+  const [likes, setLikes] = useState(0);
+  const [liked, setLiked] = useState(false);
+  const [comments, setComments] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [shared, setShared] = useState(false);
+
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      const [{ count: nLikes }, { count: nComments }, mine] = await Promise.all([
+        supabase.from("media_likes").select("id", { count: "exact", head: true })
+          .eq("media_item_id", itemId).eq("media_source", source),
+        /* SKIPPED when the comments live elsewhere. Counting `media_comments` for a listing whose
+           conversation is a property thread queries a table the reader will never be shown, and
+           the number it returns is a different number from the one the panel would display —
+           which is the two-tables bug wearing a smaller hat. Caught by comments-check.mjs
+           asserting that the feed card touches the property table and nothing else. */
+        onComments
+          ? Promise.resolve({ count: null } as any)
+          : supabase.from("media_comments").select("id", { count: "exact", head: true })
+              .eq("media_item_id", itemId).eq("media_source", source),
+        userId
+          ? supabase.from("media_likes").select("id")
+              .eq("media_item_id", itemId).eq("media_source", source).eq("user_id", userId).maybeSingle()
+          : Promise.resolve({ data: null } as any),
+      ]);
+      if (!live) return;
+      setLikes(nLikes ?? 0); setComments(nComments ?? 0); setLiked(!!mine?.data);
+
+      /* HEAL THE HISTORY. Anybody who hearted a listing before today has a `media_likes` row and
+         no `saved_items` row, so their saved list would stay empty until they un-hearted and
+         re-hearted every one. One idempotent insert on a listing they have already liked fixes
+         it silently, and does nothing at all on a listing they have not. */
+      if (savesAs && userId && mine?.data) {
+        void supabase.from("saved_items")
+          .upsert({ user_id: userId, item_id: itemId, item_type: savesAs },
+                  { onConflict: "user_id,item_type,item_id", ignoreDuplicates: true })
+          .then(() => {});
+      }
+    })();
+    return () => { live = false; };
+  }, [itemId, source, userId, onComments]);
+
+  /* OPTIMISTIC, and reverted on failure. A heart that waits for a round trip before it fills reads
+     as a broken button, and this is the single most-tapped control on the screen. */
+  async function toggleLike() {
+    if (!userId) return;
+    const was = liked;
+    setLiked(!was); setLikes(n => n + (was ? -1 : 1));
+    const q = was
+      ? supabase.from("media_likes").delete()
+          .eq("media_item_id", itemId).eq("media_source", source).eq("user_id", userId)
+      : supabase.from("media_likes").insert({ media_item_id: itemId, media_source: source, user_id: userId });
+    const { error } = await q;
+    if (error) { setLiked(was); setLikes(n => n + (was ? 1 : -1)); return; }
+
+    /* The member's own saved list, written by the SAME tap. Deliberately after the public count
+       and deliberately not fatal: the heart the person can see has already done what it says, and
+       failing the whole toggle because a second write missed would un-fill a heart that is
+       correct. The reason is logged rather than swallowed. */
+    if (savesAs && userId) {
+      const saveQuery = was
+        ? supabase.from("saved_items").delete()
+            .eq("user_id", userId).eq("item_id", itemId).eq("item_type", savesAs)
+        : supabase.from("saved_items")
+            .upsert({ user_id: userId, item_id: itemId, item_type: savesAs },
+                    { onConflict: "user_id,item_type,item_id", ignoreDuplicates: true });
+      const { error: saveError } = await saveQuery;
+      if (saveError) console.error("[engagement] saved list not updated:", saveError.code, saveError.message);
+    }
+  }
+
+  async function share() {
+    /* Recorded whether or not the person completes the share sheet — the interesting number is how
+       many people wanted to send this listing to somebody, and the OS never tells us the rest. */
+    supabase.from("media_shares")
+      .insert({ media_item_id: itemId, media_source: source, user_id: userId ?? null, share_method: "link" })
+      .then(() => {});
+    try {
+      if (navigator.share) { await navigator.share({ title: shareTitle, url: shareUrl }); return; }
+    } catch { /* the person dismissed the sheet — not an error */ }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShared(true); setTimeout(() => setShared(false), 2000);
+    } catch { window.prompt(W(lang, "Copy this link", "Copie este enlace"), shareUrl); }
+  }
+
+  /* ── THE BUTTONS GOT BIGGER, 13 Aug 2026 ──────────────────────────────────────────────
+     Lee, on the feed card: *"I would make those buttons probably a little bit bigger. I'm not
+     gonna say probably — they need to be a little bit bigger. They almost get lost, but they are
+     worth having. So I would probably double the size of those buttons so people can see that
+     you can like, share and comment."*
+
+     `compact` was doing two jobs and both were wrong on a photograph. The glyph goes 16 → 22 and
+     the hit area goes from roughly 30px to a genuine 44, which is the accessibility floor these
+     were under the whole time. Taken literally, "double" would be a 32px heart on a listing card
+     and would outweigh the price; 22px against a 14.5px title is the ratio Instagram uses, and it
+     is the size at which the row stops reading as a footnote. */
+  const size = compact ? "text-[12.5px]" : "text-[13px]";
+  /* ── THE VERTICAL RAIL LOST ITS CIRCLES (R26) ────────────────────────────────────────────
+     Lee, on the world feed: *"put a little circle around those — you don't need those. You just
+     need the icons. Make them maybe 10% bigger, and put a little shadow behind them so they
+     stand out against the background."*
+
+     The circles were doing legibility work: a white glyph on an unknown video frame. A
+     drop-shadow does the same work without putting a box around everything, and the feed's rail
+     applies one `filter` to the whole column so every glyph here inherits it.
+
+     ⚠️ THE `vertical` VARIANT HAS EXACTLY ONE CALLER. This component's own note says the stacked
+     shape exists for the world feed and nothing else, so widening the glyph and dropping the
+     chrome here changes that surface and no other. The horizontal row every listing card uses
+     is untouched, down to the pixel.
+
+     26 up from 24, and the count keeps its own line under the glyph. */
+  const glyph = vertical ? 26 : compact ? 22 : 20;
+  /* ── THE HEIGHT IS FIXED, COUNT OR NO COUNT (R27) ────────────────────────────────────────
+     Lee: *"when you don't have any count under the heart, it just reduced the space and it's
+     almost touching the comment icon. They need to maintain their spaces — there should be
+     enough room to add a number, and if the number is not there the space just remains the
+     same. Right now it's dynamically moving depending on whether there's a number there."*
+
+     Exactly the bug: the button was as tall as its contents, so a card with no likes drew a
+     26-pixel glyph and a card with likes drew 26 plus a line of digits — and the whole column
+     re-spaced itself as you swiped. A rail that rearranges under the thumb is a rail you cannot
+     build muscle memory on.
+
+     48 pixels, always, with the count line ALWAYS rendered and holding a hair space when the
+     number is zero. The glyph therefore sits at the same height on every card in every lane. */
+  const btn = `ow-tap flex font-bold transition ${vertical ? "h-[48px] min-h-0 flex-col items-center justify-center gap-0.5 px-0 text-[11px] leading-none" : "min-h-[44px] rounded-full items-center gap-1.5 px-3 py-2"}`;
+
+  return (
+    <div>
+      {/* ⚠️ `gap-1` BETWEEN THESE THREE WAS THE REST OF THE SPACING BUG (R27). The feed's rail
+           spaces ITS children at 36, but like, comment and share are three children of THIS
+           element, not of the rail — so they sat four pixels apart inside a column that was
+           otherwise breathing. One number, both places. */}
+      <div className={`flex ${vertical ? "flex-col items-center gap-9" : "items-center gap-1"} ${size} ${onDark ? "text-white" : ""}`}>
+        <button type="button" onClick={toggleLike} disabled={!userId}
+          aria-pressed={liked} aria-label={W(lang, "Like", "Me gusta")}
+          className={`${btn} disabled:opacity-40 ${vertical ? "" : onDark ? "hover:bg-white/15" : "hover:bg-ink/5 dark:hover:bg-white/10"}`}>
+          <svg width={glyph} height={glyph} viewBox="0 0 24 24" strokeWidth="2" aria-hidden
+            fill={liked ? "currentColor" : "none"} stroke="currentColor"
+            className={liked ? "text-red-500" : ""}>
+            <path d="M20.8 6.6a5 5 0 0 0-7.1 0L12 8.3l-1.7-1.7a5 5 0 1 0-7.1 7.1l8.8 8.8 8.8-8.8a5 5 0 0 0 0-7.1z" />
+          </svg>
+          {vertical ? <span className="tabular-nums">{likes > 0 ? likes : "\u2009"}</span>
+                    : likes > 0 && <span className="tabular-nums">{likes}</span>}
+        </button>
+
+        {/* v77 · U12 · The comment button is not drawn when the surface has no comments. */}
+        {!hideComments && (
+        <button type="button" onClick={() => (onComments ? onComments() : setOpen(o => !o))}
+          aria-expanded={onComments ? undefined : open} aria-label={W(lang, "Comments", "Comentarios")}
+          className={`${btn} ${vertical ? "" : onDark ? "hover:bg-white/15" : "hover:bg-ink/5 dark:hover:bg-white/10"}`}>
+          <svg width={glyph} height={glyph} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+            <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-4-.9L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z" />
+          </svg>
+          {vertical
+            ? <span className="tabular-nums">{(commentCount ?? comments) > 0 ? (commentCount ?? comments) : "\u2009"}</span>
+            : (commentCount ?? comments) > 0 && <span className="tabular-nums">{commentCount ?? comments}</span>}
+        </button>
+        )}
+
+        {/* THE OWNER'S TOGGLE, honoured here. Lee: *"the user can enable through a toggle switch
+            for the property to be shared by other people or not."* Hidden rather than disabled —
+            a greyed share button advertises sharing and then refuses it, which reads as broken;
+            no button reads as a listing that simply is not shareable. */}
+        {allowShare && (
+          <button type="button" onClick={share} aria-label={W(lang, "Share", "Compartir")}
+            className={`${btn} ${vertical ? "" : onDark ? "hover:bg-white/15" : "hover:bg-ink/5 dark:hover:bg-white/10"}`}>
+            <svg width={glyph} height={glyph} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+              strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 15V3M8 7l4-4 4 4" />
+            </svg>
+            {vertical
+              ? <span className="text-[11px]">{shared ? W(lang, "Copied", "Copiado") : "\u2009"}</span>
+              : shared && <span className="text-[11.5px]">{W(lang, "Copied", "Copiado")}</span>}
+          </button>
+        )}
+      </div>
+
+      {open && !onComments && (
+        <Comments itemId={itemId} source={source} lang={lang}
+          onCount={setComments} userId={userId ?? null} />
+      )}
+    </div>
+  );
+}
+
+/* ── COMMENTS ─────────────────────────────────────────────────────────────────────────────── */
+
+function Comments({
+  itemId, source, lang, onCount, userId,
+}: {
+  itemId: string; source: EngagementSource; lang: string;
+  onCount: (n: number) => void; userId: string | null;
+}) {
+  const [rows, setRows] = useState<any[] | null>(null);
+  const [body, setBody] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => {
+    /* Two queries, not a join: `media_comments.user_id` has no foreign key to `profiles`, so
+       PostgREST cannot embed the author. Named columns only — `select('*')` on profiles throws
+       42501 under the column-level grants. */
+    const { data } = await supabase.from("media_comments")
+      .select("id, user_id, content, created_at")
+      .eq("media_item_id", itemId).eq("media_source", source)
+      .order("created_at", { ascending: true }).limit(200);
+    const ids = Array.from(new Set((data ?? []).map(c => c.user_id)));
+    const { data: people } = ids.length
+      ? await supabase.from("profiles").select("id, full_name, photo_url").in("id", ids)
+      : { data: [] as any[] };
+    const by = new Map((people ?? []).map((p: any) => [p.id, p]));
+    const merged = (data ?? []).map(c => ({ ...c, who: by.get(c.user_id) }));
+    setRows(merged);
+    onCount(merged.length);
+  };
+
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [itemId, source]);
+
+  async function post() {
+    const text = body.trim();
+    if (!text || !userId) return;
+    setBusy(true);
+    const { error } = await supabase.from("media_comments")
+      .insert({ media_item_id: itemId, media_source: source, user_id: userId, content: text.slice(0, 1000) });
+    setBusy(false);
+    if (!error) { setBody(""); load(); }
+  }
+
+  return (
+    <div className="mt-2 border-t border-ink/[0.07] pt-2 dark:border-white/10">
+      {rows === null && <div className="ow-shimmer h-12 rounded-xl" />}
+      {rows?.length === 0 && (
+        <p className="py-1 text-[12.5px] opacity-50">
+          {W(lang, "No comments yet.", "Aún no hay comentarios.")}
+        </p>
+      )}
+      {rows?.map(c => (
+        <div key={c.id} className="flex gap-2 py-1.5">
+          <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-full bg-brand/15 text-[11px] font-bold text-brand">
+            {c.who?.photo_url
+              ? <img decoding="async" src={c.who.photo_url} alt="" className="h-full w-full object-cover" />
+              : (c.who?.full_name ?? "?").charAt(0)}
+          </span>
+          <p className="min-w-0 text-[13px] leading-snug">
+            <span className="font-bold">{c.who?.full_name ?? W(lang, "Member", "Miembro")}</span>{" "}
+            <span className="opacity-85">{c.content}</span>
+          </p>
+        </div>
+      ))}
+
+      {userId && (
+        <div className="mt-1.5 flex gap-2">
+          <input className="input w-full" value={body} maxLength={1000}
+            onChange={e => setBody(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") post(); }}
+            placeholder={W(lang, "Add a comment…", "Agregue un comentario…")} />
+          <button type="button" onClick={post} disabled={busy || !body.trim()}
+            className="btn-ghost shrink-0 px-4 disabled:opacity-40">
+            {W(lang, "Post", "Enviar")}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
