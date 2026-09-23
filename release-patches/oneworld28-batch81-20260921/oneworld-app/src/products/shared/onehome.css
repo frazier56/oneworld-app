@@ -1,0 +1,51 @@
+/**
+ * ONEHOME — one panel weight, applied to both halves at once.
+ * ============================================================================================
+ * Lee, 20 September 2026, comparing the rent and sale portfolio screens:
+ *
+ *   *"The sales props screenshot looks better. You have slightly more rounded corners on the
+ *    panels, and the panels have better contrast… the overall look for the listings for sale
+ *    looks better than how you have them for my rental properties. We need to make both UIs look
+ *    like the one on the sales side."*
+ *
+ * He is reading a real difference. The sale surfaces had been moved to `.ow-panel` — a flat 86
+ * percent white with a 24px radius — while the rent surfaces were still `.card`, whose light-mode
+ * fill is a gradient that fades to transparent partway down and whose radius is 16px. Softer,
+ * squarer, and paler at the bottom than at the top.
+ *
+ * ── WHY THIS IS A CSS SCOPE AND NOT NINETY-FIVE EDITS ───────────────────────────────────────
+ * `.card` appears in about ninety-five class lists across the two products, and it carries its
+ * own `padding: 1rem` — so swapping the class by hand means ninety-five chances to drop the
+ * padding on a screen nobody screenshots. A mechanical sweep across a hundred call sites is
+ * exactly what went wrong in batch 48, and the rule written afterwards was: never run a broad
+ * cosmetic pass to tidy up after a targeted one.
+ *
+ * So the class keeps its name and its padding, and OneHome restates its FILL. Two attributes on
+ * two route wrappers, one rule here.
+ *
+ * ── WHY NOT CHANGE `.card` FOR EVERYBODY ────────────────────────────────────────────────────
+ * `.card` is the shell's, and OneJob, OneEvent, OneScore and OneSocial are all built on it. A
+ * one-line change there would restyle four other lanes' screens in a batch none of them
+ * submitted. That is a decision for PUB30 and the other lanes, and it is raised in this batch's
+ * submission note rather than taken here.
+ */
+/* ⚠️ THE SAME DECLARATIONS AS `.ow-panel`, NOT MERELY SIMILAR ONES. Half the screens on these
+   two pages are `.ow-panel` already; if the scoped card kept `.card`'s two-layer frost shadow it
+   would sit a shade differently beside them, and "a shade differently" on one page is precisely
+   the complaint this rule exists to answer. */
+[data-onehome] .card {
+  background: rgba(255, 255, 255, .86);
+  border-radius: 1.5rem;
+  box-shadow: 0 18px 44px -20px rgba(15, 23, 42, .28);
+}
+
+/* Dark mode already treats a card as a hairline panel (Lee, 8 Aug: *"there's too many panels…
+   you only need panels when you need panels"*). OneHome keeps that and only matches the radius
+   and the one shade of lift that `.ow-panel` carries, so a list of them still separates from the
+   page without becoming four heavy slabs. */
+.dark [data-onehome] .card {
+  background: rgba(255, 255, 255, .075);
+  border-color: rgba(255, 255, 255, .14);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .34);
+}
