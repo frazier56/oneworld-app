@@ -1,0 +1,4 @@
+import { W } from '@oneworld/shell';
+export default function ExternalPaymentNotice({lang}:{lang:string}) {
+  return <p className="my-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-xs leading-relaxed">{W(lang,'You are paying the host outside OneHome. OneHome does not hold these funds and cannot guarantee a refund or reverse the transfer. Recovery depends on the provider and payment status. Confirm the host, recipient, amount and reservation before sending. Wait for pre-approval and keep your receipt.','Usted paga al anfitrión fuera de OneHome. OneHome no custodia estos fondos ni puede garantizar un reembolso o revertir la transferencia. La recuperación depende del proveedor y del estado del pago. Confirme el anfitrión, destinatario, monto y reserva antes de enviar. Espere la preaprobación y guarde su comprobante.')}</p>;
+}
