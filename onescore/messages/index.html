@@ -83,12 +83,59 @@
         import('/onehome-review-app.js?v=20260906-owner-auth1')
           .then(() => import('/onehome-owner-qa.js?v=20260907-price-v5'));
       } else {
-        import('/index-CkTPnQQO.js');
+        import('/index-xZkBj4D1.js');
       }
     </script>
-    <link rel="stylesheet" crossorigin href="/index-BYPy66u3.css">
+    <link rel="stylesheet" crossorigin href="/index-BuCJa-Qs.css">
+  <!-- ── COLD-LOAD PLACEHOLDER (ONEHOME30 overlay 34) ─────────────────────────────────────
+         Before the app's script arrives — seconds on a slow phone connection — #root was empty,
+         so people saw a blank white page (a white flash for anyone on dark mode). This paints
+         the app's own shape at once: the top bar, three content blocks and the bottom bar, in
+         the member's theme. React replaces it on its first render; nothing here is interactive.
+         The theme line copies ThemeProvider: same key, raw "dark"/"light", light by default. -->
+    <script>
+      try { if (localStorage.getItem("oneworld-theme") === "dark") { document.documentElement.classList.add("dark");
+        var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", "#0B0F1A"); } } catch (e) {}
+    </script>
+    <style>
+      html.dark { background: #0B0F1A; }
+      .owc { position: fixed; inset: 0; overflow: hidden; background: #FAFAF8; z-index: 0; }
+      html.dark .owc { background: #0B0F1A; }
+      .owc { min-height: 100vh; min-height: 100dvh; box-sizing: border-box; padding: 12px 16px 104px; font-family: Inter, system-ui, sans-serif; }
+      .owc-bar, .owc-nav { display: flex; align-items: center; gap: 10px; height: 64px; border-radius: 32px; padding: 0 18px;
+        background: rgba(255,255,255,.82); box-shadow: 0 8px 28px rgba(11,15,26,.08); }
+      .owc-bar img { width: 30px; height: 36px; object-fit: contain; }
+      .owc-nav { position: fixed; left: 16px; right: 16px; bottom: max(12px, env(safe-area-inset-bottom)); justify-content: space-around; }
+      .owc-dot { width: 26px; height: 26px; border-radius: 9px; }
+      .owc-line { height: 12px; border-radius: 6px; }
+      .owc-card { border-radius: 24px; margin-top: 14px; }
+      .owc-s { background: linear-gradient(90deg, rgba(11,15,26,.06) 25%, rgba(11,15,26,.11) 50%, rgba(11,15,26,.06) 75%);
+        background-size: 200% 100%; animation: owc-sh 1.4s ease-in-out infinite; }
+      html.dark .owc-bar, html.dark .owc-nav { background: rgba(255,255,255,.06); box-shadow: none; }
+      html.dark .owc-s { background: linear-gradient(90deg, rgba(255,255,255,.05) 25%, rgba(255,255,255,.1) 50%, rgba(255,255,255,.05) 75%); background-size: 200% 100%; }
+      .owc-slow { display: none; margin: 14px 0 0; padding: 12px 14px; border-radius: 18px; background: rgba(255,255,255,.9); font-size: 13px; line-height: 1.5; color: rgba(11,15,26,.75); }
+      html.dark .owc-slow { color: rgba(255,255,255,.75); background: rgba(255,255,255,.07); }
+      .owc-slow a { color: #0F766E; font-weight: 700; }
+      html.dark .owc-slow a { color: #5EEAD4; }
+      .owc.is-slow .owc-slow { display: block; }
+      @keyframes owc-sh { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+      @media (prefers-reduced-motion: reduce) { .owc-s { animation: none; } }
+    </style>
   </head>
   <body class="ow-no-sideways">
-    <div id="root"></div>
+    <div id="root"><div class="owc" aria-busy="true" aria-label="Loading">
+      <div class="owc-bar"><img src="/mark-oneworld.png" alt="" /><div class="owc-line owc-s" style="width:38%"></div>
+        <div style="flex:1"></div><div class="owc-dot owc-s"></div><div class="owc-dot owc-s"></div></div>
+      <p class="owc-slow">Still loading — your connection may be slow. <a href="javascript:location.reload()">Try again</a><br />
+        Sigue cargando — puede que su conexión esté lenta. <a href="javascript:location.reload()">Reintentar</a></p>
+      <div class="owc-line owc-s" style="width:46%;height:26px;border-radius:10px;margin:26px 4px 6px"></div>
+      <div class="owc-card owc-s" style="height:220px"></div>
+      <div class="owc-card owc-s" style="height:96px"></div>
+      <div class="owc-card owc-s" style="height:96px"></div>
+      <div class="owc-nav"><div class="owc-dot owc-s"></div><div class="owc-dot owc-s"></div><div class="owc-dot owc-s" style="width:44px;height:44px;border-radius:22px"></div><div class="owc-dot owc-s"></div><div class="owc-dot owc-s"></div></div>
+    </div></div>
+    <!-- After 12 s with no app, say so instead of shimmering forever. React's first render removes
+         this element, so the timer then finds nothing and does nothing. -->
+    <script>setTimeout(function () { var c = document.querySelector("#root > .owc"); if (c) c.classList.add("is-slow"); }, 12000);</script>
   </body>
 </html>
