@@ -1,0 +1,48 @@
+{
+  "status": "PASS",
+  "environment": "independent pypdf parse of real Chrome-generated baseline and patched PDFs",
+  "results": [
+    {
+      "lang": "en",
+      "kind": "signed",
+      "pages": 4,
+      "identical_page_text": true,
+      "identical_images": true
+    },
+    {
+      "lang": "en",
+      "kind": "typed",
+      "pages": 4,
+      "identical_page_text": true,
+      "identical_images": true
+    },
+    {
+      "lang": "en",
+      "kind": "draft",
+      "pages": 4,
+      "identical_page_text": true,
+      "identical_images": true
+    },
+    {
+      "lang": "es",
+      "kind": "signed",
+      "pages": 4,
+      "identical_page_text": true,
+      "identical_images": true
+    },
+    {
+      "lang": "es",
+      "kind": "typed",
+      "pages": 4,
+      "identical_page_text": true,
+      "identical_images": true
+    },
+    {
+      "lang": "es",
+      "kind": "draft",
+      "pages": 4,
+      "identical_page_text": true,
+      "identical_images": true
+    }
+  ]
+}
