@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": [
+      "vite/client"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@oneworld/shell": [
+        "../oneworld-shell/src/index.ts"
+      ],
+      "@evt/*": [
+        "src/products/oneevent/*"
+      ],
+      "@job/*": [
+        "src/products/onejob/*"
+      ],
+      "tus-js-client": [
+        "../../build-deps/node_modules/tus-js-client"
+      ],
+      "jspdf": [
+        "../../security-deps/node_modules/jspdf"
+      ]
+    },
+    "allowImportingTsExtensions": true
+  },
+  "include": [
+    "src"
+  ]
+}
