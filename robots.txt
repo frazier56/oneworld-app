@@ -1,0 +1,35 @@
+# app.oneworldlabs.ai is the APPLICATION, not the marketing site.
+#
+# Its routes render client-side, so there is nothing here for a crawler to read, and ranking it
+# would split every signal with www.oneworldlabs.ai — the host built to rank and the one every
+# canonical on this app points at.
+#
+# ⚠️ "Disallow: /" IS THE WRONG TOOL FOR THAT, AND IT USED TO BE IN THIS FILE. — 22 Sep 2026
+#
+# Disallow does not mean "do not index". It means "do not FETCH". Two things follow, and both
+# were live:
+#
+#   · A page a crawler may not fetch is a page whose `<meta name="robots" content="noindex">`
+#     it can never read. Google is explicit about this: a URL blocked in robots.txt can still
+#     be indexed from inbound links alone, listed with no title and no description, and the
+#     noindex tag that would have stopped it is the one file the crawler was told not to open.
+#     Blocking the crawl actively PREVENTS the de-indexing it was meant to achieve.
+#   · The unfurl bots read this file too. Facebook, LinkedIn, Slack, iMessage, WhatsApp and X
+#     all fetch the URL to build the preview card. Under "Disallow: /" every share of an app
+#     link — every invite, every listing somebody sends a friend — unfurls as a bare grey box.
+#     The OG and Twitter tags added to `index.html` in the same pass could never have rendered.
+#
+# So: let them fetch, and let the `noindex, follow` meta tag in `index.html` do the job it is
+# actually for. Fetched, not indexed, links followed, previews intact.
+#
+# The one thing worth keeping out of a crawl budget is the auth surface, which has nothing to
+# preview and nothing to rank.
+
+User-agent: *
+Allow: /
+Disallow: /signin
+Disallow: /join
+Disallow: /reset
+
+# The marketing site's sitemap, so anything that lands here is pointed at what it wanted.
+Sitemap: https://www.oneworldlabs.ai/sitemap.xml
