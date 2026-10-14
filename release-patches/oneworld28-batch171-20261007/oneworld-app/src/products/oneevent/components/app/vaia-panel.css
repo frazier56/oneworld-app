@@ -1,0 +1,73 @@
+/* ============================================================================================
+ * VAIA'S PANEL — the shadcn vocabulary she is written in, scoped to her and to nothing else.
+ * ============================================================================================
+ * FOUND BY THE CLASS GUARD, 14 September 2026, the moment VAIA was mounted above every product.
+ *
+ * `AskVaiaChat` speaks shadcn — `bg-background`, `text-primary`, `border-border`, `bg-muted` —
+ * and `tailwind.config.cjs` resolves every one of those to `hsl(var(--something))`. The VALUES
+ * for those variables live in `oneevent.css`, which is imported by `oneevent/routes.tsx` — a
+ * LAZY CHUNK. So on `/rentals` her component loaded and her stylesheet did not: every colour
+ * resolved to `hsl(var(--primary))` with `--primary` undefined, which is an invalid colour, which
+ * paints nothing. A transparent panel with black text on a black scrim.
+ *
+ * That is the `bg-surface` scar exactly — a class that produces no CSS, no warning anywhere, and
+ * a screen only a human looking at a phone would catch. The guard caught it first this time.
+ *
+ * TWO THINGS THIS FILE REFUSES TO DO
+ *   · Import `oneevent.css` globally. Its `:root` block is OneEvent ORANGE and would repaint
+ *     every shadcn-speaking screen in every product.
+ *   · Rewrite sixty class names inside a 580-line panel that is live and working in OneEvent.
+ *
+ * So the vocabulary is re-declared on a scope class. A custom property on a nearer ancestor beats
+ * `:root`, so these win inside the panel in EVERY product — including OneEvent, where the result
+ * is that VAIA finally looks the same everywhere rather than orange in one place.
+ *
+ * WHY THE PALETTE IS PRODUCT-NEUTRAL, DELIBERATELY
+ * Lee, 14 Sep 2026: *"Why would you have different models of VAIA?"* One assistant, one identity.
+ * Her panel carries the family's ink and paper neutrals, not the hue of whichever product you
+ * happened to open her from. No teal anywhere — teal is the family's STATE colour and never an
+ * identity. `--primary` is the shared Selection ink (#0B0F1A), which is a legitimate control
+ * ground in every product and fights none of them.
+ * ========================================================================================== */
+.ow-vaia-scope {
+  --background: 60 20% 98%;
+  --foreground: 222 45% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 45% 8%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 45% 8%;
+  --primary: 222 45% 12%;
+  --primary-foreground: 60 20% 98%;
+  --secondary: 30 12% 96%;
+  --secondary-foreground: 222 45% 12%;
+  --muted: 30 10% 94%;
+  --muted-foreground: 222 12% 42%;
+  --accent: 30 12% 93%;
+  --accent-foreground: 222 45% 12%;
+  --destructive: 0 72% 45%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 222 14% 84%;
+  --input: 222 14% 80%;
+  --ring: 222 45% 30%;
+}
+.dark .ow-vaia-scope {
+  --background: 222 44% 9%;
+  --foreground: 60 20% 98%;
+  --card: 222 40% 12%;
+  --card-foreground: 60 20% 98%;
+  --popover: 222 44% 10%;
+  --popover-foreground: 60 20% 98%;
+  --primary: 60 20% 96%;
+  --primary-foreground: 222 47% 8%;
+  --secondary: 222 28% 17%;
+  --secondary-foreground: 60 20% 96%;
+  --muted: 222 26% 18%;
+  --muted-foreground: 220 12% 66%;
+  --accent: 222 28% 20%;
+  --accent-foreground: 60 20% 96%;
+  --destructive: 0 63% 52%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 18% 24%;
+  --input: 220 18% 26%;
+  --ring: 60 20% 70%;
+}
