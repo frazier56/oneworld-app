@@ -1,0 +1,2844 @@
+{
+  "preparedAt": "2026-10-15T10:05:29.633377+00:00",
+  "release": "oneworld28-batch175-20261007",
+  "batch": 175,
+  "carries": [
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124,
+    125,
+    126,
+    127,
+    128,
+    129,
+    130,
+    131,
+    132,
+    133,
+    134,
+    135,
+    136,
+    137,
+    138,
+    139,
+    140,
+    141,
+    142,
+    143,
+    144,
+    145,
+    146,
+    147,
+    148,
+    149,
+    150,
+    151,
+    152,
+    153,
+    154,
+    155,
+    156,
+    157,
+    158,
+    159,
+    160,
+    161,
+    162,
+    163,
+    164,
+    165,
+    166,
+    167,
+    168,
+    169,
+    170,
+    171,
+    172,
+    173,
+    174,
+    175
+  ],
+  "firstBatch": 58,
+  "preparedBy": "PUB30 (Claude) — frozen 130 + Max cleared candidates 131-175 (source-corrections) + ADMIN30 route doorway + ONEHOME30 overlay 48 r2 + Max guard fixes + ONEHOME30 overlay 49 (batch 133 = 132 + overlay 49 + ClassicTopBar unused import) + ONEJOB2 promo-links overlay 1 (batch 134) + ONEJOB2 overlay 2 merged with TESTING 134 HOLD fixes (batch 135) + TESTING 135 HOLD fixes (batch 136) + ONEHOME30 overlays 50 and 51 + ONESOCIAL4 overlay 1 (batch 137) + ONESOCIAL4 overlay 1 revision 4 with TESTING P0-5 fix (batch 138) + ONESOCIAL4 overlays 2-4 with TESTING P0-1..3 fixes (batch 139) + ONESOCIAL4 overlay 4 revision 3 (batch 140; repacked as 141 on the production-139 head after the runner stopped 140 three times) + WORLDFEED30 overlay 22 Everything lane (batch 142) + lane named One World feed (batch 143) + WORLDFEED30 overlay 22 replacement (batch 144) + WORLDFEED30 overlay 23 (batch 145) + ONESOCIAL4 overlays 5 and 7 (batch 146) + WORLDFEED30 overlay 24 + ONESOCIAL4 overlay 8 + Tailwind opacity steps (batch 147) + ONERIDE overlay 2 (batch 148) + OneRide header mark asset (batch 149) + OneRide mark silver in dark (batch 150) + ONERIDE overlays 4-7 (batch 151) + ONEJOB2 one-chat-door overlay 4 + WORLDFEED30 overlay 25 (batch 152) + ONERIDE overlay 8 card payments (batch 153) + WORLDFEED30 overlay 26 publish button (batch 154) + WORLDFEED30 overlay 27 event-is-live pop-up (batch 155) + WORLDFEED30 overlay 28 toasts + PUB30 OneHome request lookup (batch 156) + WORLDFEED30 overlay 29 uncropped feed pictures (batch 157) + WORLDFEED30 overlay 30 map focus and event coordinates (batch 158)",
+  "base": "c03a6144f630c4342ed86bf4625819c9d7ac84c1",
+  "entry": {
+    "js": "index-DpiqRQeZ.js",
+    "css": "index-Bow36BxA.css"
+  },
+  "entries": [
+    {
+      "path": "404.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "account/delete/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "account/profile/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "admin/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "agent/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/alerts/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/businesses/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/leads/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/messages/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/pipeline/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/profile/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/results/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/services/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/settings/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/setup/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "business/voice/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "event/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/alerts/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/calendar/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/events/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/hosts/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/join-express/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/messages/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/plans/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/pricing/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/profile/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/settings/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "events/tickets/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "feed/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "home/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "job/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/alerts/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/calendar/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/find/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/jobs/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/messages/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/plans/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/profile/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/qr/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/reviews/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/settings/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "jobs/wallet/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "join/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "onehome/terms/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "onescore/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "onescore/alerts/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "onescore/connect/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "onescore/how/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "onescore/messages/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "onescore/plans/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "onescore/profile/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "onescore/score/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "onescore/settings/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "onescore/simulator/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/activity/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/alerts/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/catalog/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/charge/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/closeout/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/devices/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/messages/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/profile/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/settings/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/setup/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "pay/staff/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "privacy/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/agents/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/alerts/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/calendar/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/compare/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/compare/saved/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/dashboard/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/documents/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/host-profile/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/ideal-home/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/list/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/messages/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/plans/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/profile/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/properties/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/renter/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/requests/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/saved/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rentals/settings/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "reset/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rides/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rides/alerts/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rides/drivers/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rides/messages/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rides/profile/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rides/request/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rides/settings/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "rides/vehicle/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/agents/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/alerts/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/buyer/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/compare/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/compare/saved/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/dashboard/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/documents/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/ideal-home/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/list/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/messages/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/plans/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/profile/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/properties/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/requests/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/saved/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/seller/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "sales/settings/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "signin/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "social/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "social/alerts/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "social/connect/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "social/messages/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "social/people/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "social/plans/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "social/post/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "social/profile/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "social/search/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "social/settings/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "switch/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "terms/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    },
+    {
+      "path": "yourworld/index.html",
+      "before": "d86489d44f0351af93228532a7c451b4e300db128976d8fe2b31b1fd5ca97a77",
+      "after": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b",
+      "bytes": 9605
+    }
+  ],
+  "sandbox": {
+    "path": "sandbox/index.html",
+    "sha256": "e6f42c9bc3186dad37f7173eb15b4d7d2cd02f5961ea92c391bcb25efcf5642b"
+  },
+  "localAssets": [
+    {
+      "path": "samples/juan/h1.jpg",
+      "sha256": "b59ae06953ed4424893dbf75002160f99b4e2a16946589e2a44434bca45f7a9b",
+      "bytes": 224704,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\h1.jpg"
+    },
+    {
+      "path": "samples/juan/h2.jpg",
+      "sha256": "975984df69bfc744118a9b7d14b3c8e813589e99c04e1f1f271d9549f65c316a",
+      "bytes": 254221,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\h2.jpg"
+    },
+    {
+      "path": "samples/juan/h3.jpg",
+      "sha256": "71df89aaa1b253eccd9d33b087a408a5956ed545470480a2d6371fdc6ebc045e",
+      "bytes": 169398,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\h3.jpg"
+    },
+    {
+      "path": "samples/juan/h4.jpg",
+      "sha256": "da04e6653a78988d27eb9c2631e7ffb98c9dab6f76e1b9ab3206bb986fc8b22f",
+      "bytes": 187903,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\h4.jpg"
+    },
+    {
+      "path": "samples/juan/h5.jpg",
+      "sha256": "deb01433551ed75550f8798d27e47cb2599484c5203746004a561f8628c0300a",
+      "bytes": 133187,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\h5.jpg"
+    },
+    {
+      "path": "samples/juan/h6.jpg",
+      "sha256": "9524f800a4872a8196b46912bb43b5dafbec5e31e7a2e597fb9c0ca95ff165f6",
+      "bytes": 253542,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\h6.jpg"
+    },
+    {
+      "path": "samples/juan/h7.jpg",
+      "sha256": "1436264a4754bd01a44cd49bd7079d41ab7d32f482ac575abda9bd4c6f4a4fb0",
+      "bytes": 271366,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\h7.jpg"
+    },
+    {
+      "path": "samples/juan/h8.jpg",
+      "sha256": "992b8c5cba4be51dfbaededc6360f02c8cfbf03b7d470923331ed0b16dd2bd7c",
+      "bytes": 181424,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\h8.jpg"
+    },
+    {
+      "path": "samples/juan/h9.jpg",
+      "sha256": "34728ae4ccd435374ce0c990888ade4c9dea6b968c88424195a94c2ffa725635",
+      "bytes": 184607,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\h9.jpg"
+    },
+    {
+      "path": "samples/juan/j0.jpg",
+      "sha256": "a7e8af71f55a37ec2aee3dc901eefcfff0143c0a746d5be36ad1ece3c36337d4",
+      "bytes": 240113,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j0.jpg"
+    },
+    {
+      "path": "samples/juan/j1.jpg",
+      "sha256": "99be9683d9c4504f5ff66a147f3ac8a40f75df4ed67b23b750a23d0d1258c3e4",
+      "bytes": 190500,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j1.jpg"
+    },
+    {
+      "path": "samples/juan/j10.jpg",
+      "sha256": "ae62f8a28c11ab0892788acab39547907a7d5619d420987759575e0114c38843",
+      "bytes": 261752,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j10.jpg"
+    },
+    {
+      "path": "samples/juan/j11.jpg",
+      "sha256": "0e0abc7e751339c48b2f96c3dec73e6282f68cc0b23225cb78862b5034308ba1",
+      "bytes": 438648,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j11.jpg"
+    },
+    {
+      "path": "samples/juan/j2.jpg",
+      "sha256": "41d9fc99b7f8890d095ba830fa4c2087808d35cd08e24b4854afa455903f8a2e",
+      "bytes": 262232,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j2.jpg"
+    },
+    {
+      "path": "samples/juan/j3.jpg",
+      "sha256": "8a3baf52f44d0c02c9883fd7b2a6834aa16f649526564fc31986a1e27f7ee0fb",
+      "bytes": 217145,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j3.jpg"
+    },
+    {
+      "path": "samples/juan/j4.jpg",
+      "sha256": "d3b1c695fae571754c947616b208177579e74bd97bb9675093019098b4ca509a",
+      "bytes": 405639,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j4.jpg"
+    },
+    {
+      "path": "samples/juan/j5.jpg",
+      "sha256": "f575b2ce1efd73ae0578431c671a29fdde95e1b80c969e326b4e65491dae2054",
+      "bytes": 274691,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j5.jpg"
+    },
+    {
+      "path": "samples/juan/j6.jpg",
+      "sha256": "61acac6b6dcc383bb7f78b9ffffd70c634cb82baeff9fd546b152234158664e0",
+      "bytes": 227026,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j6.jpg"
+    },
+    {
+      "path": "samples/juan/j7.jpg",
+      "sha256": "265285bdb4b33c05b8e6af3a700c9f6b052e26b688137848356f5eeba601d113",
+      "bytes": 195120,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j7.jpg"
+    },
+    {
+      "path": "samples/juan/j8.jpg",
+      "sha256": "a97e0f984719573d635476a745a89929c74cf24f641c87821e5be0f89d5b6c94",
+      "bytes": 351625,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j8.jpg"
+    },
+    {
+      "path": "samples/juan/j9.jpg",
+      "sha256": "730bebcf3f6dc0e7ce6ae1f1eb01d7046507b237c92f58194c270b6c453e905b",
+      "bytes": 272011,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\j9.jpg"
+    },
+    {
+      "path": "samples/juan/juan.jpg",
+      "sha256": "f005f32e46acdeb8f07417c9a6ed674f8b974da21d1f556da4806a26a7ff5e44",
+      "bytes": 79734,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\juan.jpg"
+    },
+    {
+      "path": "samples/juan/vid_casa.mp4",
+      "sha256": "149fef036396ecbf0bd61a4aea04fddd0491f537544952679b5fe2e1d75e2a04",
+      "bytes": 637466,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\vid_casa.mp4"
+    },
+    {
+      "path": "samples/juan/vid_envigado.mp4",
+      "sha256": "115c415481e849de2f79fc93621abd41203f2858d1663cd6cb1e929b591ea297",
+      "bytes": 778576,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\vid_envigado.mp4"
+    },
+    {
+      "path": "samples/juan/vid_laureles.mp4",
+      "sha256": "4e5fe4f6c562b6245de727216063fc6d1c7b0619faa0347f0c81cf3a1a5f5df7",
+      "bytes": 382698,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\vid_laureles.mp4"
+    },
+    {
+      "path": "samples/juan/vid_pent1.mp4",
+      "sha256": "3caf6e8029f1dc32778773e961512f0157764a588dda4ddfd0bb95e0ab231fd3",
+      "bytes": 460869,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\vid_pent1.mp4"
+    },
+    {
+      "path": "samples/juan/vid_pent2.mp4",
+      "sha256": "adffa82124af1efec539cef225acbfe1932b6d45c5d014c7de62b605b871c061",
+      "bytes": 523903,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\vid_pent2.mp4"
+    },
+    {
+      "path": "samples/juan/vid_poblado.mp4",
+      "sha256": "828fd2eec26dc37ab5793116fd0d7160f9f81c06dfbb67450f98b0d54e94a6f0",
+      "bytes": 394891,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ONEHOME30-assets23\\samples\\juan\\vid_poblado.mp4"
+    },
+    {
+      "path": "v/agents-3/onehome-aria-en.mp4",
+      "sha256": "f8dfbd6655c376156b57ab9043b982c92131e06874f9b48099e86a84f3f7708b",
+      "bytes": 15418032,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\STUDIO-assets-en3r\\public\\v\\agents-3\\onehome-aria-en.mp4"
+    },
+    {
+      "path": "v/agentes-3/onehome-aria-es.mp4",
+      "sha256": "07f4d8900106cc5dcf88daff23e4d8763bec7c77c1a7aa8f5335df8eafed2f5b",
+      "bytes": 15616513,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\STUDIO-assets-es3\\public\\v\\agentes-3\\onehome-aria-es.mp4"
+    },
+    {
+      "path": "v/agents-4/onehome-aria-en.mp4",
+      "sha256": "66e698144682683a12b48ea90f241ece265e714af4a633e77316fec8442dc68f",
+      "bytes": 18181139,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\STUDIO-assets-en45\\public\\v\\agents-4\\onehome-aria-en.mp4"
+    },
+    {
+      "path": "v/agents-5/onehome-aria-en.mp4",
+      "sha256": "5e0f509d3b208c137aee09a46b8c450160dd1d389d681f346525011447a4974f",
+      "bytes": 15678557,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\STUDIO-assets-en45\\public\\v\\agents-5\\onehome-aria-en.mp4"
+    },
+    {
+      "path": "v/agentes-4/onehome-aria-es.mp4",
+      "sha256": "cac2119bd2a01b5ea5aa3088ae717148d3ab070c01f938cd9db4b8f9e1884a7b",
+      "bytes": 18640271,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\STUDIO-assets-es45\\public\\v\\agentes-4\\onehome-aria-es.mp4"
+    },
+    {
+      "path": "v/agentes-5/onehome-aria-es.mp4",
+      "sha256": "715d7b01fbcce518b20fe5e85490f3d5fa1b6d7cc20dea30221b335b7d69dd47",
+      "bytes": 16662098,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\STUDIO-assets-es45\\public\\v\\agentes-5\\onehome-aria-es.mp4"
+    },
+    {
+      "path": "v/buyers-1/onehome-buyers-en.mp4",
+      "sha256": "d9bca226291884fcd7857ea1579e2c1b6096794f3ce68216e77400c11ddb1505",
+      "bytes": 11198728,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\STUDIO-assets-buyer-en1\\public\\v\\buyers-1\\onehome-buyers-en.mp4"
+    },
+    {
+      "path": "v/compradores-1/onehome-compradores-es.mp4",
+      "sha256": "56652ced4cbf2e53c56558209773ab4c62291d641faaefa6eb7e1e4730a52af3",
+      "bytes": 11052629,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\STUDIO-assets-buyer-es1\\public\\v\\compradores-1\\onehome-compradores-es.mp4"
+    },
+    {
+      "path": "samples/aria/aria.jpg",
+      "sha256": "df96b75c6b980c9c836846edb7894377b4063071779535787d8e3a0ec9f9e902",
+      "bytes": 103304,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\STUDIO-assets-aria\\public\\samples\\aria\\aria.jpg"
+    },
+    {
+      "path": "v/founder-1/founder-chicago-medellin.mp4",
+      "sha256": "f08d33b048a7319dbd88abe1bf8ef0b7abf05ad5b6b60437af58785b342fe160",
+      "bytes": 27222349,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\PUB30-founder-1-v4\\v\\founder-1\\founder-chicago-medellin.mp4"
+    },
+    {
+      "path": "v/founder-1/poster.jpg",
+      "sha256": "39d41f858afb12c54336ca529e7c371d1f015eb35c927e6df1a99f81b79136d3",
+      "bytes": 63855,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\PUB30-founder-1-v4\\v\\founder-1\\poster.jpg"
+    },
+    {
+      "path": "v/covers/chase-cartoon.jpg",
+      "sha256": "e9619682e0565c1e610ef26291bbbe696538a83ce7f4964040e7be6daa8f8205",
+      "bytes": 67708,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\PUB30-covers-1\\v\\covers\\chase-cartoon.jpg"
+    },
+    {
+      "path": "v/covers/chase-live-v1.jpg",
+      "sha256": "3ecfb52126e54547c4bcdbe3f49604c062180ada0c0ff91a55907cbd46b595b8",
+      "bytes": 71626,
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\PUB30-covers-1\\v\\covers\\chase-live-v1.jpg"
+    },
+    {
+      "path": "v/founder-2/founder-ep2-en.mp4",
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ADMIN30-assets-founder-2\\public\\v\\founder-2\\founder-ep2-en.mp4",
+      "sha256": "e0fc886a2f90fca99d8c6e34ce10a7ead0bb69dd2e1b7a2d777a0b5dc3908615",
+      "bytes": 24115884
+    },
+    {
+      "path": "v/founder-2/founder-ep2-es.mp4",
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ADMIN30-assets-founder-2\\public\\v\\founder-2\\founder-ep2-es.mp4",
+      "sha256": "52a1ac11dab21f614b624e115aa556bc1152546ea0a3470569f47feab23b5bf6",
+      "bytes": 25045742
+    },
+    {
+      "path": "v/founder-2/poster.jpg",
+      "from": "C:\\Dev\\Projects\\One Social\\GHL\\one-world-common\\PUBLISH_QUEUE\\ADMIN30-assets-founder-2\\public\\v\\founder-2\\poster.jpg",
+      "sha256": "98c2915c8062721f56018f2197be18fe6eafefc3173ea166a0559580a4598481",
+      "bytes": 168889
+    }
+  ],
+  "assets": [
+    {
+      "path": "Activity-CttrUGJN.js",
+      "sha256": "a475a9ef438895c0a686cb5625aa8cc600d773d093c5dd2c5d0b97ae3892f0ba",
+      "bytes": 2629
+    },
+    {
+      "path": "AddCardSheet-DIEPdOIC.js",
+      "sha256": "db7a8496e3c5159845181b21092969fa775544cbd2bff91e57c152a0d13236ca",
+      "bytes": 3964
+    },
+    {
+      "path": "AdminScreen-B-ActeiM.js",
+      "sha256": "955f0127e1522b1778bd2e06a9bb749b7ac442360b1baf7f21a8d0f9cc86ab3e",
+      "bytes": 214748
+    },
+    {
+      "path": "AgentDirectory-BLwUxAB4.css",
+      "sha256": "bbc79a9dd9d0066d79b6cb58b45a0c8d7ab450860e5b87fed2eca91b3441b6de",
+      "bytes": 291
+    },
+    {
+      "path": "Agents-BssL_n_y.js",
+      "sha256": "262d9961f625bec21441522ecbe8f2d77d440955c033d3badd7c980ec27fc8ea",
+      "bytes": 2964
+    },
+    {
+      "path": "Agents-DHunqWda.js",
+      "sha256": "ef5da51ee725438450b75b1356e2c085189198441d2b8905677d5e6ad60d4528",
+      "bytes": 2980
+    },
+    {
+      "path": "AgreementNew-vPtxd8Yb.js",
+      "sha256": "9e80eaa6fe6d87487e22743cc47a4f12230aa2f518c5c824854b0035a69b0c78",
+      "bytes": 13928
+    },
+    {
+      "path": "AgreementView-u-WeUxFj.js",
+      "sha256": "56d21fea660727ddf515bc5ec8cf16efad1e255fadc73d98f6c9bca635dc33e9",
+      "bytes": 7548
+    },
+    {
+      "path": "AiAssistantContext-CALMERWE.js",
+      "sha256": "0ec32071a9434e77a9c2519c1261445315f0998ded60d52e70d7c3d76bd4f6fd",
+      "bytes": 631
+    },
+    {
+      "path": "Alerts-B2PnOYBT.js",
+      "sha256": "4c0faf4c762a299c3c61ba743fc30b74d020e33490ed80ba9f4ba4a52de98215",
+      "bytes": 1108
+    },
+    {
+      "path": "Alerts-BTyfgnoX.js",
+      "sha256": "4d187f6fc9494be20f40e67b3fc603835c6861bf62119a6cb73cfb3ac7ca6465",
+      "bytes": 2610
+    },
+    {
+      "path": "Alerts-DMH34LN0.js",
+      "sha256": "a1fa58bbaf3b6674a5278bee5dd4af8a3aa0e75975f2dccf105b19d93ab4ef72",
+      "bytes": 3628
+    },
+    {
+      "path": "Alerts-DMbiatRe.js",
+      "sha256": "5c90913da998e6e205fc841982782d26fa08afea95c51d4854aa05cebc8788cd",
+      "bytes": 3257
+    },
+    {
+      "path": "Alerts-DrhHbbkr.js",
+      "sha256": "b1f7e791b0086f6eb91a7fc45aaa567a84b8fe097804a1005d67c9edb807a937",
+      "bytes": 1104
+    },
+    {
+      "path": "Alerts-P2tly04O.js",
+      "sha256": "a14df183e2da8e708b411de73468346c7c606783430eb39dc1f40f3e92f07bfe",
+      "bytes": 1103
+    },
+    {
+      "path": "Alerts-uq2o03gM.js",
+      "sha256": "069e6d03052a90573f9661c102c2178fffa56a99405097e75c304cb79bab30ee",
+      "bytes": 3223
+    },
+    {
+      "path": "AppLayout-ClYMmCV_.js",
+      "sha256": "3ec76e7d685cd01c2f5d3c80de0619171ae4b4e1d3d7c36165faf04aca097327",
+      "bytes": 119
+    },
+    {
+      "path": "ApplicationFormRenderer--vaAsF2e.js",
+      "sha256": "0c74bc6669bf38841a4408a8cfe99678049e9e5684c58ba16fbd61348c982962",
+      "bytes": 5082
+    },
+    {
+      "path": "ApplicationView-DzeXxyil.js",
+      "sha256": "10e0d5a9125a6a3c2e7ae507a393ac8d22c794327fad443c9fedd5bc4f92aedd",
+      "bytes": 4410
+    },
+    {
+      "path": "BackLink-ByTvBQJD.js",
+      "sha256": "015a71606520e84efda54ca570d4fa1c46bc71ac2a1df293b9ba50074723eff1",
+      "bytes": 552
+    },
+    {
+      "path": "Businesses-MusOKNJE.js",
+      "sha256": "d4fe3618b8e87c813ffec1f286a7dbe111e63e9065d53a2f30dd680223810848",
+      "bytes": 1385
+    },
+    {
+      "path": "CalendarPage-mp9Or3uW.js",
+      "sha256": "e9aa200052d8399c54f575d8592dc5a700d9c4e7180bd99579ae8b631a1134f0",
+      "bytes": 1637
+    },
+    {
+      "path": "CalendarScreen-3j-cPh-N.js",
+      "sha256": "0a341c06edd1a5d15c30bd8a89ed156cded4d9a43bc34647e716efe2d6a75c0b",
+      "bytes": 1777
+    },
+    {
+      "path": "CalendarScreen-B5NuVbad.css",
+      "sha256": "bb86420603b23d0ab22d84ac168c1f52bce7ebae44a6233fac844c1031679641",
+      "bytes": 287
+    },
+    {
+      "path": "CalendarScreen-Bltth3tW.js",
+      "sha256": "e726128d1cdcc898ec41411db18392b704dccba6de6eb2617a761b23979bb211",
+      "bytes": 10233
+    },
+    {
+      "path": "CardText-Ceh9gydT.js",
+      "sha256": "a6a4068576bf29aceff6b87a7b79c09d5af94236e3de00bf0058a21b39ceac55",
+      "bytes": 1752
+    },
+    {
+      "path": "Catalog-CYTIThz5.js",
+      "sha256": "06aadc398f10aac6c8057c8faa383dba2b66374232f5a2051bd3089c26f68183",
+      "bytes": 1946
+    },
+    {
+      "path": "Charge-srJtpodL.js",
+      "sha256": "5a9117f25fe879c0c0da669a3c027bfd2fd8cc03dcdd9ba184a426f3c5b5e531",
+      "bytes": 9705
+    },
+    {
+      "path": "Closeout-B6FWpm_O.js",
+      "sha256": "95bc76a40aaeee8f823a0e9fe46dcb940c2647cc907c70c2de25f8b96b03c3f1",
+      "bytes": 2314
+    },
+    {
+      "path": "Coachmark-DgYLWy6k.js",
+      "sha256": "01bd922dca99b1eeffa5664c8878012f46d852e5a081b5c78c65177eb32568c6",
+      "bytes": 699
+    },
+    {
+      "path": "Compare-DpWKLPJP.js",
+      "sha256": "190e89500f1044faf45d0cd65dce94031d7e7454db2a94ac07479e420def0344",
+      "bytes": 15316
+    },
+    {
+      "path": "CompareSaved--Wgb7KuB.js",
+      "sha256": "f3e66686640be4476fc5a18d385fd249b763b1cd8a2a0c2cedadd0e1b47bec28",
+      "bytes": 3453
+    },
+    {
+      "path": "ConnectPlatformsScreen-Brs7ahKd.js",
+      "sha256": "115c3f7a8ec5e0ed5fdf8519e3adf92e3e3bc7398d31fa30d38ab2126c944011",
+      "bytes": 19471
+    },
+    {
+      "path": "ConnectScreen-kEoZn2Lp.js",
+      "sha256": "a977875d0653ae9ea9ce3bfa813ca7b5c25c6f3f3575067012608c785b0ed034",
+      "bytes": 29318
+    },
+    {
+      "path": "ContractImport-CK_nvtK-.js",
+      "sha256": "fd01580760a0d97bbfae5d7c3b724c66f41ebba31a1677f69d4a1e9a1916ef01",
+      "bytes": 8973
+    },
+    {
+      "path": "ContractScreen-ClcOyBFX.js",
+      "sha256": "ab9d20dfa51c1f79685c1d5eea8f2aa76f30948cf2597bb705dc07f308fd3eaf",
+      "bytes": 72797
+    },
+    {
+      "path": "ContractView-De5PppuP.js",
+      "sha256": "cee1758cc7f20bc84441cdde1266f62835b92453d4b53606841647507f13d1a8",
+      "bytes": 17164
+    },
+    {
+      "path": "Dashboard-BYF1Adx5.js",
+      "sha256": "e748298ff17bb2634b752a047237888266eabfdcd19844d395649b5f2baa1ef0",
+      "bytes": 9434
+    },
+    {
+      "path": "Devices-BCRWlL8c.js",
+      "sha256": "7a560ad2123160617448aa76b40da1b0371b913af04b983aa879db86e485e6a7",
+      "bytes": 1728
+    },
+    {
+      "path": "Drivers-BsWuS9uI.js",
+      "sha256": "57591a7010112dc8fa57da0f153b16a472612158e41b7bbf601d159241f80f64",
+      "bytes": 4176
+    },
+    {
+      "path": "EventApplyScreen-C74fWezF.js",
+      "sha256": "1553141dba7321466cdabb249f69e348149c2a3881a92bba6660f0fb6d3ad67f",
+      "bytes": 9469
+    },
+    {
+      "path": "EventBlockCard-2MFFSh7r.js",
+      "sha256": "7c6091a5f888c31d4f4fb2a46a8f38c9957b6cc9db7b467f8473ee6cea73f4ab",
+      "bytes": 5018
+    },
+    {
+      "path": "EventCheckoutScreen-BTHsVc73.js",
+      "sha256": "fb4030a82b0de8f57b550a6e77881956679123cd2b9a7469f2f011746d78fc4f",
+      "bytes": 34122
+    },
+    {
+      "path": "EventDetailScreen-BnkVXLyF.js",
+      "sha256": "2f3131a65406c72bb3212886247e258ff879fa2c606f9baf7c82d5f68ec420a4",
+      "bytes": 48012
+    },
+    {
+      "path": "EventDiscoverFilters-BCD92FS6.js",
+      "sha256": "760d44321dcfa5a21535ed276ff7beb71fe1368de9a8242ca2f95ff2a408db8c",
+      "bytes": 17887
+    },
+    {
+      "path": "EventManageScreen-3TP7rtZj.js",
+      "sha256": "1804d0cee8172827c2e8054d0fbb9d541fc22ac2577de0344cbedc5ff8e25341",
+      "bytes": 301746
+    },
+    {
+      "path": "EventReceiptScreen-C_xgHfrS.js",
+      "sha256": "fbcf7d4f9260fd1d6490b8523a108ef436113e1b3757b65ad7c307485a317eb8",
+      "bytes": 12650
+    },
+    {
+      "path": "EventSlugRedirect-DSJ6f91m.js",
+      "sha256": "f36fa09e2f1e5f9fb4e2fe8a00c7e8bd591b1ccaa074f471c3780128b4c73443",
+      "bytes": 652
+    },
+    {
+      "path": "EventTicketScreen-D3Vwe5UV.js",
+      "sha256": "c500f9df1390df243fccc8196ccebf07b36cae5a2a79c43cea0ee42a5b421cb5",
+      "bytes": 3404
+    },
+    {
+      "path": "EventTicketView-w-5M_Oe3.js",
+      "sha256": "fab3e1a54e32c9f9414d40c12682be8e22adc7d371d72cd2e36a6bcbeddbc35d",
+      "bytes": 10880
+    },
+    {
+      "path": "ExpressGate-CMaoifds.js",
+      "sha256": "41cbfea71c62529e92d6dfc149366c14aa0cbc226156292e352a194354e4843e",
+      "bytes": 917
+    },
+    {
+      "path": "ExpressJoin-CUOlxipN.js",
+      "sha256": "fc548c08630c7680925c830993c78cba96f8a95c6a6dbbed4140ee8db815be6a",
+      "bytes": 10598
+    },
+    {
+      "path": "Feed-BMpZp3S_.js",
+      "sha256": "0b8b734d839064322773965b3387ef83034f6eca9e5c6392690236e98555e09e",
+      "bytes": 18740
+    },
+    {
+      "path": "Feed-C9vpegt0.js",
+      "sha256": "8db3c5103841eafdb14a948898e4a1b49c4ab318c154d959976fa790f3348a0c",
+      "bytes": 4803
+    },
+    {
+      "path": "Feed-D9bFZOmo.js",
+      "sha256": "6e7302eaca69ca46aa083c453f60cabb459d199a21cefdc3179bd3e5158247eb",
+      "bytes": 10682
+    },
+    {
+      "path": "Feed-HTR-Fv8g.js",
+      "sha256": "6070bdf43e478bdc6d36c2a58403fc3ded9e67bba0fa322f193b8d297b51db4f",
+      "bytes": 6130
+    },
+    {
+      "path": "FeedMedia-CvZy3D1K.js",
+      "sha256": "4d2aaa1b9237a849558c4a8d0a9a30fea06653d9d5cb1fede1a21d30009c5ff3",
+      "bytes": 1009
+    },
+    {
+      "path": "FeedVideoPlayer-BDuCgmv2.js",
+      "sha256": "c33f97558ea81114d3ed09b1de9d1254bc13da6479066e7b3e9b591918ceaf8b",
+      "bytes": 2997
+    },
+    {
+      "path": "FilterSheet-J6oq1doY.js",
+      "sha256": "d013986f1d1a1f06c09a3b77f14189a191b3212e28346841f3b25e9099be1fed",
+      "bytes": 34169
+    },
+    {
+      "path": "Footer-DTutHW_h.js",
+      "sha256": "91a9cd8646a8ec07c843ed3f6cb00332454596db7c40a0fa33f42e430fd96fa6",
+      "bytes": 41
+    },
+    {
+      "path": "FormKit-CnHhVUf8.js",
+      "sha256": "198c12d2bdc27e1a7897cc73ed65272536fc0d15577659313da4d72a6e28fabf",
+      "bytes": 13918
+    },
+    {
+      "path": "GuestTicket-yenOUv8f.js",
+      "sha256": "6c269749aaba10a30e8af19f28746afe7b170817f7aa3a3047c8dbad8cdd1142",
+      "bytes": 6751
+    },
+    {
+      "path": "Home-5xyLjmdM.js",
+      "sha256": "9c5450bef1ea9dcc5500a07864b99afc000f77bac67e585494dce7a0a9cd3524",
+      "bytes": 4691
+    },
+    {
+      "path": "Home-BLZJWIFn.js",
+      "sha256": "d5a31a070f0414ef72ce25ce10f68596c83ba1d97e098768badb480da2c37cc9",
+      "bytes": 7366
+    },
+    {
+      "path": "Home-CBDrAzFK.js",
+      "sha256": "cd9e145e899ede3db995bbc545a2f73f0d23c3ed73c94e2107ffe52e5c8bd4cc",
+      "bytes": 26956
+    },
+    {
+      "path": "HomeTop-Cbn_YyrI.js",
+      "sha256": "f20152021328dc16297ec2b527de80c6874a0bcd49bb8ddec90487c949c0cd34",
+      "bytes": 3089
+    },
+    {
+      "path": "HostProfile-B6jWrAu4.js",
+      "sha256": "f03a027f6d577f567bfd68858238423f00d562c4987de2f040139eb25908e3fb",
+      "bytes": 27232
+    },
+    {
+      "path": "HostShowings-Cxo70APE.js",
+      "sha256": "c2cc44ddd0e7916a9ca49e2d5c5ad28df13ddcda77cd766225f689009d3f7e5a",
+      "bytes": 9027
+    },
+    {
+      "path": "Hosts--K6jNQBd.js",
+      "sha256": "825a67563e650b42c19145176aa162a1b619d90e4849cd29d6a211204b509a5a",
+      "bytes": 4234
+    },
+    {
+      "path": "HowScreen-CPDb8IL8.js",
+      "sha256": "5094f22bd75555b1763e5a3867904af875a86d4bf7d9378706a89a3aa7f3f856",
+      "bytes": 2847
+    },
+    {
+      "path": "HubPanels-C3ODcBWD.js",
+      "sha256": "6cda15315c3847059759e27944ba81c721dc21c644c6d93ec762fbc9bb66a38f",
+      "bytes": 25551
+    },
+    {
+      "path": "IdealHome-D168yAaN.js",
+      "sha256": "bc301084af1cc6163d691726da55de151e8365826338bdf6a4ed61ebe3eb5a02",
+      "bytes": 13599
+    },
+    {
+      "path": "IdealHome-DrSF_aGH.css",
+      "sha256": "c5f26002dff1151309c2e276585846fdb361943c3dd7ba7c2630b443feaf315a",
+      "bytes": 291
+    },
+    {
+      "path": "InfoTip-Cb68EYBp.js",
+      "sha256": "f7942705a53dc2988ab507abd337f62925edbba6880c0a108d5f636c1ff4309f",
+      "bytes": 2862
+    },
+    {
+      "path": "InfoTip-DbcYSbOl.js",
+      "sha256": "43c0466745b74fe82e15204c0c568c6cb21b0372ee0e7bc4b2963f332ce24f80",
+      "bytes": 1461
+    },
+    {
+      "path": "JobDetail-Cr64rBeC.js",
+      "sha256": "833474b6fd044ec7db27a2c44c6c0e898c0df91010ad53f622f2a2e4b239e9f6",
+      "bytes": 7091
+    },
+    {
+      "path": "Jobs-CqpybWej.js",
+      "sha256": "7455743bd37ece8e175205ebced26774aca2dab9954df271b0d0a7e1a34a75e0",
+      "bytes": 7895
+    },
+    {
+      "path": "LanguageContext-CIA2zqHa.js",
+      "sha256": "c62ed219609a732d6b4b78941854d03009e80ceb5c0783d372c5e425e8098f9d",
+      "bytes": 230479
+    },
+    {
+      "path": "LeadDetail-BjAqL4J3.js",
+      "sha256": "acaaabb032b8a51c2252790389a1dd765cba458422a08bbf7f5832d5f646443f",
+      "bytes": 4223
+    },
+    {
+      "path": "Leads-CgUgfFEi.js",
+      "sha256": "6819feffcedf5b27c528464a0dd659100d0354424e3cca45133f91fd7457faaf",
+      "bytes": 4117
+    },
+    {
+      "path": "ListHub-CB5wGz_M.js",
+      "sha256": "3befa3a928ded745e33d00577fa6f7d43e8c53cc89621a5eb0946dac3f427397",
+      "bytes": 101307
+    },
+    {
+      "path": "ListingContactBar-Co3i8TuY.js",
+      "sha256": "ed6d529339e109f0cb19de03f3eefc10610aca395c5f310c4b8e23cf07303288",
+      "bytes": 35920
+    },
+    {
+      "path": "ListingMap-Byo68eWw.js",
+      "sha256": "b301ee429e7b3bffd68d7cc50efbd4bd76008fde3428821cf7181270e76a5d95",
+      "bytes": 12756
+    },
+    {
+      "path": "ListingRatings-DKKFJvsS.js",
+      "sha256": "beea661d0f5c30bed9fd2b375fda786746ca6f2f4c6e8fd6c2de02508cdde397",
+      "bytes": 3591
+    },
+    {
+      "path": "ManageStay-DbaixUMQ.js",
+      "sha256": "e690b819ccbf4e734683889217007e636a1899a1312c43c3f5e12b61eda93ea1",
+      "bytes": 11355
+    },
+    {
+      "path": "ManagerInviteClaim-BieJ7Tsc.js",
+      "sha256": "0c98ab9bf93eaa9d1bc1f508719c036ec4efe3c389944439ea318a5c3aa9c3f3",
+      "bytes": 3057
+    },
+    {
+      "path": "MapsPin-CXAFuoxD.js",
+      "sha256": "dbc3f31d43b91cd60f75aefb38f3a2aeb5ff93a53435de716e3b9075be713dea",
+      "bytes": 584
+    },
+    {
+      "path": "MediaChoices-S_yKhW2s.js",
+      "sha256": "9b7c8c8922037829c9cabe7a8c44f3ec3b37ab5e3aa773a77ba8c6acfb294240",
+      "bytes": 25914
+    },
+    {
+      "path": "MoneyIcons-DhlyVgQX.js",
+      "sha256": "6eb04f9a59366861a8c3bb54f6a7c00fadaac4af8649bf0c7843dced3d09a90f",
+      "bytes": 6567
+    },
+    {
+      "path": "MoneyInput-BV9jaubD.js",
+      "sha256": "d19989ac32ac9f9474dd779df50a8c935a660e83c9e51fdff9b76b0a9c930443",
+      "bytes": 1883
+    },
+    {
+      "path": "MyDocuments-5wbP5Hbe.js",
+      "sha256": "48fec3eeb44f8534ac9a98ce05054bf386ce8f83a99a6e2eee1d716b5067aa09",
+      "bytes": 5257
+    },
+    {
+      "path": "MyEvents-CceZa_p2.js",
+      "sha256": "fa60069cc54a9b4d3e1b81a1c0765b99ee56b13952bc05af2392e1a74ca77aec",
+      "bytes": 329801
+    },
+    {
+      "path": "MyJobs-DJvFl0_v.js",
+      "sha256": "7d07b868c3387cf3ee0dc4e96dcf8fe29cced2035f4f27e719c4e3ab23a9adca",
+      "bytes": 78932
+    },
+    {
+      "path": "MyListings-CpjXrIKv.js",
+      "sha256": "d845a91c51492d166911d9e048c8ead668a307d40a3f15dc3b725a8e92bcfa69",
+      "bytes": 8156
+    },
+    {
+      "path": "MyProperties-9WHx4kME.js",
+      "sha256": "3a758980c7b87533501c70cb4f3f9e33bc6c241affb6d46276fbe12395aa45ed",
+      "bytes": 15219
+    },
+    {
+      "path": "Navbar-GSeeblEo.js",
+      "sha256": "d1a36c537ed4f9cccd7e0f1301ca9f7b731dfe9c3f2fa727135a307f67ef8cae",
+      "bytes": 41
+    },
+    {
+      "path": "NoticeRow-CVbYqqB0.js",
+      "sha256": "789d272d26252a9eb1865d48acf01412cf85ae67e13ba36ac42e7a779603f3f4",
+      "bytes": 1199
+    },
+    {
+      "path": "OneScoreDonut-D20jU63t.js",
+      "sha256": "0d749b17612b616a713b417888c52906b629a6bdde3bdc451b9c133a36a057bf",
+      "bytes": 5726
+    },
+    {
+      "path": "OrderDetail-BiVJ_tvw.js",
+      "sha256": "e8fb2d0ed5a0f857462e4abe74309c39576dee8c73f56bd367591a64b9c31544",
+      "bytes": 3795
+    },
+    {
+      "path": "Overview-DoY8foJl.js",
+      "sha256": "e9bcd297c9f17201a6df62e0289b545ae50e4dd9df01a1ae35a7f563e4eca11f",
+      "bytes": 4973
+    },
+    {
+      "path": "Overview-w2fXADZ-.js",
+      "sha256": "499819f7d51eb504e893f07074aba04a25e2919375d5c2b984813f3fb0251705",
+      "bytes": 4334
+    },
+    {
+      "path": "PaymentSetup-CoyIJJfS.js",
+      "sha256": "24019d19d2cf4866914554254a0c1bd4ce58f5cb27e7f1769893c0158ff95125",
+      "bytes": 14249
+    },
+    {
+      "path": "PeopleScreen-CEDD6xLE.js",
+      "sha256": "9630bae9b5d9d7a777991b2ed550ac3d794a7aa088708c071c1c1729f0ea407d",
+      "bytes": 3600
+    },
+    {
+      "path": "PhoneInput-BoCcY3P9.js",
+      "sha256": "8f7150513029db39338f3c58d28533b9379e13eaf573081d139f490f4e7eaefd",
+      "bytes": 4527
+    },
+    {
+      "path": "PhotoNote-BTIdLJO-.js",
+      "sha256": "dd73cb15b57b798b99e7bbc406da3127dd63114d69e2fedc4e8f9e77d2a10c6e",
+      "bytes": 1310
+    },
+    {
+      "path": "PinchZoom-CBUzSYor.js",
+      "sha256": "8581037b9ff38e9055a22339deae66a3d94d6e96e98d58c8b436334d54542b11",
+      "bytes": 1995
+    },
+    {
+      "path": "Pipeline-CIGSkcwY.js",
+      "sha256": "8a94d587777af70ad38e7cff025e5f57863c8677a2eaea554a0df98f12236e20",
+      "bytes": 4503
+    },
+    {
+      "path": "PlaceMap-DAMCvC-G.js",
+      "sha256": "017b5993ffd0c426d7c0fde27516a2a3191e3f0e047a0134b1f03eb7c8fde55b",
+      "bytes": 3455
+    },
+    {
+      "path": "PlacesInput-DQWrSDWK.js",
+      "sha256": "a1df9dd0f40b9d668b5127f94da179cde666fd98a08f289bc8bea4f5e8657894",
+      "bytes": 8517
+    },
+    {
+      "path": "Plans-FSjNW2GO.js",
+      "sha256": "559011ebcf884d7e597e93459f4ff89d9e9fbc420a79c488bc9f7617fb085c19",
+      "bytes": 3747
+    },
+    {
+      "path": "PostScreen-CAIAHxq0.js",
+      "sha256": "24260164e83a29120ec4c07d2810089632771cd13b053aac3aecf2c6d6a160f1",
+      "bytes": 3410
+    },
+    {
+      "path": "PriceStepper-BJmo0zUG.js",
+      "sha256": "2cc2fdd7f574ad03af49a4034e9db81d16022432a4effee4cf2c3e4803ad426d",
+      "bytes": 6365
+    },
+    {
+      "path": "PricingScreen-vIprzqor.js",
+      "sha256": "3820139d5fcb5c9015e1739c84de69b6ffabc94c1b8d3ad2922a0745c3b4ee45",
+      "bytes": 27393
+    },
+    {
+      "path": "PropertyDetail-CuGwJKc1.js",
+      "sha256": "46c9119efabe66a1acb6b641c791636a9849e5f562eb4822ab4db1762c159313",
+      "bytes": 77602
+    },
+    {
+      "path": "PropertyDetail-dqzkV795.js",
+      "sha256": "a7af2e19fa78ed84ef667719ba54e5a840db4c30667474384dcc9279ddddf32f",
+      "bytes": 22748
+    },
+    {
+      "path": "PublicSocialFeed-joMXYZiA.js",
+      "sha256": "ce9c6ccc1787ba92f6ef9bb340de3f39cb78f92ac1c887c9bf40c978908ead2d",
+      "bytes": 1888
+    },
+    {
+      "path": "QRPay-veAANnFP.js",
+      "sha256": "05bebc0cbd9ea80719d7ecc0e877a8fd9e3f7c2301255debdeacee72507cae8f",
+      "bytes": 112977
+    },
+    {
+      "path": "QuickHirePhoneInput-cnmSMyvw.js",
+      "sha256": "48612b3dbd0c111b7da1dc8c79bbd441e9b5de090c2e6ef8b2bef7a68009e881",
+      "bytes": 8734
+    },
+    {
+      "path": "ReceiptScreen-QPcOH5lW.js",
+      "sha256": "10d10a9049e0654059c7fbb6b5d3e9cf66d2d4ceff0612eb36b57c2310eb4ffb",
+      "bytes": 2835
+    },
+    {
+      "path": "RefundActions-CkPC-YOP.js",
+      "sha256": "edcb051d9d48e4da8805c4a6a7090ba8293cf70f8d75d6763ad91bf5c92afcf7",
+      "bytes": 12070
+    },
+    {
+      "path": "RentalRequests-irn7pRnz.js",
+      "sha256": "ea756c943bd7d6a457d92f5ec8a8f43b6f7d1f5ee1c0547aee230e33ac118030",
+      "bytes": 5177
+    },
+    {
+      "path": "RentalThread-BvW5s7w3.js",
+      "sha256": "5d925d55408cdf73872eedb1a69b62506dcf95a366dd5a1cb3106b4d4a31a04b",
+      "bytes": 280
+    },
+    {
+      "path": "RenterProfile-v7qqVsLH.js",
+      "sha256": "b74334562b5f14bee35a86c665cb8d83a40b8bc48e170e56e72042c5288c1b57",
+      "bytes": 11914
+    },
+    {
+      "path": "ReportBlockSheet-Dedof2zo.js",
+      "sha256": "290e26c1b34530203f204ce9e382f08b1566fe4cbb722e19e91c5126b194bcc3",
+      "bytes": 6749
+    },
+    {
+      "path": "Request-DmvavXs1.js",
+      "sha256": "fb4429b0fa5c1d511e6101144a31c7b5a908dd2b6ed16edcffdda42a3e109868",
+      "bytes": 7662
+    },
+    {
+      "path": "Requests-CM6Fz71B.js",
+      "sha256": "43a004244a61daf28bfe0a2e82c24dc4b0385312502ea5106f744af4400b8e48",
+      "bytes": 1743
+    },
+    {
+      "path": "Requests-d1ev415u.js",
+      "sha256": "76c596664d10d7b91f868a0286dc3c3b7efbc07e7c4808822874a4b602efbb0b",
+      "bytes": 938
+    },
+    {
+      "path": "ReservationNotificationSettings-BL22cILU.js",
+      "sha256": "a1e4f1a8133007a20d9d1464058e9d7febc0f7acf5329c352d66fc0da79de0f3",
+      "bytes": 2742
+    },
+    {
+      "path": "Results-TR0U_Vlk.js",
+      "sha256": "f3872b70ebf90c39dd6c22570ab0da2f4d027962517b4a568758921429a771a5",
+      "bytes": 2324
+    },
+    {
+      "path": "ReviewModal-JCXbn1qF.js",
+      "sha256": "c9ea74556bfd824a0809a2d7b2e593cd7b1187899ad3ed57d483b6a226f44fef",
+      "bytes": 1954
+    },
+    {
+      "path": "Reviews-CbjYgijV.js",
+      "sha256": "aa465c87d3f0b3e2e3d8d1567d28b922b55df3e581e9c8d71ca95ac87213c973",
+      "bytes": 4037
+    },
+    {
+      "path": "RideDetail-C932jFAI.js",
+      "sha256": "6d3fcd80fbdb72682ab797771ce9b55c376ad692e5918899862b70d0e40cdde6",
+      "bytes": 18955
+    },
+    {
+      "path": "SaleHub-l76SVDFW.js",
+      "sha256": "4572365c1d6c3efc37baae2623e7bef38e78912cc7a80aea627a52278c50619c",
+      "bytes": 37628
+    },
+    {
+      "path": "SalePayments-Cq74NZGX.js",
+      "sha256": "fd031ceeca3ac46e7366f869caab7694b87e41c6243751172936e53a50d63959",
+      "bytes": 21093
+    },
+    {
+      "path": "SaleProfile-BxZ9f1-u.js",
+      "sha256": "3ea2baaad395853921b3fb85d4813202fee46de6c33e90204aaa383ea6a6b5f8",
+      "bytes": 6634
+    },
+    {
+      "path": "Saved-CjVJeQ4_.js",
+      "sha256": "c15709abb02d6d40f378ada99a4d308e37191be22166a870c06a6478c5c5074c",
+      "bytes": 12035
+    },
+    {
+      "path": "ScoreScreen-CcV40E5L.js",
+      "sha256": "6376faf05fb846b069dcbb529d7f4d247247a02d2973629fbc8727751c14f608",
+      "bytes": 5546
+    },
+    {
+      "path": "SegmentToggle-2XindipQ.js",
+      "sha256": "2e1f5752131e1a415e0bca85ecd6639b12a2436273c1590d1cec0cd88a28a4e3",
+      "bytes": 2409
+    },
+    {
+      "path": "Services-yFX7ds8-.js",
+      "sha256": "846a40fc2a2c601188fabcf0156e4c3415195dad91c067c809e01fd1538fa554",
+      "bytes": 11461
+    },
+    {
+      "path": "Setup-Dgq221Um.js",
+      "sha256": "185dee4528bd30cd625f0eb2e7c0a73049a5f983db2acd7503876216f15ab4c9",
+      "bytes": 1989
+    },
+    {
+      "path": "Setup-Dnsun1YR.js",
+      "sha256": "7bde426fe97fce3b2fd2f48e6120e87807210fa992c7aa9f38865fc0ef32e71f",
+      "bytes": 5531
+    },
+    {
+      "path": "SharedContract-DXFOLxX5.js",
+      "sha256": "dac17f3713bcd7a826ebeed552d9bc4bb2d0e513fb6c8a0c2edeab7f6bf19502",
+      "bytes": 12854
+    },
+    {
+      "path": "SignedCopyActions-DXQ6p6-F.js",
+      "sha256": "f66939ef2bd5dae81ce1836a486fed85527cd0bac08d1756a7b22d9888b70d3e",
+      "bytes": 11421
+    },
+    {
+      "path": "SimulatorScreen-By3LN9oW.js",
+      "sha256": "881907c0c314b9fb61738c4c27de13cb06237bcc14fce6fa61910e676399201b",
+      "bytes": 4534
+    },
+    {
+      "path": "Staff-BLIbQyQx.js",
+      "sha256": "273a7c0e5861b4a06ae072bdd20a486bcadcd2747936a511241b7acc50c128a4",
+      "bytes": 2229
+    },
+    {
+      "path": "StayReviews-Chi3-PxL.js",
+      "sha256": "357af3a5b5d5e3096ed74daa5c5871e242f9d0a5ee02ca481d68586a2e0c7ea5",
+      "bytes": 5793
+    },
+    {
+      "path": "TicketsScreen-B313adtG.js",
+      "sha256": "de95fbfdf4b93d0eb5c00b3283cb1df347ef9b1c4bdd436d8c3c0101512af58f",
+      "bytes": 8365
+    },
+    {
+      "path": "VaiaChatMount-B3I25TGP.css",
+      "sha256": "c936ed501e3181313c6b4042323766095f5607182343b5aa01cf45b0b9fa24b2",
+      "bytes": 1036
+    },
+    {
+      "path": "VaiaChatMount-CsEyQ5wV.js",
+      "sha256": "20270815d6086ec9c5415d41af6d8aa8b1c890a0e2f754c2757e4e2466d51201",
+      "bytes": 19523
+    },
+    {
+      "path": "Vehicle-CNsVHG0Z.js",
+      "sha256": "8eb1caae5b421ea446de3213227528c96f42933373a8b3d2d0c2e6c4df4d5a2b",
+      "bytes": 6044
+    },
+    {
+      "path": "Voice-BauWdJEw.js",
+      "sha256": "1f1cf2afafd64239d51e134a9bdb34263a0e2ae6d61ea69e6a864e878627fc28",
+      "bytes": 4377
+    },
+    {
+      "path": "Walkthrough-y1lKvq4y.js",
+      "sha256": "70ae3c543b5edd8f83023748d272898fda9e06885171457eadbb20a8df13e0a4",
+      "bytes": 22298
+    },
+    {
+      "path": "Wallet-7CgaL8VR.js",
+      "sha256": "60e4ccb509fae7d85b02b61baca1eacd14302ce5b3a024e4e1e35f88cdcd91b2",
+      "bytes": 24953
+    },
+    {
+      "path": "WorldFeed-B0u6hayI.js",
+      "sha256": "4e153fc3fc2645d9f807351964c8a3cb32c0cbb42bc857d67bb45716b765156f",
+      "bytes": 74625
+    },
+    {
+      "path": "acceptWindow-BieuMO2W.js",
+      "sha256": "a1d2b25142dc013cea1f6061117360b3cd9957802df4583eac65dddfe92179a8",
+      "bytes": 1840
+    },
+    {
+      "path": "alert-dialog-BIoGJqRW.js",
+      "sha256": "e631266a9ea49891099244c0f55a8eb3e1dfd1dc2735ee484d1fcf383be7ef2c",
+      "bytes": 210905
+    },
+    {
+      "path": "arrow-left-Chs-WFdi.js",
+      "sha256": "2f305dab3a12c5abf484a2cc2b4d821ea0c30f5331e67bbba0ef1fdfb73eb1a1",
+      "bytes": 337
+    },
+    {
+      "path": "arrow-right-G3G8DKvP.js",
+      "sha256": "3e47473f87005bcec9d132339463d71a4ec9b5b6cc82aff638302c08d8220551",
+      "bytes": 337
+    },
+    {
+      "path": "attributes-Dx3b5veL.js",
+      "sha256": "b6266303d47eff70dabeab5f4ac4845ba356a43c096d1b594060a7d80e00f9ef",
+      "bytes": 2853
+    },
+    {
+      "path": "bell-D4PskpmC.js",
+      "sha256": "6712b69b190888207c951aac025455a46ef7bc969c61d13d6d56301ad3b7e562",
+      "bytes": 462
+    },
+    {
+      "path": "browser-BJzWpxwN.js",
+      "sha256": "a3b755a81125f5eb12b94805ba9f9bfb54cd402b8e1eb5ecdebf717666382f54",
+      "bytes": 24540
+    },
+    {
+      "path": "button-B8kPrvXe.js",
+      "sha256": "100e762465fe3e76a8cebfd061542aeac6f2f9f3c0d8024d2b0d860e9b69ba90",
+      "bytes": 887
+    },
+    {
+      "path": "calendarExport-DD26fo_9.js",
+      "sha256": "04a09eaeedace6df7457ad6ac8040951b597379747f4bd14048038ecec296eda",
+      "bytes": 1479
+    },
+    {
+      "path": "camera-B1jnDTMd.js",
+      "sha256": "00a5c2295b3bb357fe335445c2dacd85e1365366d8befdc3d0da88e755d83efd",
+      "bytes": 508
+    },
+    {
+      "path": "check-qQy1Jzv2.js",
+      "sha256": "e0dabeea674129f804b83c1a36ac8d058802bf9510cb369988d41665ee25f599",
+      "bytes": 296
+    },
+    {
+      "path": "chevron-down-Ds0b0bb3.js",
+      "sha256": "89e783be64e9d2c45c0e90868f8d4984defb43cf8d3ccc265e2b8cb9cef1e642",
+      "bytes": 300
+    },
+    {
+      "path": "circle-check-BXIqu2BH.js",
+      "sha256": "ff6e10cfc7156677a337d5b74d71e4910ede8be0b1aac01a71ae942df8071f5c",
+      "bytes": 350
+    },
+    {
+      "path": "circle-check-big-FyD2HDBV.js",
+      "sha256": "cf851fa182003e22358d99503794cf0ea680aec4b427ba5cc41061315160599a",
+      "bytes": 366
+    },
+    {
+      "path": "circle-x-Cc2-KHUQ.js",
+      "sha256": "e118f87b3a9b750ec3edfa9758707aa41e1ddfdb3446bb20ec314e87f1614e90",
+      "bytes": 379
+    },
+    {
+      "path": "clipboard-list-DR-lxNaN.js",
+      "sha256": "e86a5ff876f3a028487fdf5f80005288203987b98579477c36310658e413024f",
+      "bytes": 583
+    },
+    {
+      "path": "clock-DVc5zLV8.js",
+      "sha256": "1ffd7804f50a523331ef0f535a1ae5beaa3b64f6b9df2715340b24fded81027d",
+      "bytes": 341
+    },
+    {
+      "path": "credit-card-lx5ge8GA.js",
+      "sha256": "6bc3b899c7245ef695920becbab3e5b9c4c8649c211d1720893463372fbe2b9b",
+      "bytes": 379
+    },
+    {
+      "path": "currencies-Bz_Ez42e.js",
+      "sha256": "1aefabceb3c62be1b382e72a5449823f24a82c9bfded52e5fb35baa493d65e77",
+      "bytes": 874
+    },
+    {
+      "path": "data-CnzlIn1t.js",
+      "sha256": "4bde885da0256d9ac22cbd5dd4f4ba941d2e07220d2e4110e09545ce584f2184",
+      "bytes": 4764
+    },
+    {
+      "path": "datetime-DndB1-1p.js",
+      "sha256": "e901b5f1021d5657eacf4f2dc7b14019365577e2b5cb3cf1606779578056855e",
+      "bytes": 1426
+    },
+    {
+      "path": "download-D2oTGj_W.js",
+      "sha256": "8da28f34b61bdf55284b25b5387f45f3cec4e3543285ae81657282e7e5231a2b",
+      "bytes": 404
+    },
+    {
+      "path": "ellipsis-vertical-C9mu8ts0.js",
+      "sha256": "a11fdc4114b2b6d0b13539a67f623255be6cfc06acba24c2e56f118a46b2553a",
+      "bytes": 407
+    },
+    {
+      "path": "eventShortLinks-BY8eUED3.js",
+      "sha256": "f32c7a8c4a705d24eb32a0d99cac6eed3d58f625a06e8d64ea134073a2cd8f8b",
+      "bytes": 4796
+    },
+    {
+      "path": "eventTicketing-B6p4LSM0.js",
+      "sha256": "cf9e0f57c257959eafde65d34802f2684fe673e58dd728125b48c1a32eb51157",
+      "bytes": 1054
+    },
+    {
+      "path": "eventTime-ClY0RCEV.js",
+      "sha256": "98f291f41edb39bf0f7bff78bdb911c93dab15b772f27eda94451952f1dbfc5c",
+      "bytes": 2581
+    },
+    {
+      "path": "external-link-BaAenz9k.js",
+      "sha256": "20c66386ea61951c9135379baca284b94396f282d0911fe9cc887c493baaafa4",
+      "bytes": 423
+    },
+    {
+      "path": "eye-DnqxFtzc.js",
+      "sha256": "7ab1ba53378e530879d4b1a73a4ab4656d67c488108b94cf2e361a4655f14ce9",
+      "bytes": 981
+    },
+    {
+      "path": "fnError-DMLJ9w4l.js",
+      "sha256": "e876f59c09c210bd434972cdaf78de67adc381ff59fae34491e1f24fe0ab556c",
+      "bytes": 696
+    },
+    {
+      "path": "geo-CdYYkWtM.js",
+      "sha256": "c20158ffc041e92f1fe4a670b2339e06a39f38314a57a3bbde04ac5f7e776943",
+      "bytes": 1270
+    },
+    {
+      "path": "getCountryCallingCode-5_PzPVC-.js",
+      "sha256": "b9ef3893e39d680603f87464f793398b789f7e3a8d54181eff6337a95db13c18",
+      "bytes": 153267
+    },
+    {
+      "path": "homeCompare-B2kdymNg.js",
+      "sha256": "b2c94e7027910e7d3dc402f15e0f429bcb75d1b04f581a20a6ba5dc90fdb9440",
+      "bytes": 4003
+    },
+    {
+      "path": "html2canvas.esm-CBrSDip1.js",
+      "sha256": "b4f3add809a6d59f46260e8fd56cab240f3153def977386b230a839e8cb0b281",
+      "bytes": 202301
+    },
+    {
+      "path": "index-Bow36BxA.css",
+      "sha256": "6427274ec326394c9448407bb1d6187c5ab5b18b6494d0452cc4f25280be4239",
+      "bytes": 183455
+    },
+    {
+      "path": "index-DpiqRQeZ.js",
+      "sha256": "56ccf61f65a4d515ef5291458732ccbaa655b8c93699237b93b7ec5c2c22ea03",
+      "bytes": 2718356
+    },
+    {
+      "path": "index-dSaMOs6N.js",
+      "sha256": "b05c9c7d339e9994dd2b4d8b07284793c1bc44bfe70e1eaafebae74a66559a44",
+      "bytes": 117847
+    },
+    {
+      "path": "index.es-Lx7b9irF.js",
+      "sha256": "85a08e47ccafbe8b738b78ea6deb07af438ac3e41744b496010a2f665b7ce9cf",
+      "bytes": 150894
+    },
+    {
+      "path": "jobloop-Wrw4wJel.js",
+      "sha256": "6d80d72333d1d1b501007c7b0a7181ad0b632b24e9418e442ca3b722b401b378",
+      "bytes": 8793
+    },
+    {
+      "path": "jspdf.es.min-OzvLXS45.js",
+      "sha256": "56c8f2cfd4bff3262393a8b6147b6fb139ae23d25e3f391547a2866b0f4da30c",
+      "bytes": 390497
+    },
+    {
+      "path": "legalDocuments-CW4Uno1y.js",
+      "sha256": "7307a4a811040fe4d5e2fbea6097ab99650b2fcf06cb6960dc2f4a334cf9f092",
+      "bytes": 1691
+    },
+    {
+      "path": "loader-circle-DPQVGRf6.js",
+      "sha256": "3ea4242b4690746b2a686dea178aed9eff9f6236c3ce1cc2f9e18de285ca3193",
+      "bytes": 316
+    },
+    {
+      "path": "mail-CyGAWkIc.js",
+      "sha256": "e12e9afee17b92033ed0cb4391f19ae81b082359fdd63b0be552fe878625f307",
+      "bytes": 385
+    },
+    {
+      "path": "message-square-D9t7F5WA.js",
+      "sha256": "602000cec1d186cd592ae10230e927e20ceb20968b3a97db3a5b05c27175d701",
+      "bytes": 405
+    },
+    {
+      "path": "mic-CDZIU380.js",
+      "sha256": "0ecaf16272eb620f919347108f704254d2d20741e2484be29a1ad89ca2db01f8",
+      "bytes": 407
+    },
+    {
+      "path": "monthly-BMtuEpL1.js",
+      "sha256": "de108629553d90ba05e2f16c7b785073ad748e0652767dc6de2f65a43c006f1b",
+      "bytes": 2181
+    },
+    {
+      "path": "notificationHelpers-DA6LaU4J.js",
+      "sha256": "6cab1d24fd6b571718880e3ffea7c3d270bde3b7f2ca2cdf3ca171a747d5ac5b",
+      "bytes": 544
+    },
+    {
+      "path": "notifySms-CUa_NPVx.js",
+      "sha256": "429c9cba3dff191451561982b5a672ed2e9ec3e8b8011b94a229662ca16ae7e8",
+      "bytes": 11344
+    },
+    {
+      "path": "paymentEligibility-C4V1hJ51.js",
+      "sha256": "ffc1143840037e3c783881c06e7b2c798f4fe6896a824e26694ab7acea48d1d1",
+      "bytes": 7637
+    },
+    {
+      "path": "payoutTiming-CMRxtCyR.js",
+      "sha256": "4a93686259c4fd7c4bacb79fd2b761043fd22d14f4098be8bfc7e597309dd54d",
+      "bytes": 1832
+    },
+    {
+      "path": "places-svfbtq9T.js",
+      "sha256": "1172e45dce073a7e00ae0726280336f7f7def6cfaa8828e0d74ccba291122756",
+      "bytes": 807
+    },
+    {
+      "path": "planPrice-bD9wEPLS.js",
+      "sha256": "ec1ae23409052e27365ccf77be5a5f6f88e666d713cdca8d53bdbe4a2aa7c47c",
+      "bytes": 1044
+    },
+    {
+      "path": "plans-VEOOSNPt.js",
+      "sha256": "d66a552735fe897fd5fb3305ce0e9c0c8927dd6d1cd195c03fc5046b48d9aecc",
+      "bytes": 1276
+    },
+    {
+      "path": "plus-DBLLuvZ2.js",
+      "sha256": "9e0206e8ce61df63a3c9445bec394dc9dda4031c1cbcbc7ba42a2dc8757637f4",
+      "bytes": 325
+    },
+    {
+      "path": "proxy-KDoXajH7.js",
+      "sha256": "8bffa59216758ab3559e8e9df2744c309ac4e507574aafec10e47b7de1e7012f",
+      "bytes": 128945
+    },
+    {
+      "path": "purify.es-BYftNTi7.js",
+      "sha256": "9f24eccccf33948bbfdda22ccb0db7d9bafa21375319b34be8a0fd908402c5f7",
+      "bytes": 29398
+    },
+    {
+      "path": "renter-CscbUmR7.js",
+      "sha256": "86ac806a5901ab17d0af7f3228f339fec69d973db574a14a28d72804e14b9d2e",
+      "bytes": 1469
+    },
+    {
+      "path": "requestDisplay-CQiEM-Pz.js",
+      "sha256": "65f8dcaff37c87e58e3012aa1f7e6e35d225395ee74aca4c611a14a7fe342cc3",
+      "bytes": 1162
+    },
+    {
+      "path": "search-C93OhUAS.js",
+      "sha256": "8265edfd21d3b6ac797c44509930ef0e906cfd9b31e6b1a79609740369860890",
+      "bytes": 346
+    },
+    {
+      "path": "share-2-GVnwZN10.js",
+      "sha256": "41c652357f8d7f85032884badaf51c790723e7024a21b1d85acbb17d6080bca3",
+      "bytes": 529
+    },
+    {
+      "path": "shareLink-DCxqfM_5.js",
+      "sha256": "d19ad6b0d56831f6910745d6410061018dd122cde1ae13331b9dd068503dc9c2",
+      "bytes": 9970
+    },
+    {
+      "path": "shield-BdXohwb2.js",
+      "sha256": "a98ee29274b97e37d0d96ccce4a2e051d9d846c295627e9e2d703f2174dab033",
+      "bytes": 444
+    },
+    {
+      "path": "shield-check-CWBrdTsc.js",
+      "sha256": "9dead3b3b5ac3bb5438b2cce7829692da11b6fe2b8e75582409ca1c1f129dd86",
+      "bytes": 492
+    },
+    {
+      "path": "showings-C4loVYfL.js",
+      "sha256": "5599b2a890ca4d76650b1b245af73639d1acebd2b2f76742328de7b9cb2bd8b0",
+      "bytes": 2259
+    },
+    {
+      "path": "sparkles-P1VNZa0Z.js",
+      "sha256": "5d42d0e2cadeb81c8c7c018afb4720e75f1a02d775301b1d549968b82152c4e2",
+      "bytes": 666
+    },
+    {
+      "path": "square-C9hv2ltp.js",
+      "sha256": "5d166afc6da23d30e2fee68ae8373f1c8b2230ccefc727f21b614d7f00a20454",
+      "bytes": 319
+    },
+    {
+      "path": "storedAddress-LXABKXO0.js",
+      "sha256": "16bd665b8cf6a9e126c9c23ac10207bbf50e57596a15b6ce7f1341bdc605ef68",
+      "bytes": 10280
+    },
+    {
+      "path": "textarea-rEQM93Yx.js",
+      "sha256": "f6b86f65a05ca63805bbb6393d0588a5248f9188e54561ed59ff090f970a7a82",
+      "bytes": 726
+    },
+    {
+      "path": "trash-2-D1yy9U_S.js",
+      "sha256": "e02957442992283dd485e35453f4bc3863f0a64f42ea1a829f4b1691c29d3433",
+      "bytes": 899
+    },
+    {
+      "path": "ui-DLW72EtO.js",
+      "sha256": "91e9b2231ec77a053aefd0e9d2851526f53424222de4da2a25f3cdf551c2c5b8",
+      "bytes": 1484
+    },
+    {
+      "path": "upload-21pWc_54.js",
+      "sha256": "5d5aa1a96558aa929f90dbaf19180031f674ed017580af2b9d6fe6316d527f9c",
+      "bytes": 790
+    },
+    {
+      "path": "use-mobile-C35nw0o9.js",
+      "sha256": "e8c7512c37e29b6d8808fcbaddd71084120c151d4fe2637335fa3e0db079c822",
+      "bytes": 1428
+    },
+    {
+      "path": "useBusinessLoad-B-ngBdui.js",
+      "sha256": "c74ffca8196e07ae8eecce1b9223d64083a33e21667dbaedfcc29eccdb15b0dd",
+      "bytes": 376
+    },
+    {
+      "path": "useListingFeeWaiver-BU9E0xIw.js",
+      "sha256": "a6c3a4cac4985cd79e1840d2b49bb77c220345a739ae61302089527746cd1423",
+      "bytes": 1975
+    },
+    {
+      "path": "usePhotoNotes-DvKxkvOD.js",
+      "sha256": "60e24e13cb13f45818162403fd4574d5d138f991e8daecfe03adb7afded0cb0b",
+      "bytes": 611
+    },
+    {
+      "path": "user-C9jK33RS.js",
+      "sha256": "8f3411181541ebd7c11f8c78ca163f3d2725412b67cfcf0931f3067970269e97",
+      "bytes": 368
+    },
+    {
+      "path": "users-BcpC7Ja7.js",
+      "sha256": "4b58357e3cd178af1320a7f38faadf6c17c223d41baa590c5a17f7bee160f7ce",
+      "bytes": 478
+    },
+    {
+      "path": "utils-DaT-yT0k.js",
+      "sha256": "80f8f27e0ccc6ac7bb3aad9da42a1e77f7820511229dd0f0c9439a2e0806c022",
+      "bytes": 27539
+    },
+    {
+      "path": "wine-Bat_Bbwj.js",
+      "sha256": "de9d78daa5b3ef2e496e33b84fd6dcd5716bfa557d8c385a636a88e1841c8a2b",
+      "bytes": 839
+    },
+    {
+      "path": "x-CYZBdNWV.js",
+      "sha256": "96c1ace7b0377905a760df99138dbf44505fd96013912a708be49df4de3a9603",
+      "bytes": 326
+    },
+    {
+      "path": "brand/stores/android-robot.svg",
+      "sha256": "ff571c5e21163f07dd7176d4670411344f55409d36eb6346b402210ad7c02c4b",
+      "bytes": 1084
+    },
+    {
+      "path": "brand/stores/app-store.svg",
+      "sha256": "2a1509dccd25e6d2bc7a11a8e52941077e1a48555e192ce638699b9f083c2a7c",
+      "bytes": 650
+    },
+    {
+      "path": "brand/social/facebook.svg",
+      "sha256": "da9649f86ea77690100b224e58f1a5320779d4198fa8911ee0a797f46ddda500",
+      "bytes": 579
+    },
+    {
+      "path": "brand/social/instagram.svg",
+      "sha256": "6665fa801225a408c4fe4e25c7cd84e19552c8ea630160e2ed603f87abcf57d9",
+      "bytes": 2139
+    },
+    {
+      "path": "brand/social/linkedin.svg",
+      "sha256": "4ff303e258a4d8140af40e8989b7059d82297be44c0593116b2caab5c7de4b5d",
+      "bytes": 647
+    },
+    {
+      "path": "brand/social/onesocial.png",
+      "sha256": "62244b67a0734ad8a22c0618e0e1a446e795c038336a430d91cba521994e52b2",
+      "bytes": 52131
+    },
+    {
+      "path": "brand/social/tiktok.svg",
+      "sha256": "ad4139cd338906bc735c5d1f48b8e14ec2c56740a86b1026716ebc76209abddc",
+      "bytes": 742
+    },
+    {
+      "path": "brand/social/twitch.svg",
+      "sha256": "fbadfde5f2856e34a1cac2f57fc75ed3249b360716ba93fa33824ec6ccc0c475",
+      "bytes": 327
+    },
+    {
+      "path": "brand/social/x.svg",
+      "sha256": "da29a70ffe3e708e37e81c7e5a9c2cc880ba335d00368bb3a0e8f5540538ddb5",
+      "bytes": 282
+    },
+    {
+      "path": "brand/social/yelp.svg",
+      "sha256": "15ee2843d7e585ce531ac7a4a258a5636b19e09c14e95bc6c73761d8f299bf37",
+      "bytes": 4876
+    },
+    {
+      "path": "brand/social/youtube.svg",
+      "sha256": "68172fc123c1a1f07dc5af65982c474b49c6cff71985348b0915f2ab50209973",
+      "bytes": 495
+    },
+    {
+      "path": "og/oneevent.jpg",
+      "sha256": "47033e9b1928ab00b92411171798c880ea62fce5896a45052788ae07c51b4177",
+      "bytes": 49660
+    },
+    {
+      "path": "og/onehome.jpg",
+      "sha256": "5d468d9a01d19ab10468834d4a31fb0c00b73f3c7787324023e06288a39eaf1e",
+      "bytes": 49026
+    },
+    {
+      "path": "og/onejob.jpg",
+      "sha256": "1237fae0e378893981ad202570adabb8f30d99c87ddfc198668a8a620a8fa461",
+      "bytes": 42606
+    },
+    {
+      "path": "og/onesocial.jpg",
+      "sha256": "daa67310e7c2a2575838308d413284e54b75679afbba64a17156226d39367503",
+      "bytes": 51061
+    },
+    {
+      "path": "v/track.js",
+      "sha256": "969b72a8d04e44ffc410522ffdc62256a09be52e8fa4f497370daf4108a0ada0",
+      "bytes": 4200
+    },
+    {
+      "path": "v/agents/index.html",
+      "sha256": "b9de71198c003016b4c6c3232c605b08fb5cfbc30d4419c90e9c5d336793abc8",
+      "bytes": 4207
+    },
+    {
+      "path": "v/agents/og.jpg",
+      "sha256": "17da4d4a03fd39f1413c90683c790df1bdc31d67234751d2d0cbba37ce1a222b",
+      "bytes": 96534
+    },
+    {
+      "path": "v/agents/poster.jpg",
+      "sha256": "f54ea0dd954bf69a976d4442514a1542f36669535882597ffd5a20ca41331566",
+      "bytes": 115475
+    },
+    {
+      "path": "v/agentes-a/index.html",
+      "sha256": "17f6d39c6f47ae74cfac8c2b9c1c1a8ec485888abf24b70e98c893e6cf115898",
+      "bytes": 4227
+    },
+    {
+      "path": "v/agentes-a/og.jpg",
+      "sha256": "7b34f838fb02072b9f4545fa43bff0d2fb063f0de5246f4e5caf363e32c1d517",
+      "bytes": 98513
+    },
+    {
+      "path": "v/agentes-a/poster.jpg",
+      "sha256": "20e0c86ee0357688be28a30d8e73f57f36d952aafc92904ea575b8a7eb8fb82d",
+      "bytes": 104673
+    },
+    {
+      "path": "v/agentes-4/og.jpg",
+      "sha256": "3980a43246dfc265b6381d81c1b19b576eff4b46d9ff86037f16888afcc4b1a1",
+      "bytes": 57716
+    },
+    {
+      "path": "v/agentes-4/poster.jpg",
+      "sha256": "541c19ef58f48237801b3e72c4564331573480705999e1e2d038473377926e37",
+      "bytes": 183264
+    },
+    {
+      "path": "v/agents-a/index.html",
+      "sha256": "4971451e1de275e21614d49962770bed6b4f5a3196b932edb702400023b728f7",
+      "bytes": 4219
+    },
+    {
+      "path": "v/agents-a/og.jpg",
+      "sha256": "0fd3706cd1bad63455a77f54c36ec405965368c23d5ce0533b53d1e0d9d6744e",
+      "bytes": 91369
+    },
+    {
+      "path": "v/agents-a/poster.jpg",
+      "sha256": "40320269e37901cd5039d535008b045a101cc1754f3241a4593e1ec12301e5cb",
+      "bytes": 89326
+    },
+    {
+      "path": "v/agent/index.html",
+      "sha256": "71fc616b9946ebd28d633351518119d97e5c3c5a4b74fcd408be06fc1a774b4c",
+      "bytes": 2514
+    },
+    {
+      "path": "v/agent/es2/index.html",
+      "sha256": "0c3d24b7aa0a32652169c0bffc9e2b9028de0aefeb86c4015d0f274eae3da2b7",
+      "bytes": 4312
+    },
+    {
+      "path": "v/agent/en2/index.html",
+      "sha256": "a54b4ed0c355524610b94e613163f6c94f4b78f2bae5885d04418551d802c4db",
+      "bytes": 4304
+    },
+    {
+      "path": "v/agent/es1/index.html",
+      "sha256": "7d53657447968ba28242dce3a5372d0fada4b45b944e3d9fdc72d005b76ae01b",
+      "bytes": 4300
+    },
+    {
+      "path": "v/agent/en5/index.html",
+      "sha256": "355cea488a31b088650df4ca5963064ed0cb6badc1e9c7eb1f247e602d92e25f",
+      "bytes": 4325
+    },
+    {
+      "path": "v/agent/es5/index.html",
+      "sha256": "f541ec6b2cf67682ffd30ae712f84ad55656b1a2410e42617fa2e33225deeaa6",
+      "bytes": 4343
+    },
+    {
+      "path": "v/agent/en1/index.html",
+      "sha256": "c15817fd27f768455cae7479833d7bec3d886994e32ad20612c1c0bad37fe1fe",
+      "bytes": 4292
+    },
+    {
+      "path": "v/agent/es4/index.html",
+      "sha256": "0993ffa308ab58a15b9d6ba343dac87a00ac5fdee1d22e1b2eac0e7bdc07384c",
+      "bytes": 4305
+    },
+    {
+      "path": "v/agent/en4/index.html",
+      "sha256": "d7c5abdbb79c4073809c51a54ecbd292eb5f329e196ebb50acf002efbf7cede5",
+      "bytes": 4299
+    },
+    {
+      "path": "v/agent/es3/index.html",
+      "sha256": "af495f57b37f0a28ae140bf76427a2d389db206d3adadd5f6834404f7ceb09b6",
+      "bytes": 4305
+    },
+    {
+      "path": "v/agent/en3/index.html",
+      "sha256": "4fbdefc0036d07e8df976bda9b11de3ba1afe24377b25085e726f873ce359ae7",
+      "bytes": 4299
+    },
+    {
+      "path": "v/agents-3/og.jpg",
+      "sha256": "97cfdb0fc104d7513a22ecc00dda7ffd38b82112c3a9667e5cc8b5dda622295c",
+      "bytes": 87003
+    },
+    {
+      "path": "v/agents-3/poster.jpg",
+      "sha256": "e568d103f3edd62c138e72241d9f67c185a01b5138878a94c4ad105fd30a92f6",
+      "bytes": 77063
+    },
+    {
+      "path": "v/agentes-5/og.jpg",
+      "sha256": "8448b56a672f0c1eaa929bd51c3462c9e0edfc7afdca51fa91027aa799651375",
+      "bytes": 49610
+    },
+    {
+      "path": "v/agentes-5/poster.jpg",
+      "sha256": "6f31795b5768a1eba08ca8e89018120a207153a1187e337f870d7bcfd68946e9",
+      "bytes": 129580
+    },
+    {
+      "path": "v/buyer/es1/index.html",
+      "sha256": "0720d9e2033f0d11dceb7b07886cb6727a5613244f4d8397f5836bd0277e7dc4",
+      "bytes": 4421
+    },
+    {
+      "path": "v/buyer/en1/index.html",
+      "sha256": "b3e77690f95cc1f9507afb83652cbff74ec15ccebe2e225921683a9d0e3b46d5",
+      "bytes": 4334
+    },
+    {
+      "path": "v/compradores-1/og.jpg",
+      "sha256": "4a1cf1ea6290ede4c4f236acf4933c5e85b70847c9349d36d10808b07a325dda",
+      "bytes": 52264
+    },
+    {
+      "path": "v/compradores-1/poster.jpg",
+      "sha256": "c0c184bb1848cf8accea5585b37c640ba03a0bcd2b222fafb30fb0d4cfa9c1ad",
+      "bytes": 84843
+    },
+    {
+      "path": "v/agentes-3/og.jpg",
+      "sha256": "79815d92ff18e0791c86b5b18ccebd46663e6b74ba356f5750de1e399c56824d",
+      "bytes": 87022
+    },
+    {
+      "path": "v/agentes-3/poster.jpg",
+      "sha256": "2c75334b89603d0ceb97821e2c7babb2d3e0944c07b2fdaa9e188c86a2a749b4",
+      "bytes": 77795
+    },
+    {
+      "path": "v/buyers-1/og.jpg",
+      "sha256": "f71714cd35d885f212a2c07dce8ac683470a5f676f1ff1dd0adf6252c0104165",
+      "bytes": 43316
+    },
+    {
+      "path": "v/buyers-1/poster.jpg",
+      "sha256": "06db14bd2e08f626ca97ea42fda300a150b640fc8a67487bcc7b7d8b99fd9350",
+      "bytes": 79703
+    },
+    {
+      "path": "v/agents-5/og.jpg",
+      "sha256": "68c7c7a61248217a5c180f0fe86db20243f3c354c4ea1ae3c4574e9e4e478ace",
+      "bytes": 53303
+    },
+    {
+      "path": "v/agents-5/poster.jpg",
+      "sha256": "0bbb09d58e22a91f4a082984a6c4adeb6a44f08079f6a335426a9bcc2bed1dd1",
+      "bytes": 76620
+    },
+    {
+      "path": "v/agents-4/og.jpg",
+      "sha256": "7d9174d453af01f5aadaa2c5f962a22ee61b30ca33cd3d0a9875d9bb8592313a",
+      "bytes": 62148
+    },
+    {
+      "path": "v/agents-4/poster.jpg",
+      "sha256": "a425209b92978c826ff773ccf6434443d8ba592cf5a9e729e179685e9779bbaf",
+      "bytes": 110826
+    },
+    {
+      "path": "v/agentes/index.html",
+      "sha256": "da65dcc535413d49feeb83ac232700b41a8ccd158d277e9b50f4d054e5c761a4",
+      "bytes": 4215
+    },
+    {
+      "path": "v/agentes/og.jpg",
+      "sha256": "079d507827e380f94fdb14d395b107b73359062ed13a56c8defa017107551613",
+      "bytes": 94524
+    },
+    {
+      "path": "v/agentes/poster.jpg",
+      "sha256": "463f113c311b5eae27f0192733c2cabadac2e5569ca19ca55e2576c238ad0fcc",
+      "bytes": 103254
+    },
+    {
+      "path": "opener/one-world-opener-v5.mp4",
+      "sha256": "30048cccf3a849f2b677a90a9f4d2e6d0c30d9b6df7d62d8d53421f9500f7250",
+      "bytes": 13226549
+    }
+  ],
+  "reviewedChanges": [
+    "Release 130: listing query failures show retry (Max, cleared)",
+    "Max candidates 131-175 (independent source clearances; see MAX_ONEHOME_AUDIT_20261005/ACCOUNTABILITY_REPORT_20261006.md)",
+    "ADMIN30 route doorway 1 (Testing 60/60 + 5/5)",
+    "ONEHOME30 overlay 48 r2 (P1 address-pending gate and P2 mic-after-Stop fixed; ONEHOME30 regressions addr 9/9, mic 5/5)",
+    "Max TS findings: ApplicationView result guard, PublicWorld Boolean(visibility.error)",
+    "ONEHOME30 overlay 49: per-photo hidden notes (rent+sale), testimonials on public profiles (no stars, not in rating), AppShell publicPaths add to defaults; migration oneworld_listing_photo_notes_overlay49 applied live 7 Oct",
+    "ClassicTopBar unused Lang type import removed (declared to Max)",
+    "ONEJOB2 promo-links overlay 1: own website (max 3) + App Store/Google Play buttons on the shared profile (ProfileScreen editor via Edit, PublicWorld read-only); PUB30 polish: W() i18n, contrast-picked text, glyph icons, one link per store; migration onejob2_promo_links_overlay1 applied live 8 Oct with server caps",
+    "Batch 135: ONEJOB2 overlay 2 (swatch picker, auto-https, equal glass buttons, logo upload, store glyph slot) merged with PUB30 i18n; TESTING HOLD fixes: colour shows on outline + glyph in preview and public, unknown app address never labelled Google Play, Add removed at the 3-website cap with the reason shown, wordmark accessible name OneJob; logo must live in the owner media folder (DB constraint)",
+    "Batch 136 (TESTING 135 HOLD): header link accessible name OneJob in TopBar + ClassicTopBar; store links matched by hostname (client) + constraint promo_links_store_host (DB), website buttons cannot use store names; logo upload lifecycle — replaced/removed/failed-save/abandoned/deleted-link logos removed from storage",
+    "Batch 137: ONEHOME30 overlay 50 (one agreement checkbox; owner Review request(s) button only when requests exist; contract-for-own-tenant title), overlay 51 (look-but-dont-touch: guests browse everything, AccountGate on every interaction with resume after sign-up, guest /feed route), ONESOCIAL4 overlay 1 (profile Social media section at the bottom, chips/sort/3 widths/auto-load capped at 4 pages, 6 tiles, PlatformMark official-file slot); shell index.ts and App.tsx 3-way merged (51 + ONESOCIAL4); PUB30 removed the duplicate Recent-posts feed from OneSocial's public profile (same rows as the new section); broken/missing post images show a plain tile instead of the browser broken-image glyph",
+    "Batch 138: ONESOCIAL4 overlay 1 revision 4 (3-way merged onto 137, PUB30 137 fixes kept): official platform marks shipped (simple-icons 13.7.0, CC0) at /brand/social/, OneSocial chip uses its drawn mark, connected-apps chip row no longer depends on the current tab; TESTING OS4 P0-5: imported post links render only when a parsed https URL without credentials (else plain tile) + DB constraint media_posts_source_post_url_https. ONESOCIAL4 overlay 2 NOT included (TESTING HOLD, inert)",
+    "Batch 139: ONESOCIAL4 overlay 2 (identity confidence, inert) with PUB30 fixes for TESTING P0-1 (Connect disabled on a check verdict until challengePassed), P0-2 (pass needs exact email or phone plus one more match; unproven capped at 80), P0-3 (same local part at another provider = unknown); overlay 3 (one-tap connect, off until VITE_SOCIAL_CONNECT_START + _PLATFORMS are set); overlay 4 (Followers/Likes/Comments/Engagement header from social_snapshots, logo-only chips). PUB30: chip outlines use ow-edge (dark outline was invisible); TikTok/X marks inverted in dark. DB: members can no longer set is_verified or write social_snapshots (server-only triggers).",
+    "Batch 140: ONESOCIAL4 overlay 4 revision 3 (sha 4f5b488c; supersedes r1 in 139): header numbers follow the selected logos, selected logo grows / others shrink, row fits 334 px, real OneSocial mark (png), full-screen viewer with swipe and Whole photo / Fill toggle, Your view / Public view switch on the own profile. 3-way merged keeping PUB30 edits. PUB30 fixes: viewer portalled to body (it opened off-screen inside the glass card), See-the-original link https-only, TikTok/X marks white in the viewer in both themes.",
+    "Batch 142: WORLDFEED30 overlay 22 (sha 7cd596c1) — Everything lane first and default: merges the four lanes' loaded cards newest first, no new query, product chip only in Everything, search drives all four, map excludes socials. Base 7/7 matched. PUB30: onboarding Next button text fixed in dark (was light text on white).",
+    "Batch 143: Lee 9 Oct — the first lane is titled One World feed (es: Feed de One World), not Everything.",
+    "Batch 144: WORLDFEED30 overlay 22 REPLACEMENT (sha cf837c4f): product-name chips (OneHome/OneEvent/OneJob/OneSocial) in the One World lane, jobs carry their poster (public profile fields only), previewFixtures jobs have posters. Lee's title kept (One World feed). Lane's live data fix verified: 36 live jobs, 0 without an owner.",
+    "Batch 144 also: App Store and Google Play buttons now show the Apple logo and the Android robot (simple-icons 13.7.0, CC0) at /brand/stores/, tinted by the button colour; label stays beside the logo.",
+    "Batch 145: WORLDFEED30 overlay 23 (sha 017f44f5, base 144 3/3 matched): back-to-the-top arrow bottom-right on all five lanes while the footer is hidden; first lane titled One World (Lee, evening of 9 Oct, supersedes One World feed).",
+    "Batch 146: ONESOCIAL4 overlay 5 (sha 2382271a; TESTING P0s 1-5 fixed at source: challenge is one object {node, passed, token} and a check with no challenge fails closed; pass needs 2 counted signals incl. exact email or phone; same local part elsewhere worth nothing; photo puzzle removed, step-up = forced fresh platform sign-in; https-only post links) + overlay 7 (sha 512f7142; Add photos/videos from the profile media section on every app — own media/<uid>/ folder enforced by the storage policy; Connect on every app's own profile, falls back to OneSocial connect). 3-way merged onto 145; PUB30 kept the stricter safeHttpsUrl (rejects user:pass@) and removed the duplicate helper; bg-white/18 (not a real class, viewer buttons had no background) -> bg-white/20.",
+    "Batch 147: WORLDFEED30 overlay 24 (P0, sha eea49dd7; OneSocial and OneScore message threads opened the not-found page — messages/:id route added, bound to the shell ThreadScreen; R37 bundle diff all green) + ONESOCIAL4 overlay 8 (sha 13e58b81; original OneSocial uploader ported: multi-file posts read from media_post_items, caption, likes/comments/shares, grid opens two across; imported platform counts kept separate from ours). 3-way merged onto 146. PUB30: new MediaPostViewer portalled to body, https links refuse user:pass@, TikTok/X marks white in the viewer (all three were fixed in 140 for the old viewer and came back with the new one). Tailwind preset gains opacity 8/12/18 — 56 classes in 18 files (border-ink/8, bg-white/12, dark:border-white/12 …) had been compiling to nothing.",
+    "Batch 148: ONERIDE overlay 2 (sha 269c0637, cumulative over overlay 1): ninth app OneRide at /rides in black, admin-only (everyone else sees Coming soon); My car (plate private), Drivers, Request a ride with stops/time/price style sent to chosen drivers through Messages, ride page with quotes/accept/raise/cancel, Open ride button on ride messages; OnePay/One Business Alerts read action_url (were always empty). DB applied by Lee 9 Oct 8:30 PM (product key in 7 places, ride_vehicles, ride_requests + ride_request_drivers + 7 functions, text_alert_message branch), verified live.",
+    "Batch 149: same source as 148; the packer now carries new top-level public files, so OneRide's black mark (mark-oneride.png, same 432 by 512 artwork as every other app) ships — 148 dropped it and the header showed a bare O.",
+    "Batch 150: OneRide mark silver in dark (tokens.css).",
+    "Batch 151: ONERIDE overlays 4-7 (safety rules, reviews in every app, chat in the reader's language, route and suggested price, rider/driver footer icon); DB + translate-content v3 applied by PUB30 10 Oct.",
+    "Batch 152: ONEJOB2 one-chat-door overlay 4 + WORLDFEED30 overlay 25 (untitled drafts save, one free AI try, upgrade return keeps the draft, Duration toggle recomputes end time, browser translation off); PUB30: CreateEventForm .then(ok, err), activation notranslate.",
+    "Batch 153: ONERIDE overlay 8 card rides (pay by Checkout, Start waits for payment, driver paid 80 percent after both End, refund on cancel, 30-minute unpaid expiry). DB applied live by PUB30 (proof 6/6 on live, rolled back); ride-money deployed with PUB30 fixes (settled-currency payout, waits for settlement, sandbox return address). Staging Stripe test mode: USD and COP rides paid out exactly once at 80 percent, full refund, expiry, stranger 403, rider cannot write money columns.",
+    "Batch 154: WORLDFEED30 overlay 26, the missing half of 25 (13 string edits on BATCH153_SOURCE): Publish no longer sticks on Processing (spinner reset in finally; a failed save is treated as a failure and kept as a draft; backup cleared only after a confirmed save); Save to drafts lands on the Drafts tab with a Saved to Drafts toast; the payout dialog Save as draft now saves; failure messages translated. PUB30 added the two toasts in German, Russian, Chinese and Portuguese.",
+    "Batch 155: WORLDFEED30 overlay 27 — after Publish the app opens the live event with a 'Your event is live' pop-up (See your event / Manage my events), a back control to My events and a one-time hint; 7 languages. PUB30 signed-in run on staging: draft lands in Drafts; full publish → pop-up → Back to my events, all pass. Live DB: events.allow_reentry added (missing since 20 Sep; every event save on production had failed with 400).",
+    "Batch 156: WORLDFEED30 overlay 28 mounts the app's message box (sonner Toaster) once at the root — every toast in every product was invisible before (Please fix…, Saved to Drafts, errors). PUB30 signed-in run on staging: empty Publish shows 'Please fix: Description, Start date, End date, Location'; draft shows 'Saved to Drafts'; full publish → pop-up → back, all pass. PUB30: OneHome PropertyDetail live-request lookup used a non-existent state value (every call 400) — now state = requested.",
+    "Batch 157: WORLDFEED30 overlay 29 — feed pictures were cropped to the middle of their width (the image service was asked for a width with no height); now width + height + contain, so every product shows the whole picture. OneEvent feed cards fit off-shape flyers whole over a blurred fill. PUB30: rendered /events at 390 px light and dark — Karen's flyer served at 860x1075 (true 4:5), 0 page errors.",
+    "Batch 158: WORLDFEED30 overlay 30 — new events save their map pin (latitude/longitude from the picked place); the feed map opens on the card you were reading. PUB30 fix on top: editing an event keeps its saved pin (the form now loads it), otherwise every edit would have wiped the coordinates. Signed-in staging run: draft, empty-publish message, full publish, pop-up, back — all pass.",
+    "Batch 159: WORLDFEED30 overlay 31 code part (End date follows Start date until the host sets its own, so a one-day event publishes with one date) + overlay 32 (editing an event keeps a hidden street address hidden and an evergreen event evergreen; both were reset to defaults by any edit). Signed-in staging run: draft, empty-publish message, one-date publish, pop-up, back; edit of an event with address hidden re-published with it still hidden. generate-event-flyer v17 (overlay 31 part 2) is a separate edge-function deploy, not in this bundle.",
+    "Batch 160: WORLDFEED30 overlay 33 — publish pop-up asks Show this event in the main feed (on by default; off keeps the event live on its link but out of the One World feed); saved to events.feed_visible, seeded on edit, EventsLane filters feed_visible = true. PUB30: toggle text in es/de/ru/zh/pt (was English-only); Cancel button outline visible in dark. Signed-in staging run: toggle shows on, flips to off with the helper line changing, Confirm publishes with feed_visible = false, pop-up and back pass; light and dark checked at 390 px. Live data: 23 of 23 published events feed_visible = true, so nothing leaves the feed.",
+    "Batch 161: WORLDFEED30 overlay 34 app part — AiFlyerStudio reads lettered:true from generate-event-flyer and then composites only the QR card (and watermark when locked), contain-fit with blurred fill; the Flyer text panel becomes a one-line note for lettered flyers; sends the browser time zone. Inert until the v17 function is deployed (old function sends no flag). PUB30 fixes found in the signed-in run: (1) the one free AI try was claimed and then bounced to pricing by the studio's own plan check (trialGranted prop; locked added to the generate and recompose dependencies); (2) the studio auto-generated with an empty title on open and told the host to add a title they had typed (falls back to the live title, first compose uses it). Staging run with mocked flyer responses: free member gets 3 options with no bounce; lettered flyer = art + QR only; plain flyer = old composite with the title.",
+    "Batch 162: WORLDFEED30 overlay 35 — Location shows its own error line (it was named in the Please fix message with nothing under the field); the message box follows the app's own light/dark setting (it was always light). Signed-in staging run: empty Publish shows 5 field messages for 5 named fields; toaster theme light in light, dark in dark.",
+    "Batch 163 (PUB30, Lee 12 Oct): dictation shows words as they are spoken — the shell microphone now starts the browser's live engine first (flag language) and uses the per-pause server engine only where live dictation is unavailable; the profile About field in edit mode is the shared AiTextField (Speak it / Type it + VAIA) instead of a bare textarea. Signed-in staging run with a scripted recognizer: words appear while speaking, interim word highlighted, 2-minute timer, Stop.",
+    "Batch 164: WORLDFEED30 overlay 36 — a new profile photo saves itself (photo_url only) with a Photo saved note; tap any profile photo (your own or someone else's) to see it full screen with an X (new shared PhotoLightbox). Signed-in staging run: upload → Photo saved, row updated; tap → full screen; X closes. Also proved on staging that Delete event in My Events works in 1 second (WORLDFEED30's hang was the SQL tool's confirmation, not the database).",
+    "Batch 165 (PUB30, Lee 12 Oct): one rich-text editor for every description — OneEvent and OneJob now use the shell editor (their forks re-export it); strike-through added; AiTextField rich mode (toolbar + Speak with VAIA); the bio on the profile, the Edit form and OneSale profile uses it; every bio display goes through RichTextView (allow-list sanitizer: only p/br/b/i/u/s/lists/span with colour and size kept; script/style/iframe/svg dropped with their text; img, links and event handlers removed — tested in Chromium, no dialog, no element survived). Old plain-text bios keep their line breaks. Signed-in staging: plain bio lifted into the editor, bold + strike applied, saved as HTML, shown formatted; OneEvent publish flow still passes on the shared editor.",
+    "Batch 166: WORLDFEED30 overlay 37 — Manage Event has a Flyer button beside Share that opens the AI Flyer Studio in flyer mode; Save flyer uploads it, puts it first in the event photos and makes it the feed picture (feed_preview). PUB30: the studio now waits for the save, so a failed save keeps the studio open (it used to say saved and close first); one success message, not two; Flyer strings in 6 languages. Overlay 38 — every required field on Create Event shows a red outline and ring in dark mode too (the dark border used to win). Signed-in staging run (VIP mocked, flyer mocked): Flyer → 3 options → Save flyer → upload 200, event row 204 with feed_preview and photos set, studio closed; forced refusal → studio stays open; empty Publish → Event Name red border + ring in light and dark.",
+    "Batch 167: one free AI try, one gate, every door (Lee 12 Oct) — the AI Flyer Studio itself holds the offer: a free host sees Your first AI flyer is free / after this it comes with VIP, 19.99 dollars a month, cancel any time / Make my free flyer or Not now; nothing is spent until they tap; once used it says so and offers See VIP (no automatic jump to pricing). Same box from Create Event and from Manage Event Flyer button (covers: Pro). 6 languages. Server: generate-event-flyer v17 live with a plan check (VIP/Pro or a free try claimed in the last 2 hours), words designed into the flyer, QR corner kept clear. WORLDFEED30 overlay 39: Photos section shows best shape 1080 by 1350, the band the name covers, video advice, See it in the feed with the real card; PUB30 fixes: missing class bg-brand/15, heading no longer runs out of its box, two strings translated. Signed-in staging: gate free, claim, 3 options; reopen shows used, Not now closes; Create Event door same; guide light and dark at 390 px.",
+    "Batch 168: WORLDFEED30 overlay 40 — a member name is never cut off (shared MemberName: wraps, steps the size down, three lines max; Karen was shown as karen Mujer Maga Mag…); plan prices in the reader money from the header flag (COP at the official TRM, other currencies at the published rate) with the dollar amount the card is charged beside it; fmtCcy prints the code for every currency whose symbol is shared ($ and ¥) so COP 31.912 can never be read as 31 dollars; USD keeps $. PUB30: the free-try box in the AI studio uses the same rule (COP 63.857 ($19.99 USD)); OneJob plan price no longer breaks inside the dollar figure at 390 px. Signed-in staging with Colombia selected: OneEvent pricing and OneJob plans show COP 31.912 for 9.99 dollars (TRM 3,194.44) with the charge in USD; studio gate shows the peso price in Spanish.",
+    "Batch 169: WORLDFEED30 overlay 41 — the OneEvent pricing page in all 7 languages (plan names Basic/Pro/VIP kept; usted in Spanish); pesos drawn from the official TRM only (dollars until it answers, market rate only if it fails — no more peso figure changing on screen); every currency grouped the way its readers write it (1 680 ₽); badge no longer breaks mid-phrase. ONERIDE overlay 9 — the ride price box shows dollar cents (8 + one tap showed 11 while the ride would be sent at 10.50); pesos unchanged. Signed-in staging at 390 px: Colombian Spanish light shows COP 31.912 straight away with the TRM footnote, no English left; Russian dark shows 840 ₽ with the dollar charge.",
+    "Batch 170: ONERIDE overlay 10 — the ride price + and − buttons show dollar cents as two digits (8 + one tap = 10.50, not 10.5); whole amounts and pesos unchanged. WORLDFEED30 overlay 42 — two unused imports removed from the shell (MemberName React, ProfileScreen IconX) that failed the shell typecheck. PUB30: OneEvent platformFee.ts header no longer claims to be the fee source of truth (nothing imports it; live fee is the shell FEE_RATE 5.99 percent). Server, not in this bundle: generate-event-flyer v18 (free AI try capped at 4 runs per claim via consume_ai_trial) and capture-contract-payment v24 (final contract write checked; both-sides-complete rule for every caller). Signed-in staging: ride price 8 + tap = 10.50, + = 13, − = 10.50; profile and events render, no page errors; flyer gate 4 runs pass then 403.",
+    "Batch 171: ONERIDE overlay 11 — the ride route map uses night colours in dark mode with a teal route line (it was a white card in the dark app); shop and bus labels hidden in both themes; the map redraws when the theme changes. Signed-in staging, Request screen Parque Lleras to Olaya Herrera: dark = night map + teal line, light = normal map + black line; no page errors.",
+    "Batch 172: ONERIDE overlay 12 (shared shell Pickers: the four picker arrows use text-brand-deep in light and text-brand-light in dark — in dark mode they were dark on dark, in every app) + overlay 13 (OneRide My car: Colour example White/Blanco/Weiß etc., Plate example ABC123). Signed-in staging at 390 px: dark arrows rgb(201,205,211), light unchanged rgb(28,28,30); My car shows 2024 / White / Toyota / Corolla / ABC123 (German: Weiß); no page errors.",
+    "Batch 173: WORLDFEED30 overlay 43 — the unused OneEvent platformFee.ts (an unshipped 8.99 percent tiered schedule) is deleted (Lee 14 Oct: the fee is 5.99 percent); zero importers. ONERIDE overlay 14 frontend part — the Waze button opens the drop-off (it opened the pickup; TESTING 13 Oct). The ride-money v2 edge function in overlay 14 is NOT part of this release and is on TESTING hold. Signed-in staging: Waze -> drop-off, Google Maps -> full trip; events renders; no page errors.",
+    "Batch 174: WORLDFEED30 overlay 44 (sha 35f25624, corrected rev 2) — NO fee rate changes. New ONE_WORLD_FEES.md at the source root: two fees (transaction 5.99 percent; OneHome rental 8.99 percent = manager 1.50 + tenant 7.49; OneRide 20 percent of fare). Shell supabase.ts warning above the rental split (constants untouched 0.0150/0.0749). ListProperty manager-pays-all comparison used a typed 0.09; now RENTAL_FEE_RATE. previewFixtures rates corrected to 0.015/0.0749. Two scar comments reworded. PUB30 phase 1: apply 8/8 + re-apply no-op, tsc 0 errors, vite build green, CSS 179,271 bytes identical to 173, asset set identical to 173.",
+    "Batch 175 (SANDBOX GLASS BUILD — built with VITE_OW_GLASS_REFRESH=true; NOT for automatic production promotion): 174 + MAX GLASS overlay 1 (6 files: AppShell opt-in + glass-refresh.css 2808c62c with SH-GLASS-01/02 corrections, BottomTabs raised centre action, Drawer compact hook, Event/Home layout selector targets). All base hashes matched the 174 tree; tsc 0 errors; flagged vite build green; local 390 px light/dark, fine and coarse pointer, 6 routes: glass attribute set, 0 overflow, 0 page errors. Unflagged builds keep existing visuals (all new styles scoped to :root[data-ow-glass-refresh]). Marketing overlay NOT included (separate repo)."
+  ],
+  "databaseDependency": "138: migration onesocial4_media_posts_source_url_https_guard. 139: migration onesocial4_server_only_verification_and_snapshots (two triggers; existing rows untouched; proved in rolled-back transactions). No edge changes.",
+  "fixedRouteAliases": {
+    "routes": [
+      "/account/delete",
+      "/account/profile",
+      "/admin",
+      "/agent",
+      "/business",
+      "/business/alerts",
+      "/business/businesses",
+      "/business/leads",
+      "/business/messages",
+      "/business/pipeline",
+      "/business/profile",
+      "/business/results",
+      "/business/services",
+      "/business/settings",
+      "/business/setup",
+      "/business/voice",
+      "/event",
+      "/events",
+      "/events/alerts",
+      "/events/calendar",
+      "/events/events",
+      "/events/hosts",
+      "/events/join-express",
+      "/events/messages",
+      "/events/plans",
+      "/events/pricing",
+      "/events/profile",
+      "/events/settings",
+      "/events/tickets",
+      "/feed",
+      "/home",
+      "/job",
+      "/jobs",
+      "/jobs/alerts",
+      "/jobs/calendar",
+      "/jobs/find",
+      "/jobs/jobs",
+      "/jobs/messages",
+      "/jobs/plans",
+      "/jobs/profile",
+      "/jobs/qr",
+      "/jobs/reviews",
+      "/jobs/settings",
+      "/jobs/wallet",
+      "/join",
+      "/onehome/terms",
+      "/onescore",
+      "/onescore/alerts",
+      "/onescore/connect",
+      "/onescore/how",
+      "/onescore/messages",
+      "/onescore/plans",
+      "/onescore/profile",
+      "/onescore/score",
+      "/onescore/settings",
+      "/onescore/simulator",
+      "/pay",
+      "/pay/activity",
+      "/pay/alerts",
+      "/pay/catalog",
+      "/pay/charge",
+      "/pay/closeout",
+      "/pay/devices",
+      "/pay/messages",
+      "/pay/profile",
+      "/pay/settings",
+      "/pay/setup",
+      "/pay/staff",
+      "/privacy",
+      "/rentals",
+      "/rentals/agents",
+      "/rentals/alerts",
+      "/rentals/calendar",
+      "/rentals/compare",
+      "/rentals/compare/saved",
+      "/rentals/dashboard",
+      "/rentals/documents",
+      "/rentals/host-profile",
+      "/rentals/ideal-home",
+      "/rentals/list",
+      "/rentals/messages",
+      "/rentals/plans",
+      "/rentals/profile",
+      "/rentals/properties",
+      "/rentals/renter",
+      "/rentals/requests",
+      "/rentals/saved",
+      "/rentals/settings",
+      "/reset",
+      "/rides",
+      "/rides/alerts",
+      "/rides/drivers",
+      "/rides/messages",
+      "/rides/profile",
+      "/rides/request",
+      "/rides/settings",
+      "/rides/vehicle",
+      "/sales",
+      "/sales/agents",
+      "/sales/alerts",
+      "/sales/buyer",
+      "/sales/compare",
+      "/sales/compare/saved",
+      "/sales/dashboard",
+      "/sales/documents",
+      "/sales/ideal-home",
+      "/sales/list",
+      "/sales/messages",
+      "/sales/plans",
+      "/sales/profile",
+      "/sales/properties",
+      "/sales/requests",
+      "/sales/saved",
+      "/sales/seller",
+      "/sales/settings",
+      "/signin",
+      "/social",
+      "/social/alerts",
+      "/social/connect",
+      "/social/messages",
+      "/social/people",
+      "/social/plans",
+      "/social/post",
+      "/social/profile",
+      "/social/search",
+      "/social/settings",
+      "/switch",
+      "/terms",
+      "/yourworld"
+    ],
+    "sourceHashes": {
+      "oneworld-shell/src/routes.ts": "5b49d1ab7b3527ef12fdfaf29a8acc39d5417ec5750cbe71cde95b5393e59066",
+      "oneworld-app/src/App.tsx": "442cea67c993af97e3fae77abd00d7bc461ccf9941d86304dbf6dc2016f80800",
+      "oneworld-app/src/products/onejob/routes.tsx": "6ae1e4c78006ffb5f375b26e37bb21ec9535895e8d83c16d59aaba8127bc1431",
+      "oneworld-app/src/products/oneevent/routes.tsx": "2217482454bca6e8150dfb2b78adff9a4de9ffb95d90c5913fb51a9b289cfb00",
+      "oneworld-app/src/products/oneagent/routes.tsx": "e930ce3688fb224ac00eb3866fbd1c046cda5ddf455b445c805da5f7ff683a88",
+      "oneworld-app/src/products/onepay/routes.tsx": "b5e6dd05c8ec8992639ae7e1c6652e6f1a02aef86cc49358de9b6699510e5e0e",
+      "oneworld-app/src/products/onebusiness/routes.tsx": "5c79976238aaad38eb14f3136723eb9fa1f34ceca6784dd6bccac0e9e1cf2357",
+      "oneworld-app/src/products/onerental/routes.tsx": "49221ced9ecb43bce1a75df2c41feda991886d8e3111b8e452fb2b3b75132528",
+      "oneworld-app/src/products/onesale/routes.tsx": "cd2e89e76f6aefe98e47fb333bde57df17bf438d97006a2313ea615b7d36cc82",
+      "oneworld-app/src/products/oneride/routes.tsx": "49215739048aadd871b44203584ebbcad6810c5a877dd627c29eff4589d10722"
+    }
+  }
+}
