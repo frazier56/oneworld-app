@@ -1,0 +1,1 @@
+import{r as t}from"./index-D-mkCjJ1.js";const a="/vaia-avatar-v5.png",s=t.createContext({avatar:a,name:"VAIA",fullName:"Virtual Artificial Intelligence Assistant"});function n(){return t.useContext(s)}export{n as u};
