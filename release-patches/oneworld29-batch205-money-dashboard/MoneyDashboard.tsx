@@ -196,7 +196,7 @@ export default function MoneyDashboard() {
             {drill.kind === "person" && head && <p className="m-0 text-[13px] opacity-60">{lang === "es" ? CAT_ES[head.category] ?? head.category : head.category}</p>}
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className={`grid gap-3 ${youPaid > 0 && youGot > 0 ? "grid-cols-2" : "grid-cols-1"}`}>
           {youPaid > 0 && (
             <div className="card p-4"><p className="m-0 text-[12px] font-bold uppercase tracking-[0.06em] opacity-55">
               {drill.kind === "person" ? W(lang, "You paid them", "Usted les pagó") : W(lang, "You paid", "Usted pagó")}</p>
@@ -207,14 +207,18 @@ export default function MoneyDashboard() {
               {drill.kind === "person" ? W(lang, "They paid you", "Le pagaron") : W(lang, "You received", "Usted recibió")}</p>
               <p className="m-0 mt-1 text-[19px] font-black tabular-nums text-teal-dark dark:text-teal">{fmt(youGot, currency, lang)}</p></div>
           )}
-          <div className="card p-4"><p className="m-0 text-[12px] font-bold uppercase tracking-[0.06em] opacity-55">{W(lang, "Payments", "Pagos")}</p>
-            <p className="m-0 mt-1 text-[19px] font-black tabular-nums">{n}</p>
-            <p className="m-0 text-[12px] opacity-60">{W(lang, "Average", "Promedio")} {fmt(avg, currency, lang)}</p></div>
-          {first && last && (
-            <div className="card p-4"><p className="m-0 text-[12px] font-bold uppercase tracking-[0.06em] opacity-55">{W(lang, "Since", "Desde")}</p>
-              <p className="m-0 mt-1 text-[16px] font-black">{dateShort(first, lang)} {first.getFullYear()}</p>
-              <p className="m-0 text-[12px] opacity-60">{W(lang, "Last", "Último")}: {dateShort(last, lang)}</p></div>
-          )}
+        </div>
+        {/* One row of facts, so the grid never leaves a hole. */}
+        <div className="card grid grid-cols-3 divide-x divide-ink/10 p-0 dark:divide-white/10">
+          <div className="p-3 text-center"><p className="m-0 text-[11px] font-bold uppercase tracking-[0.06em] opacity-55">{W(lang, "Payments", "Pagos")}</p>
+            <p className="m-0 mt-1 text-[18px] font-black tabular-nums">{n}</p></div>
+          <div className="p-3 text-center"><p className="m-0 text-[11px] font-bold uppercase tracking-[0.06em] opacity-55">{W(lang, "Average", "Promedio")}</p>
+            <p className="m-0 mt-1 text-[14px] font-black tabular-nums">{fmt(avg, currency, lang)}</p></div>
+          <div className="p-3 text-center"><p className="m-0 text-[11px] font-bold uppercase tracking-[0.06em] opacity-55">{W(lang, "Since", "Desde")}</p>
+            <p className="m-0 mt-1 text-[14px] font-black">{first ? `${dateShort(first, lang)} ${String(first.getFullYear()).slice(2)}` : "—"}</p>
+            {first && last && last.toDateString() !== first.toDateString() && (
+              <p className="m-0 text-[11px] opacity-60">{W(lang, "Last", "Último")} {dateShort(last, lang)}</p>
+            )}</div>
         </div>
         <div className="card p-4">
           <p className="m-0 mb-3 text-[14px] font-extrabold">{W(lang, "Last 12 months", "Últimos 12 meses")}</p>
@@ -301,8 +305,8 @@ export default function MoneyDashboard() {
             {pending > 0 && (
               <p className="m-0 mt-2 rounded-xl bg-ink/[0.05] px-3 py-2 text-[12.5px] font-semibold dark:bg-white/[0.08]">
                 {side === "in"
-                  ? `${fmt(pending, currency, lang)} ${W(lang, "is on its way to you.", "va en camino a usted.")}`
-                  : `${fmt(pending, currency, lang)} ${W(lang, "is held until the work is done.", "está retenido hasta terminar el trabajo.")}`}
+                  ? `${fmt(pending, currency, lang)} ${W(lang, "of this is still on its way to you.", "de esto aún va en camino a usted.")}`
+                  : `${fmt(pending, currency, lang)} ${W(lang, "of this is held until the work is done.", "de esto está retenido hasta terminar el trabajo.")}`}
               </p>
             )}
             <div className="mt-4"><Bars data={buckets(grain, sideRows, lang)} color={color} cur={currency} lang={lang} /></div>
