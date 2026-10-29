@@ -22,7 +22,7 @@ function ScanToPay({ attemptId, lang }: { attemptId: string; lang: "en" | "es" }
     supabase.rpc("onepay_pay_token" as never, { p_attempt: attemptId } as never).then(({ data, error }) => {
       if (error || !data) { setErr(true); return; }
       const base = window.location.pathname.startsWith("/sandbox") ? "/sandbox" : "";
-      setUrl(`${window.location.origin}${base}/pay/${data as unknown as string}`);
+      setUrl(`${window.location.origin}${base}/checkout/${data as unknown as string}`);
     });
   }, [attemptId]);
   useEffect(() => {
