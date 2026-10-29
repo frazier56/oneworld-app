@@ -12,6 +12,8 @@ import { useI18n, W, Wt } from "@job/lib/i18n";
 import Chevron from "@job/components/Chevron";
 import { hireLink } from "@job/lib/oneWorld";
 import { IconWrite, IconPhoto, IconToolbox } from "@job/components/ActionIcons";
+import { History as LucideHistory } from "lucide-react";
+const IconHistory = (p: { size?: number; className?: string }) => <LucideHistory size={p.size} className={p.className} strokeWidth={1.9} />;
 
 /**
  * "Start a job" — the center (cash-bag) tab. Full screen, not a modal.
@@ -30,10 +32,11 @@ export default function QRPay() {
   const toRaw = params.get("to");
   const toParam = toRaw && /^[0-9a-f-]{36}$/i.test(toRaw) && toRaw !== user?.id ? toRaw : null;
   const [toName, setToName] = useState<string>("");
+  const [toJob, setToJob] = useState<string>("");
   useEffect(() => {
     if (!toParam) return;
-    void supabase.from("profiles").select("full_name").eq("id", toParam).maybeSingle()
-      .then(({ data }) => setToName((data as any)?.full_name || "—"));
+    void supabase.from("profiles").select("full_name, job_title").eq("id", toParam).maybeSingle()
+      .then(({ data }) => { setToJob((data as any)?.job_title ?? ""); setToName((data as any)?.full_name || "—"); });
   }, [toParam]);
   const [mode, setMode] = useState<"home" | "contract" | "qr">(draftParam || toParam ? "contract" : "home");
 
@@ -176,7 +179,7 @@ export default function QRPay() {
             {claimErr}
           </div>
         )}
-        {toParam && !draftParam && !toName ? <p className="p-6 text-center text-sm opacity-60">…</p> : <ContractForm initialDraftId={draftParam} {...(toParam && !draftParam ? { recipientId: toParam, recipientName: toName, initialRole: "payer" as const } : {})} autoPreview={params.get("preview") === "1"} onClose={closeContract} onSent={closeContract} />}
+        {toParam && !draftParam && !toName ? <p className="p-6 text-center text-sm opacity-60">…</p> : <ContractForm initialDraftId={draftParam} {...(toParam && !draftParam ? { recipientId: toParam, recipientName: toName, recipientJobTitle: toJob, initialRole: "payer" as const } : {})} autoPreview={params.get("preview") === "1"} onClose={closeContract} onSent={closeContract} />}
       </>
     );
 
@@ -303,6 +306,9 @@ export default function QRPay() {
         <Opt icon={IconWrite} title={W(lang, "Create a contract", "Crear un contrato")} sub={W(lang, "Write the job, set the price, then preview & share.", "Describe el trabajo, pon el precio, luego revisa y comparte.")} primary onClick={() => setMode("contract")} />
         <Opt icon={IconPhoto} title={W(lang, "Show a QR code", "Mostrar un código QR")} sub={W(lang, "In person — they scan to begin.", "En persona — escanean para empezar.")} onClick={() => setMode("qr")} />
         <Opt icon={IconToolbox} title={W(lang, "My Jobs", "Mis trabajos")} sub={W(lang, "Pending, active, drafts — pick up where you left off.", "Pendientes, activos, borradores — retoma donde lo dejaste.")} onClick={() => nav("/jobs/jobs")} />
+        {/* Lee, 29 Oct 2026: "using that middle center button… here's my history" — every person
+            paid or paid by, each one opening to their jobs, payments and totals. */}
+        <Opt icon={IconHistory} title={W(lang, "History", "Historial")} sub={W(lang, "Everyone you've paid or been paid by, job by job.", "Todos a quienes ha pagado o le han pagado, trabajo por trabajo.")} onClick={() => nav("/jobs/money")} />
       </div>
     </div>
   );
