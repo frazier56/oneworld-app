@@ -9,3 +9,4 @@ The tenant pays the guest service fee and the host pays the host fee, each in pe
 - wompi-pay v7: purposes `onehome_guest_fee` / `onehome_host_fee` (amount server-side; caller must be the tenant / the property's host).
 - wompi-webhook v5: settles both.
 - UI: `OneHomeFeePay` card in the tenant's request card and the host's contract screen (accepted COP bookings).
+- 207b: fee amount shows as 'COP 7,490' to match the rest of the booking card.

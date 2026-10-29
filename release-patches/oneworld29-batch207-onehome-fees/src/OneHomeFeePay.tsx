@@ -24,7 +24,7 @@ export default function OneHomeFeePay({ requestId, lang, returnPath }: { request
   useEffect(() => { if (back && back !== "checking") void load(); }, [back, load]);
 
   if (!fee || (!fee.paid && !(fee.amount > 0))) return null;
-  const money = new Intl.NumberFormat(lang === "es" ? "es-CO" : "en-US", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(fee.amount);
+  const money = new Intl.NumberFormat(lang === "es" ? "es-CO" : "en-US", { style: "currency", currency: "COP", currencyDisplay: "code", maximumFractionDigits: 0 }).format(fee.amount);
   const host = fee.side === "host";
 
   if (fee.paid) {
