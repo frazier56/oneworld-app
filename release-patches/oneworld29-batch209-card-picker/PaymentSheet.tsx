@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase, FEE_RATE, FEE_PCT } from "@job/lib/supabase";
 import { loadStripeJs } from "@job/lib/stripeClient";
 import AddCardSheet from "@job/components/AddCardSheet";
@@ -24,6 +25,7 @@ type Method = { id: string; created_at?: string; provider?: string | null; metho
 export default function PaymentSheet({ agreement, onPaid, onClose, onStage }:
   { agreement: any; onPaid: (info?: { free?: boolean; chargedCents?: number }) => void; onClose: () => void; onStage?: (s: "authorizing" | "authorized" | "failed") => void }) {
   const { lang } = useI18n();
+  const nav = useNavigate();
   const [methods, setMethods] = useState<Method[]>([]);
   const [selId, setSelId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -31,7 +33,7 @@ export default function PaymentSheet({ agreement, onPaid, onClose, onStage }:
   const [addOpen, setAddOpen] = useState(false);
   /* Lee, 29 Oct 2026: "if I want to change the card, it shouldn't just bring the form up… I should
      have cards on file already… you select the card that you want, or you can add a new card." */
-  const [pickOpen, setPickOpen] = useState(false);
+
   const [err, setErr] = useState("");
   const [promo, setPromo] = useState("");
   const [promoTotalCents, setPromoTotalCents] = useState<number | null>(null);
@@ -56,6 +58,10 @@ export default function PaymentSheet({ agreement, onPaid, onClose, onStage }:
       setSelId(newest.id); setErr(""); setDeclined(false);
       return;
     }
+    // Coming back from the Vault with a card chosen there.
+    let picked: string | null = null;
+    try { picked = sessionStorage.getItem("onejob-pay-method"); sessionStorage.removeItem("onejob-pay-method"); } catch { /* private mode */ }
+    if (picked && list.some(m => m.id === picked)) { setSelId(picked); return; }
     setSelId(s => s ?? list.find(m => m.is_primary)?.id ?? list[0]?.id ?? null);
     // DO NOT auto-open the add-card sheet. It ran on mount, before any promo code could be typed, so
     // a payer with no saved card was pushed into "add a card" and backing out closed the whole sheet —
@@ -150,9 +156,15 @@ export default function PaymentSheet({ agreement, onPaid, onClose, onStage }:
     onPaid({ free: !!(data as any)?.free || isFree, chargedCents: (data as any)?.chargedCents });
   };
 
+  /* "Change" opens the OneJob Vault — the one place cards are kept and chosen — and comes back
+     here with the choice. Same screen as Wallet, so there is one interface for picking a card. */
+  const changeInVault = () => {
+    const ret = `/jobs/qr?draft=${agreement.agreementId}&preview=1&pay=1`;
+    nav(`/jobs/wallet?pick=1&return=${encodeURIComponent(ret)}`);
+  };
   const label = (m: Method) => m.alias || `${m.brand ?? W(lang, "Card", "Tarjeta")} •••• ${m.last4 ?? "0000"}`;
 
-  if (addOpen) return <AddCardSheet onClose={() => { setAddOpen(false); if (methods.length === 0) onClose(); }} onSaved={() => { setAddOpen(false); setPickOpen(false); void load(true); }} />;
+  if (addOpen) return <AddCardSheet onClose={() => { setAddOpen(false); if (methods.length === 0) onClose(); }} onSaved={() => { setAddOpen(false); void load(true); }} />;
 
   return (
     <div className="fixed inset-0 z-[88] grid place-items-end sm:place-items-center">
@@ -214,7 +226,7 @@ export default function PaymentSheet({ agreement, onPaid, onClose, onStage }:
         ) : (
           <>
             <div className="mt-4 mb-2 text-xs opacity-50">{W(lang, "Paying with", "Pagando con")}</div>
-            <button onClick={() => (methods.length ? setPickOpen(o => !o) : setAddOpen(true))} aria-expanded={pickOpen} className="card flex w-full items-center gap-3 p-3.5 text-left">
+            <button onClick={() => (methods.length ? changeInVault() : setAddOpen(true))} className="card flex w-full items-center gap-3 p-3.5 text-left">
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-ink/5 text-lg dark:bg-white/10">💳</span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[15px] font-semibold">{sel ? label(sel) : W(lang, "Add a payment method", "Agregar un método de pago")}</span>
@@ -222,25 +234,7 @@ export default function PaymentSheet({ agreement, onPaid, onClose, onStage }:
               </span>
               <span className="text-[13px] font-bold text-brand">{methods.length ? W(lang, "Change", "Cambiar") : "›"}</span>
             </button>
-            {pickOpen && (
-              <div className="card mt-2 divide-y divide-ink/5 p-1.5 dark:divide-white/5" data-ow="card-picker">
-                {methods.map(m => (
-                  <button key={m.id} onClick={() => { setSelId(m.id); setPickOpen(false); setErr(""); setDeclined(false); }}
-                    aria-pressed={m.id === selId}
-                    className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left hover:bg-brand/5">
-                    <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border-2 ${m.id === selId ? "border-brand" : "border-ink/30 dark:border-white/35"}`}>
-                      {m.id === selId && <span className="h-2.5 w-2.5 rounded-full bg-brand" />}
-                    </span>
-                    <span className="flex-1 text-sm font-semibold">{label(m)}</span>
-                    {m.is_primary && <span className="text-[11px] opacity-55">{W(lang, "Primary", "Principal")}</span>}
-                  </button>
-                ))}
-                <button onClick={() => setAddOpen(true)} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left hover:bg-brand/5">
-                  <span className="grid h-5 w-5 shrink-0 place-items-center text-brand">＋</span>
-                  <span className="flex-1 text-sm font-semibold">{W(lang, "Add a new card", "Agregar una tarjeta nueva")}</span>
-                </button>
-              </div>
-            )}
+
             {err && <p className="mt-2 text-sm text-red-500">{err}</p>}
             <button onClick={pay} disabled={busy} className="btn-primary mt-4 w-full text-lg">
               {busy ? (isFree ? W(lang, "Sending…", "Enviando…") : W(lang, "Authorizing payment…", "Autorizando el pago…"))
