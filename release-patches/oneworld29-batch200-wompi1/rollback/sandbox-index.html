@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" translate="no" class="ow-no-sideways notranslate">
+  <head>
+    <meta name="google" content="notranslate" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#FAFAF8" />
+    <script>
+      /* Dark mode BEFORE the first paint. React applies the class in an effect, which runs
+         after the browser has already painted, so frame one was the LIGHT page for every
+         dark-mode member - a white flash on every cold start. Inline in the head is the only
+         place this can work: anything the browser has to fetch is already too late.
+         try/catch because localStorage THROWS ON ACCESS in Safari Lockdown Mode. */
+      (function () {
+        try {
+          if (localStorage.getItem("oneworld-theme") === "dark") {
+            document.documentElement.classList.add("dark");
+            var m = document.querySelector('meta[name="theme-color"]');
+            if (m) m.setAttribute("content", "#0B0F1A");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <script>
+      /* PUB30-SANDBOX-MOUNT. This file is byte-identical at / (production) and /next/ (the next
+         version), so everything here is conditioned on the address it was served at. Wrapped in
+         try/catch because localStorage and history THROW ON ACCESS in Safari Lockdown Mode. */
+      (function () {
+        try {
+          var B = "/sandbox", p = location.pathname;
+          if (p.indexOf(B + "/") === 0 && p !== B + "/") {
+            location.replace(B + "/?r=" + encodeURIComponent(p.slice(B.length) + location.search + location.hash));
+            return;
+          }
+          if (p === B || p === B + "/") {
+            var m = /[?&]r=([^&]*)/.exec(location.search);
+            if (m) history.replaceState(null, "", B + decodeURIComponent(m[1]));
+            document.title = "SANDBOX \u00b7 One World";
+            var band = document.createElement("div");
+            band.setAttribute("style", "position:fixed;top:0;left:0;right:0;height:3px;background:#E0A21F;z-index:2147483647;pointer-events:none");
+            document.documentElement.appendChild(band);
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <title>One World</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=optional" rel="stylesheet" />
+
+    <!-- ── INSTALLABLE ────────────────────────────────────────────────────────────────────
+         Max asked for this twice and it did not exist. Without a manifest the browser never
+         offers "Add to Home Screen", so every decision made for the installed-app case — the
+         start_url, the sign-out behaviour, the standalone check on the front door — was code
+         for a state the app could not reach.
+
+         `start_url` and `scope` are the bare origin because all eight products are ROUTES under
+         one origin: one install, one icon, and the switcher can reach every product without
+         leaving the installed window. Scoping to a product would trap the install in that
+         product and break the thing the single-origin decision was made for.
+
+         The marks sit at the ROOT rather than in /marks/ for one blunt reason: this repo is
+         updated through GitHub's web uploader, which cannot create a directory from a file input.
+         A folder would have meant the logo could not ship at all. Flat and live beats tidy and
+         missing; move them when the deploy gets a real push. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/mark-oneworld.png" />
+    <link rel="icon" href="/mark-oneworld.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="One World" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script type="module">
+      const oneHomeHandoff = /^\/rentals\/(?:review|inspection)\/[a-f0-9]{48}\/?$/i.test(location.pathname);
+      if (oneHomeHandoff) {
+        for (const href of [
+          '/onehome-review-app.css?v=20260906-owner-auth1',
+          '/onehome-owner-qa.css?v=20260906-owner-auth1',
+        ]) {
+          const stylesheet = document.createElement('link');
+          stylesheet.rel = 'stylesheet';
+          stylesheet.href = href;
+          document.head.append(stylesheet);
+        }
+        import('/onehome-review-app.js?v=20260906-owner-auth1')
+          .then(() => import('/onehome-owner-qa.js?v=20260907-price-v5'));
+      } else {
+        import('/index-CbBrPJvy.js');
+      }
+    </script>
+    <link rel="stylesheet" crossorigin href="/index-DuxCHm8u.css">
+  <!-- ── COLD-LOAD PLACEHOLDER (ONEHOME30 overlay 34) ─────────────────────────────────────
+         Before the app's script arrives — seconds on a slow phone connection — #root was empty,
+         so people saw a blank white page (a white flash for anyone on dark mode). This paints
+         the app's own shape at once: the top bar, three content blocks and the bottom bar, in
+         the member's theme. React replaces it on its first render; nothing here is interactive.
+         The theme line copies ThemeProvider: same key, raw "dark"/"light", light by default. -->
+    <script>
+      try { if (localStorage.getItem("oneworld-theme") === "dark") { document.documentElement.classList.add("dark");
+        var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute("content", "#0B0F1A"); } } catch (e) {}
+    </script>
+    <style>
+      html.dark { background: #0B0F1A; }
+      .owc { position: fixed; inset: 0; overflow: hidden; background: #FAFAF8; z-index: 0; }
+      html.dark .owc { background: #0B0F1A; }
+      .owc { min-height: 100vh; min-height: 100dvh; box-sizing: border-box; padding: 12px 16px 104px; font-family: Inter, system-ui, sans-serif; }
+      .owc-bar, .owc-nav { display: flex; align-items: center; gap: 10px; height: 64px; border-radius: 32px; padding: 0 18px;
+        background: rgba(255,255,255,.82); box-shadow: 0 8px 28px rgba(11,15,26,.08); }
+      .owc-bar img { width: 30px; height: 36px; object-fit: contain; }
+      .owc-nav { position: fixed; left: 16px; right: 16px; bottom: max(12px, env(safe-area-inset-bottom)); justify-content: space-around; }
+      .owc-dot { width: 26px; height: 26px; border-radius: 9px; }
+      .owc-line { height: 12px; border-radius: 6px; }
+      .owc-card { border-radius: 24px; margin-top: 14px; }
+      .owc-s { background: linear-gradient(90deg, rgba(11,15,26,.06) 25%, rgba(11,15,26,.11) 50%, rgba(11,15,26,.06) 75%);
+        background-size: 200% 100%; animation: owc-sh 1.4s ease-in-out infinite; }
+      html.dark .owc-bar, html.dark .owc-nav { background: rgba(255,255,255,.06); box-shadow: none; }
+      html.dark .owc-s { background: linear-gradient(90deg, rgba(255,255,255,.05) 25%, rgba(255,255,255,.1) 50%, rgba(255,255,255,.05) 75%); background-size: 200% 100%; }
+      .owc-slow { display: none; margin: 14px 0 0; padding: 12px 14px; border-radius: 18px; background: rgba(255,255,255,.9); font-size: 13px; line-height: 1.5; color: rgba(11,15,26,.75); }
+      html.dark .owc-slow { color: rgba(255,255,255,.75); background: rgba(255,255,255,.07); }
+      .owc-slow a { color: #0F766E; font-weight: 700; }
+      html.dark .owc-slow a { color: #5EEAD4; }
+      .owc.is-slow .owc-slow { display: block; }
+      @keyframes owc-sh { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+      @media (prefers-reduced-motion: reduce) { .owc-s { animation: none; } }
+    </style>
+  </head>
+  <body class="ow-no-sideways">
+    <div id="root"><div class="owc" aria-busy="true" aria-label="Loading">
+      <div class="owc-bar"><img src="/mark-oneworld.png" alt="" /><div class="owc-line owc-s" style="width:38%"></div>
+        <div style="flex:1"></div><div class="owc-dot owc-s"></div><div class="owc-dot owc-s"></div></div>
+      <p class="owc-slow">Still loading — your connection may be slow. <a href="javascript:location.reload()">Try again</a><br />
+        Sigue cargando — puede que su conexión esté lenta. <a href="javascript:location.reload()">Reintentar</a></p>
+      <div class="owc-line owc-s" style="width:46%;height:26px;border-radius:10px;margin:26px 4px 6px"></div>
+      <div class="owc-card owc-s" style="height:220px"></div>
+      <div class="owc-card owc-s" style="height:96px"></div>
+      <div class="owc-card owc-s" style="height:96px"></div>
+      <div class="owc-nav"><div class="owc-dot owc-s"></div><div class="owc-dot owc-s"></div><div class="owc-dot owc-s" style="width:44px;height:44px;border-radius:22px"></div><div class="owc-dot owc-s"></div><div class="owc-dot owc-s"></div></div>
+    </div></div>
+    <!-- After 12 s with no app, say so instead of shimmering forever. React's first render removes
+         this element, so the timer then finds nothing and does nothing. -->
+    <script>setTimeout(function () { var c = document.querySelector("#root > .owc"); if (c) c.classList.add("is-slow"); }, 12000);</script>
+
+  </body>
+</html>
