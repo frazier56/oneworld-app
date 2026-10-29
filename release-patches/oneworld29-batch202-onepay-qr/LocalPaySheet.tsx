@@ -57,8 +57,9 @@ function errorText(code: string, lang: string): string {
   return hit ? W(lang, hit[0], hit[1]) : W(lang, "The payment didn't go through. Try again.", "El pago no se pudo hacer. Intente de nuevo.");
 }
 
-const INPUT = `h-[50px] w-full rounded-[16px] border border-ink/15 bg-white/80 px-4 text-[15.5px] font-semibold
+const BOX = `h-[50px] rounded-[16px] border border-ink/15 bg-white/80 px-4 text-[15.5px] font-semibold
   outline-none focus:border-ink/50 dark:border-white/20 dark:bg-white/[0.08] dark:focus:border-white/60`;
+const INPUT = `${BOX} w-full min-w-0`;
 const SHEET = `w-full max-w-[440px] rounded-[30px] border p-5 pt-[22px] text-ink shadow-[0_20px_50px_rgba(0,0,0,.4)]
   backdrop-blur-2xl dark:text-white
   border-white/70 bg-[linear-gradient(160deg,rgba(255,255,255,.96),rgba(242,240,252,.94))]
@@ -208,7 +209,7 @@ export function LocalPaySheet({ purpose, purposeRef, amountLabel, extra, returnP
                 {cfg?.banks.map(b => <option key={b.code} value={b.code}>{b.name}</option>)}
               </select>
               <div className="flex gap-2">
-                <select value={idType} onChange={e => setIdType(e.target.value)} className={`${INPUT} w-[92px] shrink-0 px-3`} aria-label={W(lang, "ID type", "Tipo de documento")}>
+                <select value={idType} onChange={e => setIdType(e.target.value)} className={`${BOX} w-[92px] shrink-0 px-3`} aria-label={W(lang, "ID type", "Tipo de documento")}>
                   <option value="CC">CC</option><option value="CE">CE</option><option value="NIT">NIT</option>
                 </select>
                 <input value={idNum} onChange={e => setIdNum(e.target.value)} inputMode="numeric" autoComplete="off"
