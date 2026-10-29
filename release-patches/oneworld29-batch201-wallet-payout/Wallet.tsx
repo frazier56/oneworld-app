@@ -427,13 +427,13 @@ export default function Wallet() {
             trailing={<span className="w-6 shrink-0 text-center text-2xl text-brand">+</span>} />
           <Row icon="🌍" title="Wise" sub={W(lang, "Get paid directly — not held by OneJob", "Te pagan directo — no lo resguarda OneJob")} onClick={() => setAddManual("wise")}
             trailing={<span className="w-6 shrink-0 text-center text-2xl text-brand">+</span>} />
-          <Row icon="🅰️" title="AstroPay" sub={W(lang, "Coming soon", "Pronto")} muted trailing={<span className="rounded-full border border-ink/15 px-2 py-0.5 text-[10px] font-bold opacity-60 dark:border-white/20">{W(lang, "SOON", "PRONTO")}</span>} />
           {/* Pesos (Lee, 28 Oct 2026): live through our own screens — nothing to save in advance,
               the customer picks Nequi or PSE at the moment of paying. */}
           <Row icon="📲" title="Nequi" sub={W(lang, "Pay from your Nequi app", "Pague desde su app Nequi")}
             trailing={<span className="rounded-full bg-teal/15 px-2.5 py-1 text-[10.5px] font-bold text-teal-dark dark:text-teal">{W(lang, "Ready", "Listo")}</span>} />
           <Row icon="🏦" title={W(lang, "PSE (bank transfer)", "PSE (transferencia)")} sub={W(lang, "Bancolombia and every Colombian bank", "Bancolombia y todos los bancos de Colombia")}
             trailing={<span className="rounded-full bg-teal/15 px-2.5 py-1 text-[10.5px] font-bold text-teal-dark dark:text-teal">{W(lang, "Ready", "Listo")}</span>} />
+          <Row icon="🅰️" title="AstroPay" sub={W(lang, "Coming soon", "Pronto")} muted trailing={<span className="rounded-full border border-ink/15 px-2 py-0.5 text-[10px] font-bold opacity-60 dark:border-white/20">{W(lang, "SOON", "PRONTO")}</span>} />
         </div>
         <p className="mt-3 text-center text-[10px] leading-relaxed opacity-45">
           {W(lang, "🔒 Card details are handled by Stripe · Nequi and PSE are chosen when you pay", "🔒 Stripe procesa los datos de la tarjeta · Nequi y PSE se eligen al pagar")}
