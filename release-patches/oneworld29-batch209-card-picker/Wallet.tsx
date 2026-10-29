@@ -381,7 +381,7 @@ export default function Wallet() {
         </div>
       )}
 
-      {returnTo && methods.length> 0 && (
+      {returnTo && !pick && methods.length> 0 && (
         <button onClick={back} className="mt-3 text-sm font-semibold text-brand">{W(lang, "✓ Method saved — back to your contract →", "✓ Método guardado — volver a tu contrato →")}</button>
       )}
 
