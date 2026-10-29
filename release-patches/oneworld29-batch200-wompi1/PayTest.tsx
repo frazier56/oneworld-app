@@ -27,7 +27,7 @@ export default function PayTest() {
       {shown && <p className="m-0 font-extrabold" data-ow-pay-status={shown.status}>{shown.status}</p>}
       {open && (
         <LocalPaySheet purpose="sandbox_test" extra={{ amount_pesos: n }} amountLabel={`COP ${n.toLocaleString("es-CO")}`}
-          returnPath="/pay-test" onClose={() => setOpen(false)} onDone={setLast} />
+          returnPath={window.location.pathname} onClose={() => setOpen(false)} onDone={setLast} />
       )}
     </div>
   );
