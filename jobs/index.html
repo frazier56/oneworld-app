@@ -43,7 +43,36 @@
         } catch (e) {}
       })();
     </script>
-    <title>One World</title>
+    <title>OneJob — find work or hire talent | One World</title>
+    <!-- ── SEARCH + SHARE (SEO 1, 10 Nov 2026) ──────────────────────────────────────────────
+         `robots.txt` on this host has said since 22 Sep that this file carries `noindex, follow`
+         and Open Graph tags. It did not: the live index.html had neither, so every app route was
+         indexable as a page titled "One World" with no description, and every shared app link
+         unfurled as a bare URL. This block is the thing robots.txt promised.
+
+         · noindex, follow — the app is client-rendered; the ranking host is www.oneworldlabs.ai.
+           No canonical here on purpose: Google treats noindex + a cross-host canonical as
+           conflicting signals. noindex alone is the clean instruction.
+         · The OG/Twitter tags are the card WhatsApp, iMessage, Facebook, LinkedIn and X draw.
+           None of them run JavaScript, so this static block is all they ever see.
+         · Product doors (/events, /jobs, /home …) get their own title and image stamped into
+           their route copies by scripts/seo-route-meta.mjs after the deploy copy step.
+         · Listing cards come from the share-listing edge function, not from here. -->
+    <meta name="description" content="Find work, hire talent and keep the contract, payment and reviews for each job in one place. Part of One World." />
+    <meta name="robots" content="noindex, follow" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="One World" />
+    <meta property="og:title" content="OneJob — find work or hire talent | One World" />
+    <meta property="og:description" content="Find work, hire talent and keep the contract, payment and reviews for each job in one place. Part of One World." />
+    <meta property="og:url" content="https://app.oneworldlabs.ai/jobs" />
+    <meta property="og:image" content="https://app.oneworldlabs.ai/og/onejob.jpg" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="es_CO" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="OneJob — find work or hire talent | One World" />
+    <meta name="twitter:description" content="Find work, hire talent and keep the contract, payment and reviews for each job in one place. Part of One World." />
+    <meta name="twitter:image" content="https://app.oneworldlabs.ai/og/onejob.jpg" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=optional" rel="stylesheet" />
