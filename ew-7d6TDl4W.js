@@ -1,0 +1,1 @@
+import{a,W as r,b as u}from"./index-BPaDUGUY.js";import"./vendor-react-C2MSH1Lz.js";function i(){const{lang:n}=a();return(t,s)=>r(n,t,s)}function f(){const{lang:n}=a();return(t,s,o)=>u(n,t,s,o)}export{f as a,i as u};
