@@ -1,0 +1,1 @@
+import{r as o}from"./vendor-react-C2MSH1Lz.js";import{br as s,bs as f}from"./index-L02vw6aW.js";function h(i){const t=i??"",[a,e]=o.useState(()=>t&&s(t)||t);return o.useEffect(()=>{let r=!0;return e(t&&s(t)||t),t&&f(t).then(n=>{r&&n&&e(n)},()=>{}),()=>{r=!1}},[t]),a}export{h as u};
