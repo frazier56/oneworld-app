@@ -1,0 +1,1 @@
+import{a as o,W as u,b as a}from"./index-JJec3uiE.js";import"./vendor-react-C2MSH1Lz.js";const c=()=>typeof document<"u"&&document.documentElement.lang||"en",d=(n,t)=>u(c(),n,t);function f(){const{lang:n}=o();return(t,e)=>u(n,t,e)}function i(){const{lang:n}=o();return(t,e,s)=>a(n,t,e,s)}export{i as a,d as e,f as u};
