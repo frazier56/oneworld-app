@@ -1,0 +1,1 @@
+import{b as o,W as s,c}from"./index-HM7payjG.js";const a=()=>typeof document<"u"&&document.documentElement.lang||"en",d=(n,e)=>s(a(),n,e);function m(){const{lang:n}=o();return(e,t)=>s(n,e,t)}function f(){const{lang:n}=o();return(e,t,u)=>c(n,e,t,u)}export{f as a,d as e,m as u};
