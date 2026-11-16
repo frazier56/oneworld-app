@@ -50,16 +50,16 @@
          indexable as a page titled "One World" with no description, and every shared app link
          unfurled as a bare URL. This block is the thing robots.txt promised.
 
-         · noindex, follow — the app is client-rendered; the ranking host is www.oneworldlabs.ai.
-           No canonical here on purpose: Google treats noindex + a cross-host canonical as
-           conflicting signals. noindex alone is the clean instruction.
+         · robots + canonical are set per route by scripts/seo-route-meta.mjs (WB-28): public doors,
+           events, listings and profiles index with a self-canonical; private screens are noindex.
          · The OG/Twitter tags are the card WhatsApp, iMessage, Facebook, LinkedIn and X draw.
            None of them run JavaScript, so this static block is all they ever see.
          · Product doors (/events, /jobs, /home …) get their own title and image stamped into
            their route copies by scripts/seo-route-meta.mjs after the deploy copy step.
          · Listing cards come from the share-listing edge function, not from here. -->
     <meta name="description" content="A real middleman who finds and negotiates work for you. Coming soon to One World." />
-    <meta name="robots" content="noindex, follow" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://app.oneworldlabs.ai/agent/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="One World" />
     <meta property="og:title" content="OneAgent — someone in your corner | One World" />
@@ -113,7 +113,7 @@
         import('/onehome-review-app.js?v=20260906-owner-auth1')
           .then(() => import('/onehome-owner-qa.js?v=20260907-price-v5'));
       } else {
-        import('/index-B2ydN0f-.js');
+        import('/index-CYlgSoSn.js');
       }
     </script>
     <link rel="stylesheet" crossorigin href="/index-BsijfY2W.css">
