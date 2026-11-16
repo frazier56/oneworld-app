@@ -1,0 +1,1 @@
+import{ak as o,j as e,eX as r}from"./index-B_EM11Bv.js";import{R as a}from"./RentalRequests-lAgx1sDq.js";import"./requestDisplay-CQiEM-Pz.js";function d(){const{id:t}=o();return e.jsx(r,{product:"onerental",contextSlot:t?e.jsx(a,{conversationId:t}):void 0})}export{d as default};
