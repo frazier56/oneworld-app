@@ -1,0 +1,1 @@
+import{W as o,b as s,d as u}from"./index-CacXdyTa.js";const a=()=>typeof document<"u"&&document.documentElement.lang||"en",r=(n,t)=>o(a(),n,t),m=(n,t,e)=>u(a(),n,t,e);function f(){const{lang:n}=s();return(t,e)=>o(n,t,e)}function g(){const{lang:n}=s();return(t,e,c)=>u(n,t,e,c)}export{g as a,m as b,r as e,f as u};
