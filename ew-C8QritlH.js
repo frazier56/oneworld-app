@@ -1,0 +1,1 @@
+import{W as o,b as s,c}from"./index-DW0LeTJv.js";const u=()=>typeof document<"u"&&document.documentElement.lang||"en",d=(n,t)=>o(u(),n,t),m=(n,t,e)=>c(u(),n,t,e);function f(){const{lang:n}=s();return(t,e)=>o(n,t,e)}function g(){const{lang:n}=s();return(t,e,a)=>c(n,t,e,a)}export{g as a,m as b,d as e,f as u};
